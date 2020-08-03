@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "agile.dictionary.enable",
+      "type": "java.lang.Boolean",
+      "description": "Agile字典支持",
+      "defaultValue": true
+    }
+  ]
+}
