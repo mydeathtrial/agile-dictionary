@@ -59,7 +59,8 @@ public final class DictionaryUtil {
     /**
      * 转换字典对象
      *
-     * @param fullCode 全路径字典码
+     * @param fullCode  全路径字典码
+     * @param splitChar 自定义分隔符
      * @return bean
      */
     public static DictionaryData coverDicBean(String fullCode, String splitChar) {
@@ -69,7 +70,7 @@ public final class DictionaryUtil {
     /**
      * 转换字典对象
      *
-     * @param fullName 全路径字典码
+     * @param fullName 全路径字典值
      * @return bean
      */
     public static DictionaryData coverDicBeanByFullName(String fullName) {
@@ -80,7 +81,8 @@ public final class DictionaryUtil {
     /**
      * 转换字典对象
      *
-     * @param fullName 全路径字典码
+     * @param fullName  全路径字典值
+     * @param splitChar 自定义分隔符
      * @return bean
      */
     public static DictionaryData coverDicBeanByFullName(String fullName, String splitChar) {
@@ -143,7 +145,8 @@ public final class DictionaryUtil {
     /**
      * 编码转字典值
      *
-     * @param fullCodes 全路径字典码，支持包含逗号分隔的多全路径字典码，转换结果为逗号分隔非全路径字典值
+     * @param fullCodes   全路径字典码，支持包含逗号分隔的多全路径字典码，转换结果为逗号分隔非全路径字典值
+     * @param defaultName 当未找到对应字典时，默认翻译结果
      * @return 字典值
      */
     public static String coverDicName(String fullCodes, String defaultName) {
@@ -181,6 +184,7 @@ public final class DictionaryUtil {
      * @param codes        子字典码集合，逗号分隔
      * @param defaultValue 默认值
      * @param isFull       是否全路径模式翻译
+     * @param splitChar    自定义分隔符
      * @return 逗号分隔字典值
      */
     public static String coverDicNameByParent(String parentCode, String codes, String defaultValue, boolean isFull, String splitChar) {
@@ -197,8 +201,10 @@ public final class DictionaryUtil {
     /**
      * 编码转字典值
      *
-     * @param fullCodes 全路径字典码，支持包含逗号分隔的多全路径字典码，转换结果为逗号分隔非全路径字典值
-     * @param isFull    true 全路径名，false 字典值
+     * @param fullCodes   全路径字典码，支持包含逗号分隔的多全路径字典码，转换结果为逗号分隔非全路径字典值
+     * @param defaultName 未找到字典时默认返回值
+     * @param isFull      true 全路径名，false 字典值
+     * @param splitChar   自定义分隔符
      * @return 字典值
      */
     public static String coverDicName(String fullCodes, String defaultName, boolean isFull, String splitChar) {
@@ -241,7 +247,7 @@ public final class DictionaryUtil {
 
     /**
      * 编码转字典码
-     *
+     * @param defaultCode 未找到字典时默认返回值
      * @param fullNames 全路径字典值，支持包含逗号分隔的多全路径字典值，转换结果为逗号分隔非全路径字典码集
      * @return 字典码
      */
@@ -306,7 +312,7 @@ public final class DictionaryUtil {
         }
         StringBuilder builder = new StringBuilder();
         Arrays.stream(fulNames.split(Constant.RegularAbout.COMMA)).forEach(c -> {
-            DictionaryData targetEntity = coverDicBeanByFullName(c,splitChar);
+            DictionaryData targetEntity = coverDicBeanByFullName(c, splitChar);
             if (builder.length() > 0) {
                 builder.append(Constant.RegularAbout.COMMA);
             }

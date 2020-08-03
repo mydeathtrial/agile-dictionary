@@ -4,7 +4,6 @@ import com.agile.App;
 import com.agile.common.annotation.Dictionary;
 import com.agile.common.cache.AgileCache;
 import com.agile.common.dictionary.DictionaryData;
-import com.agile.common.dictionary.DictionaryDataManager;
 import com.agile.common.dictionary.DictionaryDataManagerProxy;
 import com.agile.common.dictionary.DictionaryEngine;
 import com.agile.common.dictionary.MemoryDictionaryData;

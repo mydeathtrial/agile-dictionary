@@ -55,7 +55,7 @@ public class DictionaryDataManagerProxy {
         delete(dictionaryData);
     }
 
-    private void delete(DictionaryData dictionaryData) {
+    public void delete(DictionaryData dictionaryData) {
         delete(DictionaryEngine.CODE_CACHE, dictionaryData, dictionaryData.getFullCode());
         delete(DictionaryEngine.NAME_CACHE, dictionaryData, dictionaryData.getFullName());
     }

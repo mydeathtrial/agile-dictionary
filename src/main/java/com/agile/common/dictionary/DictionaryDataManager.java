@@ -29,7 +29,8 @@ public interface DictionaryDataManager {
     void delete(String code);
 
     /**
-     * 刷新缓存
+     * 更新字典
+     * @param dictionaryData 字典数据
      */
     void update(DictionaryData dictionaryData);
 }
