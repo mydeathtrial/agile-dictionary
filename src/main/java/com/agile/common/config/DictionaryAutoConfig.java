@@ -4,17 +4,12 @@ import com.agile.common.dictionary.DictionaryDataManager;
 import com.agile.common.dictionary.DictionaryDataManagerProxy;
 import com.agile.common.dictionary.DictionaryEngine;
 import com.agile.common.dictionary.MemoryDictionaryManager;
+import com.agile.common.jpa.JpaDictionaryManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.MethodInterceptor;
-import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 
 /**
  * @author 佟盟
@@ -38,11 +33,12 @@ public class DictionaryAutoConfig {
 
     /**
      * 字典数据管理器
+     *
      * @return 内存字典数据管理器
      */
     @Bean
     @ConditionalOnMissingBean(DictionaryDataManager.class)
-    MemoryDictionaryManager dictionaryManager(){
+    MemoryDictionaryManager dictionaryManager() {
         return new MemoryDictionaryManager();
     }
 
@@ -55,5 +51,10 @@ public class DictionaryAutoConfig {
     @ConditionalOnBean(DictionaryDataManager.class)
     DictionaryDataManagerProxy dictionaryDataManagerProxy(DictionaryDataManager dictionaryDataManager) {
         return new DictionaryDataManagerProxy(dictionaryDataManager);
+    }
+
+    @Bean
+    JpaDictionaryManager dataExtendManager() {
+        return new JpaDictionaryManager();
     }
 }
