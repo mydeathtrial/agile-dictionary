@@ -55,6 +55,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.agileframework</groupId>
@@ -86,18 +87,17 @@
             <groupId>com.agileframework</groupId>
             <artifactId>agile-cache</artifactId>
             <version>LATEST</version>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.agileframework</groupId>
             <artifactId>agile-jpa</artifactId>
             <version>LATEST</version>
             <optional>true</optional>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 

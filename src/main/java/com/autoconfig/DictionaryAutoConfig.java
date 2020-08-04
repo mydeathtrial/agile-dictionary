@@ -1,10 +1,11 @@
-package com.agile.common.config;
+package com.autoconfig;
 
 import com.agile.common.dictionary.DictionaryDataManager;
 import com.agile.common.dictionary.DictionaryDataManagerProxy;
 import com.agile.common.dictionary.DictionaryEngine;
 import com.agile.common.dictionary.MemoryDictionaryManager;
 import com.agile.common.jpa.JpaDictionaryManager;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -19,8 +20,12 @@ import org.springframework.context.annotation.Configuration;
  * @since 1.0
  */
 @Configuration
+@AutoConfigureBefore(DaoAutoConfiguration.class)
 @ConditionalOnProperty(name = "enable", prefix = "agile.dictionary")
 public class DictionaryAutoConfig {
+    public DictionaryAutoConfig() {
+    }
+
     /**
      * 字典引擎
      *

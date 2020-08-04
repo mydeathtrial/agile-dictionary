@@ -12,24 +12,28 @@ import java.util.List;
 public interface DictionaryDataManager {
     /**
      * 获取所有字典数据
+     *
      * @return 字典数据集合
      */
     List<DictionaryData> all();
 
     /**
      * 新增字典
+     *
      * @param dictionaryData 字典
      */
     void add(DictionaryData dictionaryData);
 
     /**
      * 删除字典
+     *
      * @param code 字典码
      */
     void delete(String code);
 
     /**
      * 更新字典
+     *
      * @param dictionaryData 字典数据
      */
     void update(DictionaryData dictionaryData);

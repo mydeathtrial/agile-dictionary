@@ -45,6 +45,7 @@ public class DictionaryEngine implements ApplicationRunner {
 
     /**
      * 刷新字典缓存
+     *
      * @param list 字典数据
      */
     public void refreshCache(List<DictionaryData> list) {

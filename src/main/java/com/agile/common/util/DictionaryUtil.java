@@ -19,6 +19,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -247,8 +248,9 @@ public final class DictionaryUtil {
 
     /**
      * 编码转字典码
+     *
      * @param defaultCode 未找到字典时默认返回值
-     * @param fullNames 全路径字典值，支持包含逗号分隔的多全路径字典值，转换结果为逗号分隔非全路径字典码集
+     * @param fullNames   全路径字典值，支持包含逗号分隔的多全路径字典值，转换结果为逗号分隔非全路径字典码集
      * @return 字典码
      */
     public static String coverDicCode(String fullNames, String defaultCode) {
@@ -492,6 +494,9 @@ public final class DictionaryUtil {
         if (ObjectUtils.isEmpty(o)) {
             return;
         }
+        if (Collection.class.isAssignableFrom(o.getClass())) {
+            cover((Collection<?>) o);
+        }
         Set<ClassUtil.Target<Dictionary>> targets = ClassUtil.getAllEntityAnnotation(o.getClass(), Dictionary.class);
         targets.forEach(target -> {
             Dictionary dictionary = target.getAnnotation();
@@ -519,14 +524,14 @@ public final class DictionaryUtil {
     /**
      * 字典自动转换，针对Dictionary注解进行解析
      *
-     * @param list 目标数据集
-     * @param <T>  泛型
+     * @param collection 目标数据集
+     * @param <T>        泛型
      */
-    public static <T> void cover(List<T> list) {
-        if (ObjectUtils.isEmpty(list)) {
+    public static <T> void cover(Collection<T> collection) {
+        if (ObjectUtils.isEmpty(collection)) {
             return;
         }
-        list.parallelStream().forEach(DictionaryUtil::cover);
+        collection.parallelStream().forEach(DictionaryUtil::cover);
     }
 
     /**

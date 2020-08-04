@@ -1,7 +1,6 @@
 package com.agile.common.dictionary;
 
 import com.agile.common.util.DictionaryUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Map;

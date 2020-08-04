@@ -40,7 +40,7 @@ public class MemoryDictionaryData implements DictionaryData {
 
     @Override
     public String getFullCode() {
-        if(fullCode == null){
+        if (fullCode == null) {
             return code;
         }
         return fullCode;
@@ -53,7 +53,7 @@ public class MemoryDictionaryData implements DictionaryData {
 
     @Override
     public String getFullName() {
-        if(fullName == null){
+        if (fullName == null) {
             return name;
         }
         return fullName;
