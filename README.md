@@ -41,12 +41,19 @@ agile-jpa组件中已集成该组件实现无感翻译。
 
 以版本agile-dictionary-0.1.jar为例。
 #### 步骤 2: 添加maven依赖
-```xml
-        <dependency>
-            <groupId>cloud.agileframework</groupId>
-            <artifactId>agile-dictionary</artifactId>
-            <version>0.1</version>
-        </dependency>
+```
+//声明中央仓库
+<repository>
+    <id>cent</id>
+    <url>https://repo1.maven.org/maven2/</url>
+</repository>
+
+//添加依赖
+<dependency>
+    <groupId>cloud.agileframework</groupId>
+    <artifactId>agile-dictionary</artifactId>
+    <version>0.1</version>
+</dependency>
 ```
 #### 步骤 3: 开箱即用
 
