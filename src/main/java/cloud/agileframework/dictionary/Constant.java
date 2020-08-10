@@ -1,4 +1,4 @@
-package com.agile.common.dictionary;
+package cloud.agileframework.dictionary;
 
 /**
  * @author 佟盟 on 2017/9/2

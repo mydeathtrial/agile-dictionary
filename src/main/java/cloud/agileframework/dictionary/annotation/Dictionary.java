@@ -1,4 +1,4 @@
-package com.agile.common.annotation;
+package cloud.agileframework.dictionary.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

@@ -1,12 +1,13 @@
 package com.agile.common.util;
 
+import cloud.agileframework.cache.support.AgileCache;
+import cloud.agileframework.dictionary.util.DictionaryUtil;
 import com.agile.App;
-import com.agile.common.annotation.Dictionary;
-import com.agile.common.cache.AgileCache;
-import com.agile.common.dictionary.DictionaryData;
-import com.agile.common.dictionary.DictionaryDataManagerProxy;
-import com.agile.common.dictionary.DictionaryEngine;
-import com.agile.common.dictionary.MemoryDictionaryData;
+import cloud.agileframework.dictionary.annotation.Dictionary;
+import cloud.agileframework.dictionary.DictionaryData;
+import cloud.agileframework.dictionary.DictionaryDataManagerProxy;
+import cloud.agileframework.dictionary.DictionaryEngine;
+import cloud.agileframework.dictionary.MemoryDictionaryData;
 import com.google.common.collect.Maps;
 import org.assertj.core.util.Lists;
 import org.junit.Before;

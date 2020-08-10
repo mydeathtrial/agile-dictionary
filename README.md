@@ -1,15 +1,56 @@
-# agile-dictionary
+# agile-dictionary ： 字典解析器
+[![spring-boot](https://img.shields.io/badge/Spring--boot-LATEST-green)](https://img.shields.io/badge/spring-LATEST-green)
+[![maven](https://img.shields.io/badge/build-maven-green)](https://img.shields.io/badge/build-maven-green)
+## 它有什么作用
 
-简介：字典通用工具集，该组件具备字典数据启动加载、复杂翻译、缓存同步能力、支持redis等自定义缓存方式、字典注解、自定义字典分隔符、全路径字典值码翻译，结合持久层组件，可为持久层能力扩展自动翻译字典功能；字典默认使用内存方式提供数据存储，用户可通过向spring容器中注入自定义DictionaryDataManager接口实现自定义持久化数据方式
+* **启动自动加载**
+集成该组件后，字典数据加载将伴随spring应用启动，将持久层字典数据加载如缓存，以便提高缓存查询性能
 
-##使用方法：
-1、手动翻译：工具类com.agile.common.util.DictionaryUtil，该工具类包含相当丰富的字典翻译方法，用于开发人员在特定场景中主动调用实现按需翻译。
-2、自动翻译：自定翻译指用于pojo类属性上添加com.agile.common.annotation.Dictionary字典注解，通过DictionaryUtil.cover方法或内嵌至持久层组件中，实现无感翻译。
+* **缓存同步**
+集成缓存组件agile-cache可实现缓存方式切换`spring.cache.type`，如redis、ehcache、memory等方式，缓存使用请参照缓存组件https://gitee.com/agile-framework/agile-cache
 
-##组件启动条件：
-1、开启配置：agile.dictionary.enable=true
+* **复杂翻译**
+通过提供工具类cloud.agileframework.dictionary.util.DictionaryUtil，实现诸多复杂字典翻译方式，如字典码与字典值相互转换，根据父子字典信息翻译、全路径字典值/码翻译、字典注解解析
+集合数据字典翻译、自定义字典分隔符、指定默认值等等一系列工具
 
-##工具部分常用方法汇总：
+* **字典注解**
+用于pojo类属性上添加cloud.agileframework.dictionary.annotation.Dictionary字典注解，通过DictionaryUtil.cover方法或内嵌至持久层组件中，实现无感翻译。
+agile-jpa组件中已集成该组件实现无感翻译。
+
+* **自定义字典分隔符**
+字典分隔符指针对全路径字典值/码的分级标识符，如`状态`字典有子值`开`与`关`两种类型，则`开`与`关`字典值分别对应`状态/开`与`状态/关`，其中斜杠`/`就是字典分隔符，该分隔符可在调用翻译工具或字典
+翻译注解中指定，且对字典值/码不存在任何特殊符号限制。
+
+* **全路径字典值码翻译**
+除当前字典值/码翻译以外，还提供携带所有父级字典值/码以字典分隔符标记的全路径字典翻译，如`状态`字典有子值`开`与`关`两种类型，则`开`与`关`为当前字典值，全路径字典值则分别对应`状态/开`与`状态/关`
+字典码亦是如此
+
+* **自定义持久化数据方式**
+字典的持久化方式默认直接使用内存形式，用户可以通过实现`cloud.agileframework.dictionary.DictionaryDataManager`，实现自定义的字典数据持久化方式，如使用mysql存储字典数据，字典的数据结构
+需符合接口`cloud.agileframework.dictionary.DictionaryData`规范，当切换mysql时，开发人员只需要将字典表的orm映射继承自该接口，并实现接口方法即可完成mysql切换。
+
+* **组件开关**
+内置组件开启，配置：agile.dictionary.enable=true，默认为开启，用户也可使用springboot组件排除方式实现排除加载
+-------
+## 快速入门
+开始你的第一个项目是非常容易的。
+
+#### 步骤 1: 下载包
+您可以从[最新稳定版本]下载包(https://github.com/mydeathtrial/agile-dictionary/releases).
+该包已上传至maven中央仓库，可在pom中直接声明引用
+
+以版本agile-dictionary-0.1.jar为例。
+#### 步骤 2: 添加maven依赖
+```xml
+        <dependency>
+            <groupId>cloud.agileframework</groupId>
+            <artifactId>agile-dictionary</artifactId>
+            <version>0.1</version>
+        </dependency>
+```
+#### 步骤 3: 开箱即用
+
+#####工具部分常用方法汇总：
 ```
     /**
      * 转换字典对象
@@ -225,7 +266,7 @@
     public static <T> void cover(List<T> list)
 ```
 
-##字典注解使用：com.agile.common.annotation.Dictionary
+#####字典注解使用：com.agile.common.annotation.Dictionary
 ```
     public static class TuDou {
         /**
@@ -245,7 +286,7 @@
 该对象或该对象集合，可直接充当参数，直接调用DictionaryUtil.cover方法进行翻译，字典翻译器会自动根据status属性与注解，将翻译的字典值结果装填到text属性中。
 
 
-##自定义持久化方式
+#####自定义持久化方式
 DictionaryDataManager：字典数据管理器（类似xxxService，用于提供持久层交互API，如字典的增删改查操作）
 DictionaryData：字典数据结构化接口（类似于xxxDo，一般用于数据库字典表的ORM映射）
 默认的持久化方式为内存形式，当开发人员需要自定义持久化方式时，可直接实现以上两个接口，并将实现类注入到spring容器中即可
@@ -343,7 +384,7 @@ public interface DictionaryDataManager {
 }
 ```
 
-##缓存同步
+#####缓存同步
 直接调用DictionaryDataManagerProxy的增删改方法，例如：
 ```
 private class YourBean {

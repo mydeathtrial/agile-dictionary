@@ -1,4 +1,4 @@
-package com.agile.common.dictionary;
+package cloud.agileframework.dictionary;
 
 import java.io.Serializable;
 import java.util.List;

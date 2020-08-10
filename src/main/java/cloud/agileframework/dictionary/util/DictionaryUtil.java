@@ -1,14 +1,15 @@
-package com.agile.common.util;
+package cloud.agileframework.dictionary.util;
 
-import com.agile.common.annotation.Dictionary;
-import com.agile.common.cache.AgileCache;
-import com.agile.common.dictionary.Constant;
-import com.agile.common.dictionary.DictionaryData;
-import com.agile.common.dictionary.DictionaryEngine;
-import com.agile.common.util.clazz.ClassUtil;
-import com.agile.common.util.clazz.TypeReference;
-import com.agile.common.util.object.ObjectUtil;
-import com.agile.common.util.string.StringUtil;
+import cloud.agileframework.cache.support.AgileCache;
+import cloud.agileframework.cache.util.CacheUtil;
+import cloud.agileframework.common.util.clazz.ClassUtil;
+import cloud.agileframework.common.util.clazz.TypeReference;
+import cloud.agileframework.common.util.object.ObjectUtil;
+import cloud.agileframework.common.util.string.StringUtil;
+import cloud.agileframework.dictionary.annotation.Dictionary;
+import cloud.agileframework.dictionary.Constant;
+import cloud.agileframework.dictionary.DictionaryData;
+import cloud.agileframework.dictionary.DictionaryEngine;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.agile.common.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHAR;
+import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHAR;
 
 /**
  * @author 佟盟

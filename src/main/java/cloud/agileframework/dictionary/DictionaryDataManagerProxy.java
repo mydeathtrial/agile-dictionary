@@ -1,6 +1,6 @@
-package com.agile.common.dictionary;
+package cloud.agileframework.dictionary;
 
-import com.agile.common.util.DictionaryUtil;
+import cloud.agileframework.dictionary.util.DictionaryUtil;
 
 import java.util.List;
 import java.util.Map;
