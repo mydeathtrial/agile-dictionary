@@ -19,11 +19,9 @@ import org.springframework.context.annotation.Configuration;
  * @since 1.0
  */
 @Configuration
-@AutoConfigureBefore(name="cloud.agileframework.jpa.config.DaoAutoConfiguration.class")
+@AutoConfigureBefore(name = "cloud.agileframework.jpa.config.DaoAutoConfiguration.class")
 @ConditionalOnProperty(name = "enable", prefix = "agile.dictionary")
-public class DictionaryAutoConfig {
-    public DictionaryAutoConfig() {
-    }
+public class DictionaryAutoConfiguration {
 
     /**
      * 字典引擎

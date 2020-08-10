@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-cloud.agileframework.dictionary.config.DictionaryAutoConfig
+cloud.agileframework.dictionary.config.DictionaryAutoConfiguration
