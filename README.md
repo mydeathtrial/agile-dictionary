@@ -266,7 +266,7 @@ agile-jpa组件中已集成该组件实现无感翻译。
     public static <T> void cover(List<T> list)
 ```
 
-#####字典注解使用：com.agile.common.annotation.Dictionary
+#####字典注解使用：cloud.agileframework.dictionary.annotation.Dictionary
 ```
     public static class TuDou {
         /**

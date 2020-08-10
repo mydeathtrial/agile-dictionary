@@ -1,7 +1,7 @@
 package cloud.agileframework.dictionary;
 
+import cloud.agileframework.common.util.collection.TreeUtil;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
-import com.agile.common.util.collection.TreeUtil;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
