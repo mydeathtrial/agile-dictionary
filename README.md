@@ -39,7 +39,7 @@ agile-jpa组件中已集成该组件实现无感翻译。
 您可以从[最新稳定版本]下载包(https://github.com/mydeathtrial/agile-dictionary/releases).
 该包已上传至maven中央仓库，可在pom中直接声明引用
 
-以版本agile-dictionary-0.1.jar为例。
+以版本agile-dictionary-2.0.0.jar为例。
 #### 步骤 2: 添加maven依赖
 ```
 //声明中央仓库
@@ -47,12 +47,11 @@ agile-jpa组件中已集成该组件实现无感翻译。
     <id>cent</id>
     <url>https://repo1.maven.org/maven2/</url>
 </repository>
-
 //添加依赖
 <dependency>
     <groupId>cloud.agileframework</groupId>
     <artifactId>agile-dictionary</artifactId>
-    <version>0.1</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 #### 步骤 3: 开箱即用
