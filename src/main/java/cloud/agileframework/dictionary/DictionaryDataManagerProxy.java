@@ -49,8 +49,8 @@ public class DictionaryDataManagerProxy {
     }
 
     public void delete(String fullCode) {
-        dictionaryDataManager.delete(fullCode);
         DictionaryData dictionaryData = DictionaryUtil.coverDicBean(fullCode);
+        dictionaryDataManager.delete(dictionaryData);
         delete(dictionaryData);
     }
 

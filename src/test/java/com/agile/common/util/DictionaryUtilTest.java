@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = App.class)
@@ -216,9 +217,12 @@ public class DictionaryUtilTest {
         System.out.println(o.toString());
 
         ArrayList<Object> list = Lists.newArrayList();
-        list.add(new TuDou2("status.1"));
-        list.add(new TuDou2("status.2"));
+
+        long start = System.currentTimeMillis();
+        IntStream.range(0,1000).forEach(a->{
+            list.add(new TuDou2("status.1"));
+        });
         DictionaryUtil.cover(list);
-        System.out.println(list.toString());
+        System.out.println(System.currentTimeMillis() - start);
     }
 }

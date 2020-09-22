@@ -27,9 +27,9 @@ public interface DictionaryDataManager {
     /**
      * 删除字典
      *
-     * @param code 字典码
+     * @param dictionaryData 字典
      */
-    void delete(String code);
+    void delete(DictionaryData dictionaryData);
 
     /**
      * 更新字典

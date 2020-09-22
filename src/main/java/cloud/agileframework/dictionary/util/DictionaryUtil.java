@@ -6,10 +6,11 @@ import cloud.agileframework.common.util.clazz.ClassUtil;
 import cloud.agileframework.common.util.clazz.TypeReference;
 import cloud.agileframework.common.util.object.ObjectUtil;
 import cloud.agileframework.common.util.string.StringUtil;
-import cloud.agileframework.dictionary.annotation.Dictionary;
 import cloud.agileframework.dictionary.Constant;
 import cloud.agileframework.dictionary.DictionaryData;
 import cloud.agileframework.dictionary.DictionaryEngine;
+import cloud.agileframework.dictionary.annotation.Dictionary;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -522,6 +524,9 @@ public final class DictionaryUtil {
         });
     }
 
+
+    private static Map<String, String> dicCoverCache;
+
     /**
      * 字典自动转换，针对Dictionary注解进行解析
      *
@@ -532,7 +537,11 @@ public final class DictionaryUtil {
         if (ObjectUtils.isEmpty(collection)) {
             return;
         }
-        collection.parallelStream().forEach(DictionaryUtil::cover);
+        if (dicCoverCache == null) {
+            dicCoverCache = Maps.newConcurrentMap();
+        }
+        Collections.synchronizedCollection(collection).parallelStream().forEach(DictionaryUtil::cover);
+        dicCoverCache.clear();
     }
 
     /**
@@ -553,7 +562,7 @@ public final class DictionaryUtil {
         if (ObjectUtils.isEmpty(code)) {
             return;
         } else if (code instanceof Boolean) {
-            codeStr = (Boolean) code ? "1" : "0";
+            codeStr = Boolean.TRUE.equals(code) ? "1" : "0";
         } else {
             codeStr = code.toString();
         }
@@ -568,10 +577,18 @@ public final class DictionaryUtil {
 
         // 全路径字典值
         String targetName;
-        if (isFull) {
-            targetName = coverDicName(fullCode, DEFAULT_NAME, true, split);
+
+        if (dicCoverCache != null && dicCoverCache.containsKey(fullCode)) {
+            targetName = dicCoverCache.get(fullCode);
         } else {
-            targetName = coverDicName(fullCode);
+            if (isFull) {
+                targetName = coverDicName(fullCode, DEFAULT_NAME, true, split);
+            } else {
+                targetName = coverDicName(fullCode);
+            }
+            if (dicCoverCache != null) {
+                dicCoverCache.put(fullCode, targetName);
+            }
         }
 
         // 赋值

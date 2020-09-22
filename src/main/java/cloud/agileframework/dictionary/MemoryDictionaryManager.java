@@ -31,13 +31,13 @@ public class MemoryDictionaryManager implements DictionaryDataManager {
     }
 
     @Override
-    public void delete(String id) {
-        CACHE.removeIf(n -> id.equals(n.getId()));
+    public void delete(DictionaryData dictionaryData) {
+        CACHE.removeIf(n -> dictionaryData.getId().equals(n.getId()));
     }
 
     @Override
     public void update(DictionaryData dictionaryData) {
-        delete(dictionaryData.getId());
+        delete(dictionaryData);
         add(dictionaryData);
     }
 }
