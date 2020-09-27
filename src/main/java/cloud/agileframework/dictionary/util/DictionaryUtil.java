@@ -10,6 +10,7 @@ import cloud.agileframework.dictionary.Constant;
 import cloud.agileframework.dictionary.DictionaryData;
 import cloud.agileframework.dictionary.DictionaryEngine;
 import cloud.agileframework.dictionary.annotation.Dictionary;
+import cloud.agileframework.dictionary.annotation.DirectionType;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,7 +27,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHAR;
 
@@ -130,7 +133,7 @@ public final class DictionaryUtil {
         // 直接从缓存中查找对应字典码
         DictionaryData entity = getCache().getFromMap(cacheKey, fullIndex, DictionaryData.class);
         if (entity == null) {
-            LOGGER.error(errorMessage, fullIndex);
+            LOGGER.error(errorMessage, fullIndex.replace(DEFAULT_SPLIT_CHAR, "/"));
             return null;
         }
         return entity;
@@ -223,7 +226,7 @@ public final class DictionaryUtil {
             }
             if (targetEntity == null) {
                 if (DEFAULT_NAME.equals(defaultName)) {
-                    builder.append(StringUtil.getSplitLastAtomic(c, splitChar));
+                    builder.append(StringUtil.getSplitByStrLastAtomic(c, splitChar));
                 } else if (defaultName != null) {
                     builder.append(defaultName);
                 }
@@ -275,32 +278,32 @@ public final class DictionaryUtil {
     /**
      * 根据父级字典值与子字典值(多，逗号分隔)，转换字典码
      *
-     * @param parentName   父全路径字典值
-     * @param names        子字典值集合，逗号分隔
-     * @param defaultValue 默认值
+     * @param parentName  父全路径字典值
+     * @param names       子字典值集合，逗号分隔
+     * @param defaultCode 默认值
      * @return 非全路径子字典码集合，逗号分隔
      */
-    public static String coverDicCodeByParent(String parentName, String names, String defaultValue) {
-        return coverDicCodeByParent(parentName, names, defaultValue, false, Constant.RegularAbout.SPOT);
+    public static String coverDicCodeByParent(String parentName, String names, String defaultCode) {
+        return coverDicCodeByParent(parentName, names, defaultCode, false, Constant.RegularAbout.SPOT);
     }
 
     /**
      * 根据父级字典值与子字典值(多，逗号分隔)，转换字典码
      *
-     * @param parentName   父全路径字典值
-     * @param names        子字典值集合，逗号分隔
-     * @param defaultValue 默认值
-     * @param isFull       是否全路径模式翻译
+     * @param parentName  父全路径字典值
+     * @param names       子字典值集合，逗号分隔
+     * @param defaultCode 默认值
+     * @param isFull      是否全路径模式翻译
      * @return 逗号分隔字典码
      */
-    public static String coverDicCodeByParent(String parentName, String names, String defaultValue, boolean isFull, String splitChar) {
+    public static String coverDicCodeByParent(String parentName, String names, String defaultCode, boolean isFull, String splitChar) {
         if (StringUtils.isBlank(parentName) || StringUtils.isBlank(names)) {
-            return defaultValue;
+            return defaultCode;
         }
 
         names = parentName + splitChar + names;
         names = names.replace(Constant.RegularAbout.COMMA, Constant.RegularAbout.COMMA + parentName + splitChar);
-        return coverDicCode(names, defaultValue, isFull, splitChar);
+        return coverDicCode(names, defaultCode, isFull, splitChar);
     }
 
 
@@ -311,7 +314,7 @@ public final class DictionaryUtil {
      * @param isFull   true 全路径名，false 字典值
      * @return 字典码
      */
-    public static String coverDicCode(String fulNames, String defaultName, boolean isFull, String splitChar) {
+    public static String coverDicCode(String fulNames, String defaultCode, boolean isFull, String splitChar) {
         if (fulNames == null) {
             return null;
         }
@@ -322,10 +325,10 @@ public final class DictionaryUtil {
                 builder.append(Constant.RegularAbout.COMMA);
             }
             if (targetEntity == null) {
-                if (DEFAULT_NAME.equals(defaultName)) {
-                    builder.append(StringUtil.getSplitLastAtomic(c, splitChar));
-                } else if (defaultName != null) {
-                    builder.append(defaultName);
+                if (DEFAULT_NAME.equals(defaultCode)) {
+                    builder.append(StringUtil.getSplitByStrLastAtomic(c, splitChar));
+                } else if (defaultCode != null) {
+                    builder.append(defaultCode);
                 }
             } else {
                 if (isFull) {
@@ -421,7 +424,7 @@ public final class DictionaryUtil {
                 String column = columns[i];
                 String textColumn = textColumns[i];
                 if (defaultValues == null || defaultValues.length <= i) {
-                    map.put(textColumn, coverDicName(dictionaryCodes[i], String.valueOf(map.get(column))));
+                    map.put(textColumn, coverDicNameByParent(dictionaryCodes[i], String.valueOf(map.get(column))));
                 } else {
                     String defaultValue = defaultValues[i];
                     map.put(textColumn, coverDicNameByParent(dictionaryCodes[i], String.valueOf(map.get(column)), defaultValue));
@@ -504,10 +507,6 @@ public final class DictionaryUtil {
         targets.forEach(target -> {
             Dictionary dictionary = target.getAnnotation();
             Member member = target.getMember();
-            String parentDicCode = dictionary.dicCode();
-            String linkColumn = dictionary.fieldName();
-            boolean isFull = dictionary.isFull();
-            String split = dictionary.split();
             Field field;
             if (member instanceof Method) {
                 String fieldName = StringUtil.toLowerName(member.getName().substring(Constant.NumberAbout.THREE));
@@ -520,7 +519,7 @@ public final class DictionaryUtil {
             } else {
                 return;
             }
-            parseNodeField(parentDicCode, linkColumn, isFull, split, field, o);
+            parseNodeField(dictionary, field, o);
         });
     }
 
@@ -547,27 +546,32 @@ public final class DictionaryUtil {
     /**
      * 翻译一个对象的一个字段
      *
-     * @param parentDicCode 父级字典码
-     * @param linkColumn    关联的存储字典码的字段
-     * @param isFull        是否需要全路径字典值
-     * @param field         翻译后存储字典值的字段
-     * @param node          对象
-     * @param <T>           对象类型
+     * @param dictionary 字典注解
+     * @param field      翻译后存储字典值的字段
+     * @param node       对象
+     * @param <T>        对象类型
      */
-    private static <T> void parseNodeField(String parentDicCode, String linkColumn, boolean isFull, String split, Field field, T node) {
-        Object code = ObjectUtil.getFieldValue(node, linkColumn);
+    private static <T> void parseNodeField(Dictionary dictionary, Field field, T node) {
+        String parentDicCode = dictionary.dicCode();
+        boolean isFull = dictionary.isFull();
+        String split = dictionary.split();
 
-        // 处理布尔类型
-        String codeStr;
-        if (ObjectUtils.isEmpty(code)) {
-            return;
-        } else if (code instanceof Boolean) {
-            codeStr = Boolean.TRUE.equals(code) ? "1" : "0";
-        } else {
-            codeStr = code.toString();
-        }
+        // 组装要翻译的内容
+        String codeStr = Arrays.stream(dictionary.fieldName()).map(column -> {
+            Object code = ObjectUtil.getFieldValue(node, column);
+            // 处理布尔类型
+            if (ObjectUtils.isEmpty(code)) {
+                return null;
+            } else if (code instanceof Boolean) {
+                return Boolean.TRUE.equals(code) ? "1" : "0";
+            } else if (code.getClass().isEnum()) {
+                return ((Enum) code).name();
+            } else {
+                return code.toString();
+            }
+        }).filter(Objects::nonNull).collect(Collectors.joining(split));
 
-        // 全路径字典码
+        // 组装要翻译的内容
         String fullCode;
         if (ObjectUtils.isEmpty(parentDicCode)) {
             fullCode = codeStr;
@@ -575,16 +579,24 @@ public final class DictionaryUtil {
             fullCode = parentDicCode + Constant.RegularAbout.SPOT + codeStr;
         }
 
-        // 全路径字典值
+        // 翻译后值
         String targetName;
 
         if (dicCoverCache != null && dicCoverCache.containsKey(fullCode)) {
             targetName = dicCoverCache.get(fullCode);
         } else {
             if (isFull) {
-                targetName = coverDicName(fullCode, DEFAULT_NAME, true, split);
+                if (dictionary.directionType() == DirectionType.CodeToName) {
+                    targetName = coverDicName(fullCode, DEFAULT_NAME, true, split);
+                } else {
+                    targetName = coverDicCode(fullCode, DEFAULT_NAME, true, split);
+                }
             } else {
-                targetName = coverDicName(fullCode);
+                if (dictionary.directionType() == DirectionType.CodeToName) {
+                    targetName = coverDicName(fullCode);
+                } else {
+                    targetName = coverDicCode(fullCode);
+                }
             }
             if (dicCoverCache != null) {
                 dicCoverCache.put(fullCode, targetName);

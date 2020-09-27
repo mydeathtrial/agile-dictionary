@@ -21,9 +21,37 @@ agile-jpa组件中已集成该组件实现无感翻译。
 字典分隔符指针对全路径字典值/码的分级标识符，如`状态`字典有子值`开`与`关`两种类型，则`开`与`关`字典值分别对应`状态/开`与`状态/关`，其中斜杠`/`就是字典分隔符，该分隔符可在调用翻译工具或字典
 翻译注解中指定，且对字典值/码不存在任何特殊符号限制。
 
+* **支持枚举、整数、字符串等类型数据**
+字典支持使用经常用于判断得整型、字符串、枚举等类型作为转换源，枚举类型会取枚举项name值作为转换源，可以参照源码中测试用例
+
 * **全路径字典值码翻译**
 除当前字典值/码翻译以外，还提供携带所有父级字典值/码以字典分隔符标记的全路径字典翻译，如`状态`字典有子值`开`与`关`两种类型，则`开`与`关`为当前字典值，全路径字典值则分别对应`状态/开`与`状态/关`
 字典码亦是如此
+
+* **级联字典值码翻译**
+以“国家”、“城市”、“地区”一类的级联字典为例子，其数据结构中往往同时存在这三个属性，翻译子字典时需要依赖父字典值。在字典注解中提供了该功能的支持，用法如下：
+country代表国家、city代表城市、region代表地区。
+```
+    private String country;
+    private String city;
+    private String region;
+        
+    @Dictionary(fieldName = {"country"})
+    private String countryValue;
+    @Dictionary(fieldName = {"country","city"})
+    private String cityValue;
+    @Dictionary(fieldName = {"country","city","region"})
+    private String regionValue;
+```
+
+* **正向/反向翻译支持**
+注解及工具均支持字典码与字典值之间的互转，默认注解方式的转换方向为字典码转字典值，可通过`directionType`转换方向，如：
+```
+    private String countryName;
+    
+    @Dictionary(fieldName = "countryName", directionType = DirectionType.NameToCode)
+    private String countryCode;
+```
 
 * **自定义持久化数据方式**
 字典的持久化方式默认直接使用内存形式，用户可以通过实现`cloud.agileframework.dictionary.DictionaryDataManager`，实现自定义的字典数据持久化方式，如使用mysql存储字典数据，字典的数据结构
@@ -403,16 +431,46 @@ private class YourBean {
         manager.add(new MemoryDictionaryData("1", null, "状态", "status"));
     }
 
-    public void add(){
+    public void delete(){
         //MemoryDictionaryData为内存方式字典，该处可改为自定义DictionaryData实现
         manager.delete("1");
         //方式2
         manager.delete(new MemoryDictionaryData("1", null, "状态", "status"));
     }
 
-    public void add(){
+    public void update(){
         //MemoryDictionaryData为内存方式字典，该处可改为自定义DictionaryData实现
         manager.update(new MemoryDictionaryData("1", null, "状态", "status"));
     }
+}
+```
+#####字典注解
+字典注解支持定义翻译依据字典、翻译方向、全路径翻译、翻译分隔符等内容
+```java
+public @interface Dictionary {
+    /**
+     * 字典码
+     */
+    String dicCode() default "";
+
+    /**
+     * 指向字典字段
+     */
+    String[] fieldName();
+
+    /**
+     * 是否翻译出全路径字典值
+     */
+    boolean isFull() default false;
+
+    /**
+     * 全路径字典值分隔符
+     */
+    String split() default ".";
+
+    /**
+     * 字典转换方向
+     */
+    DirectionType directionType() default DirectionType.CodeToName;
 }
 ```

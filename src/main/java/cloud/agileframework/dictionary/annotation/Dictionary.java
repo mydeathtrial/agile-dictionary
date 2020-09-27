@@ -25,7 +25,7 @@ public @interface Dictionary {
     /**
      * 指向字典字段
      */
-    String fieldName();
+    String[] fieldName();
 
     /**
      * 是否翻译出全路径字典值
@@ -36,4 +36,9 @@ public @interface Dictionary {
      * 全路径字典值分隔符
      */
     String split() default ".";
+
+    /**
+     * 字典转换方向
+     */
+    DirectionType directionType() default DirectionType.CodeToName;
 }
