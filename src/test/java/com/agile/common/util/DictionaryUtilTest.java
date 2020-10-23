@@ -60,6 +60,14 @@ public class DictionaryUtilTest {
         DictionaryData dic2 = DictionaryUtil.coverDicBean("sex#boy", "#");
         logger.info(dic1.getName());
         logger.info(dic2.getName());
+        IntStream.range(0,10).forEach(a->{
+            new Thread(){
+                @Override
+                public void run() {
+                    logger.info(getId()+DictionaryUtil.coverDicBean("sex.boy").getName());
+                }
+            }.run();
+        });
     }
 
     @Test
