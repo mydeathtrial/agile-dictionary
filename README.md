@@ -67,7 +67,7 @@ country代表国家、city代表城市、region代表地区。
 您可以从[最新稳定版本]下载包(https://github.com/mydeathtrial/agile-dictionary/releases).
 该包已上传至maven中央仓库，可在pom中直接声明引用
 
-以版本agile-dictionary-2.0.0.jar为例。
+以版本agile-dictionary-2.0.6.jar为例。
 #### 步骤 2: 添加maven依赖
 ```
 //声明中央仓库
@@ -79,7 +79,7 @@ country代表国家、city代表城市、region代表地区。
 <dependency>
     <groupId>cloud.agileframework</groupId>
     <artifactId>agile-dictionary</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.6</version>
 </dependency>
 ```
 #### 步骤 3: 开箱即用
