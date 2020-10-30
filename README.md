@@ -84,7 +84,7 @@ country代表国家、city代表城市、region代表地区。
 ```
 #### 步骤 3: 开箱即用
 
-#####工具部分常用方法汇总：
+##### 工具部分常用方法汇总：
 ```
     /**
      * 转换字典对象
@@ -300,7 +300,7 @@ country代表国家、city代表城市、region代表地区。
     public static <T> void cover(List<T> list)
 ```
 
-#####字典注解使用：cloud.agileframework.dictionary.annotation.Dictionary
+##### 字典注解使用：cloud.agileframework.dictionary.annotation.Dictionary
 ```
     public static class TuDou {
         /**
@@ -320,7 +320,7 @@ country代表国家、city代表城市、region代表地区。
 该对象或该对象集合，可直接充当参数，直接调用DictionaryUtil.cover方法进行翻译，字典翻译器会自动根据status属性与注解，将翻译的字典值结果装填到text属性中。
 
 
-#####自定义持久化方式
+##### 自定义持久化方式
 DictionaryDataManager：字典数据管理器（类似xxxService，用于提供持久层交互API，如字典的增删改查操作）
 DictionaryData：字典数据结构化接口（类似于xxxDo，一般用于数据库字典表的ORM映射）
 默认的持久化方式为内存形式，当开发人员需要自定义持久化方式时，可直接实现以上两个接口，并将实现类注入到spring容器中即可
@@ -418,7 +418,7 @@ public interface DictionaryDataManager {
 }
 ```
 
-#####缓存同步
+##### 缓存同步
 直接调用DictionaryDataManagerProxy的增删改方法，例如：
 ```
 private class YourBean {
@@ -444,7 +444,7 @@ private class YourBean {
     }
 }
 ```
-#####字典注解
+##### 字典注解
 字典注解支持定义翻译依据字典、翻译方向、全路径翻译、翻译分隔符等内容
 ```java
 public @interface Dictionary {
