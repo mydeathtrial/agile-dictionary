@@ -14,7 +14,7 @@ import java.util.function.Function;
  * @since 1.0
  */
 public class DictionaryDataManagerProxy {
-    private DictionaryDataManager dictionaryDataManager;
+    private final DictionaryDataManager dictionaryDataManager;
 
     public DictionaryDataManagerProxy(DictionaryDataManager dictionaryDataManager) {
         this.dictionaryDataManager = dictionaryDataManager;
@@ -50,11 +50,11 @@ public class DictionaryDataManagerProxy {
 
     public void delete(String fullCode) {
         DictionaryData dictionaryData = DictionaryUtil.coverDicBean(fullCode);
-        dictionaryDataManager.delete(dictionaryData);
         delete(dictionaryData);
     }
 
     public void delete(DictionaryData dictionaryData) {
+        dictionaryDataManager.delete(dictionaryData);
         delete(DictionaryEngine.CODE_CACHE, dictionaryData, dictionaryData.getFullCode());
         delete(DictionaryEngine.NAME_CACHE, dictionaryData, dictionaryData.getFullName());
     }

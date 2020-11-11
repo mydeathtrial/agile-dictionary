@@ -322,8 +322,8 @@ country代表国家、city代表城市、region代表地区。
 
 ##### 自定义持久化方式
 DictionaryDataManager：字典数据管理器（类似xxxService，用于提供持久层交互API，如字典的增删改查操作）
-DictionaryData：字典数据结构化接口（类似于xxxDo，一般用于数据库字典表的ORM映射）
-默认的持久化方式为内存形式，当开发人员需要自定义持久化方式时，可直接实现以上两个接口，并将实现类注入到spring容器中即可
+DictionaryDataBase：字典数据结构化基类（类似于xxxDo，一般用于数据库字典表的ORM映射）
+默认的持久化方式为内存形式，当开发人员需要自定义持久化方式时，可直接实现或继承以上两个接口，并将实现类注入到spring容器中即可
 ```
 public interface DictionaryData extends Serializable {
     /**

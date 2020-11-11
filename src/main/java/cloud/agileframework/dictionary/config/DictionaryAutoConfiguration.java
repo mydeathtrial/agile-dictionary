@@ -3,11 +3,14 @@ package cloud.agileframework.dictionary.config;
 import cloud.agileframework.dictionary.DictionaryDataManager;
 import cloud.agileframework.dictionary.DictionaryDataManagerProxy;
 import cloud.agileframework.dictionary.DictionaryEngine;
+import cloud.agileframework.dictionary.DictionaryProperties;
 import cloud.agileframework.dictionary.MemoryDictionaryManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,7 +24,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @AutoConfigureBefore(name = "cloud.agileframework.jpa.config.DaoAutoConfiguration.class")
 @ConditionalOnProperty(name = "enable", prefix = "agile.dictionary")
+@EnableConfigurationProperties(DictionaryProperties.class)
 public class DictionaryAutoConfiguration {
+    @Autowired
+    private DictionaryProperties dictionaryProperties;
 
     /**
      * 字典引擎
@@ -30,7 +36,7 @@ public class DictionaryAutoConfiguration {
      */
     @Bean
     DictionaryEngine dictionaryEngine() {
-        return new DictionaryEngine();
+        return new DictionaryEngine(dictionaryProperties.getRootParentId());
     }
 
     /**

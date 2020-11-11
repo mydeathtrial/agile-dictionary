@@ -17,14 +17,23 @@ import lombok.ToString;
 @Builder
 @ToString
 public class Data2 {
+    //CHINA
     private Integer country;
+
+    //HLJ
     private Integer city;
+
+    //HRB
     private Integer region;
 
     @Dictionary(fieldName = {"country"})
     private String countryValue;
+
     @Dictionary(fieldName = {"country","city"})
     private String cityValue;
-    @Dictionary(fieldName = {"country","city","region"})
+
+    //中国/黑龙江/哈尔滨
+    //哈尔滨
+    @Dictionary(fieldName = {"region"})
     private String regionValue;
 }

@@ -1,12 +1,13 @@
 package com.agile.common.util;
 
 import cloud.agileframework.cache.support.AgileCache;
+import cloud.agileframework.dictionary.DictionaryDataBase;
+import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
 import com.agile.App;
 import cloud.agileframework.dictionary.DictionaryData;
 import cloud.agileframework.dictionary.DictionaryDataManagerProxy;
 import cloud.agileframework.dictionary.DictionaryEngine;
-import cloud.agileframework.dictionary.MemoryDictionaryData;
 import com.google.common.collect.Maps;
 import org.assertj.core.util.Lists;
 import org.junit.Before;
@@ -35,16 +36,16 @@ public class DictionaryUtilTest {
 
     @Before
     public void init() {
-        manager.add(new MemoryDictionaryData("1", null, "性别", "sex"));
-        manager.add(new MemoryDictionaryData("2", null, "对错", "isTrue"));
-        manager.add(new MemoryDictionaryData("3", "1", "男", "boy"));
-        manager.add(new MemoryDictionaryData("4", "1", "女", "girl"));
-        manager.add(new MemoryDictionaryData("5", "2", "对", "1"));
-        manager.add(new MemoryDictionaryData("6", "2", "错", "2"));
+        manager.add(new DictionaryDataBase("1", null, "性别", "sex"));
+        manager.add(new DictionaryDataBase("2", null, "对错", "isTrue"));
+        manager.add(new DictionaryDataBase("3", "1", "男", "boy"));
+        manager.add(new DictionaryDataBase("4", "1", "女", "girl"));
+        manager.add(new DictionaryDataBase("5", "2", "对", "1"));
+        manager.add(new DictionaryDataBase("6", "2", "错", "2"));
 
-        manager.add(new MemoryDictionaryData("7", null, "中国", "7"));
-        manager.add(new MemoryDictionaryData("8", "7", "黑龙江", "8"));
-        manager.add(new MemoryDictionaryData("9", "8", "哈尔滨", "9"));
+        manager.add(new DictionaryDataBase("7", null, "中国", "7"));
+        manager.add(new DictionaryDataBase("8", "7", "黑龙江", "8"));
+        manager.add(new DictionaryDataBase("9", "8", "哈尔滨", "9"));
     }
 
     @Test

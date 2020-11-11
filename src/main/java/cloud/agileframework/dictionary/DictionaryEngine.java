@@ -22,6 +22,11 @@ public class DictionaryEngine implements ApplicationRunner {
     public static final String CODE_CACHE = "codeCache";
     public static final String NAME_CACHE = "nameCache";
     public static final String DEFAULT_SPLIT_CHAR = "$SPLIT$";
+    private String rootValue;
+
+    public DictionaryEngine(String rootValue) {
+        this.rootValue = rootValue;
+    }
 
     @Autowired
     private DictionaryDataManager dictionaryDataManager;
@@ -29,17 +34,21 @@ public class DictionaryEngine implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         List<DictionaryData> list = dictionaryDataManager.all();
+
+        list.forEach(dic -> {
+            dic.setFullCode(dic.getCode());
+            dic.setFullName(dic.getName());
+        });
+
         TreeUtil.createTree(list,
                 "id",
                 "parentId",
                 "children",
                 "code",
-                null,
+                rootValue,
                 DEFAULT_SPLIT_CHAR,
-                "fullName",
-                "fullCode"
+                "fullName", "fullCode"
         );
-
         refreshCache(list);
     }
 
