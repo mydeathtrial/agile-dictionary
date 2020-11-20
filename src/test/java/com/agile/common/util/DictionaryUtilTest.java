@@ -2,19 +2,17 @@ package com.agile.common.util;
 
 import cloud.agileframework.cache.support.AgileCache;
 import cloud.agileframework.dictionary.DictionaryDataBase;
-import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
 import com.agile.App;
 import cloud.agileframework.dictionary.DictionaryData;
 import cloud.agileframework.dictionary.DictionaryDataManagerProxy;
 import cloud.agileframework.dictionary.DictionaryEngine;
 import com.google.common.collect.Maps;
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -25,11 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+@Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = App.class)
 public class DictionaryUtilTest {
-
-    private final Logger logger = LoggerFactory.getLogger(DictionaryUtilTest.class);
 
     @Autowired
     private DictionaryDataManagerProxy manager;
@@ -37,35 +34,35 @@ public class DictionaryUtilTest {
     @Before
     public void init() {
         manager.add(new DictionaryDataBase("1", null, "性别", "sex"));
-        manager.add(new DictionaryDataBase("2", null, "对错", "isTrue"));
-        manager.add(new DictionaryDataBase("3", "1", "男", "boy"));
+//        manager.add(new DictionaryDataBase("2", null, "对错", "isTrue"));
+//        manager.add(new DictionaryDataBase("3", "1", "男", "boy"));
         manager.add(new DictionaryDataBase("4", "1", "女", "girl"));
-        manager.add(new DictionaryDataBase("5", "2", "对", "1"));
-        manager.add(new DictionaryDataBase("6", "2", "错", "2"));
-
-        manager.add(new DictionaryDataBase("7", null, "中国", "7"));
-        manager.add(new DictionaryDataBase("8", "7", "黑龙江", "8"));
-        manager.add(new DictionaryDataBase("9", "8", "哈尔滨", "9"));
+//        manager.add(new DictionaryDataBase("5", "2", "对", "1"));
+//        manager.add(new DictionaryDataBase("6", "2", "错", "2"));
+//
+//        manager.add(new DictionaryDataBase("7", null, "中国", "7"));
+//        manager.add(new DictionaryDataBase("8", "7", "黑龙江", "8"));
+//        manager.add(new DictionaryDataBase("9", "8", "哈尔滨", "9"));
     }
 
     @Test
     public void getCache() {
         AgileCache cache = DictionaryUtil.getCache();
         Map code = cache.get(DictionaryEngine.CODE_CACHE, Map.class);
-        logger.info(code.toString());
+        log.info(code.toString());
     }
 
     @Test
     public void coverDicBean() {
         DictionaryData dic1 = DictionaryUtil.coverDicBean("sex.boy");
         DictionaryData dic2 = DictionaryUtil.coverDicBean("sex#boy", "#");
-        logger.info(dic1.getName());
-        logger.info(dic2.getName());
+        log.info(dic1.getName());
+        log.info(dic2.getName());
         IntStream.range(0,10).forEach(a->{
             new Thread(){
                 @Override
                 public void run() {
-                    logger.info(getId()+DictionaryUtil.coverDicBean("sex.boy").getName());
+                    log.info(getId()+DictionaryUtil.coverDicBean("sex.boy").getName());
                 }
             }.run();
         });
@@ -74,59 +71,59 @@ public class DictionaryUtilTest {
     @Test
     public void coverDicBeanByFullName() {
         DictionaryData dic1 = DictionaryUtil.coverDicBeanByFullName("性别.男");
-        logger.info(dic1.getFullCode());
+        log.info(dic1.getFullCode());
     }
 
     @Test
     public void testCoverDicBeanByFullName() {
         DictionaryData dic1 = DictionaryUtil.coverDicBeanByFullName("性别|男", "|");
-        logger.info(dic1.getFullCode());
+        log.info(dic1.getFullCode());
     }
 
     @Test
     public void coverDicBeanByParent() {
         DictionaryData dic1 = DictionaryUtil.coverDicBeanByParent("sex", "男");
-        logger.info(dic1.getFullName());
+        log.info(dic1.getFullName());
     }
 
     @Test
     public void coverDicName() {
         String name = DictionaryUtil.coverDicName("sex");
-        logger.info(name);
+        log.info(name);
         String name2 = DictionaryUtil.coverDicName("sex.boy");
-        logger.info(name2);
+        log.info(name2);
         String name3 = DictionaryUtil.coverDicName("sex.no", "未知");
-        logger.info(name3);
+        log.info(name3);
     }
 
     @Test
     public void coverDicNameByParent() {
         String name = DictionaryUtil.coverDicNameByParent("sex", "男,女");
-        logger.info(name);
+        log.info(name);
         String name2 = DictionaryUtil.coverDicNameByParent("sex", "中性,男,女", "no");
-        logger.info(name2);
+        log.info(name2);
         String name3 = DictionaryUtil.coverDicNameByParent("sex", "中性,男,女", "no", true, "#");
-        logger.info(name3);
+        log.info(name3);
     }
 
     @Test
     public void coverDicCode() {
         String code = DictionaryUtil.coverDicCode("性别.男,性别.女");
-        logger.info(code);
+        log.info(code);
         String code2 = DictionaryUtil.coverDicCode("性别.男,性别.女,性别.中性", "no");
-        logger.info(code2);
+        log.info(code2);
         String code3 = DictionaryUtil.coverDicCode("性别|男,性别|女,性别|中性", "no", true, "|");
-        logger.info(code3);
+        log.info(code3);
     }
 
     @Test
     public void coverDicCodeByParent() {
         String code = DictionaryUtil.coverDicCodeByParent("性别", "男,女");
-        logger.info(code);
+        log.info(code);
         String code2 = DictionaryUtil.coverDicCodeByParent("性别", "男,女,中性", "no");
-        logger.info(code2);
+        log.info(code2);
         String code3 = DictionaryUtil.coverDicCodeByParent("性别", "男,女,中性", "no", true, "|");
-        logger.info(code3);
+        log.info(code3);
     }
 
     @Test
@@ -143,13 +140,13 @@ public class DictionaryUtilTest {
         list.add(Data5.builder().code(SexEnum.boy).build());
 
         Map<String, Object> o = DictionaryUtil.coverMapDictionary(map, new String[]{"sex"}, "_value", new String[]{"code"});
-        logger.info(o.toString());
+        log.info(o.toString());
 
         List<Map<String, Object>> toList1 = DictionaryUtil.coverMapDictionary(list, new String[]{"sex"}, "_value", new String[]{"code"});
-        logger.info(toList1.toString());
+        log.info(toList1.toString());
 
         List<Map<String, Object>> toList2 = DictionaryUtil.coverMapDictionary(list, "sex", "_value", "code");
-        logger.info(toList2.toString());
+        log.info(toList2.toString());
     }
 
     @Test
@@ -167,16 +164,16 @@ public class DictionaryUtilTest {
         list.add(Data1.builder().sex("no").build());
 
         Data1 o = DictionaryUtil.coverBeanDictionary(Data1.builder().sex("boy").build(), new String[]{"sex"}, new String[]{"sex"}, new String[]{"text"});
-        logger.info(o.toString());
+        log.info(o.toString());
 
         Data1 o1 = DictionaryUtil.coverBeanDictionary(Data1.builder().sex("no").build(), new String[]{"sex"}, new String[]{"sex"}, new String[]{"text"}, new String[]{"default"});
-        logger.info(o1.toString());
+        log.info(o1.toString());
 
         List<Object> list1 = DictionaryUtil.coverBeanDictionary(list, "sex", "sex", "text");
-        logger.info(list1.toString());
+        log.info(list1.toString());
 
         List<Object> list2 = DictionaryUtil.coverBeanDictionary(list, new String[]{"sex"}, new String[]{"sex"}, new String[]{"text"}, new String[]{"default"});
-        logger.info(list2.toString());
+        log.info(list2.toString());
     }
 
     @Test

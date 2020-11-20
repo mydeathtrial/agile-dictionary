@@ -74,5 +74,9 @@ public interface DictionaryData extends Serializable {
      */
     List<DictionaryData> getChildren();
 
-
+    /**
+     * 设置子
+     * @param children 子集
+     */
+    void setChildren(List<DictionaryData> children);
 }

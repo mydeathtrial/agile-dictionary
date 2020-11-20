@@ -22,7 +22,7 @@ public class DictionaryEngine implements ApplicationRunner {
     public static final String CODE_CACHE = "codeCache";
     public static final String NAME_CACHE = "nameCache";
     public static final String DEFAULT_SPLIT_CHAR = "$SPLIT$";
-    private String rootValue;
+    private final String rootValue;
 
     public DictionaryEngine(String rootValue) {
         this.rootValue = rootValue;

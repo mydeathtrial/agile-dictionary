@@ -1,5 +1,6 @@
 package cloud.agileframework.dictionary;
 
+import com.google.common.collect.Lists;
 import lombok.Data;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class DictionaryDataBase implements DictionaryData {
     private String code;
     private String fullName;
     private String fullCode;
-    private List<DictionaryData> children;
+    private List<DictionaryData> children = Lists.newArrayList();
 
     public DictionaryDataBase() {
     }
@@ -33,7 +34,7 @@ public class DictionaryDataBase implements DictionaryData {
 
     @Override
     public String getFullName() {
-        if(fullName==null){
+        if (fullName == null) {
             return name;
         }
         return fullName;
@@ -41,7 +42,7 @@ public class DictionaryDataBase implements DictionaryData {
 
     @Override
     public String getFullCode() {
-        if(fullCode==null){
+        if (fullCode == null) {
             return code;
         }
         return fullCode;

@@ -2,11 +2,11 @@ package cloud.agileframework.dictionary.util;
 
 import cloud.agileframework.cache.support.AgileCache;
 import cloud.agileframework.cache.util.CacheUtil;
+import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.clazz.ClassUtil;
 import cloud.agileframework.common.util.clazz.TypeReference;
 import cloud.agileframework.common.util.object.ObjectUtil;
 import cloud.agileframework.common.util.string.StringUtil;
-import cloud.agileframework.dictionary.Constant;
 import cloud.agileframework.dictionary.DictionaryData;
 import cloud.agileframework.dictionary.DictionaryEngine;
 import cloud.agileframework.dictionary.annotation.Dictionary;
