@@ -6,6 +6,8 @@ import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,7 @@ import java.util.Map;
  * @version 1.0
  * @since 1.0
  */
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class DictionaryEngine implements ApplicationRunner {
 
     public static final String CODE_CACHE = "codeCache";

@@ -37,7 +37,6 @@ public class DictionaryAutoConfiguration {
      * @return 注入字典引擎
      */
     @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
     DictionaryEngine dictionaryEngine() {
         return new DictionaryEngine(dictionaryProperties.getRootParentId());
     }
