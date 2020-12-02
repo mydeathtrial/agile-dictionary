@@ -200,7 +200,7 @@ public final class DictionaryUtil {
         }
 
         codes = parentCode + splitChar + codes;
-        codes = codes.replace(Constant.RegularAbout.COMMA, Constant.RegularAbout.COMMA + parentCode + Constant.RegularAbout.SPOT);
+        codes = codes.replace(Constant.RegularAbout.COMMA, Constant.RegularAbout.COMMA + parentCode + splitChar);
         return coverDicName(codes, defaultValue, isFull, splitChar);
     }
 
@@ -220,7 +220,7 @@ public final class DictionaryUtil {
         }
         StringBuilder builder = new StringBuilder();
         Arrays.stream(fullCodes.split(Constant.RegularAbout.COMMA)).forEach(c -> {
-            DictionaryData targetEntity = coverDicBean(c);
+            DictionaryData targetEntity = coverDicBean(c, splitChar);
             if (builder.length() > 0) {
                 builder.append(Constant.RegularAbout.COMMA);
             }
@@ -576,7 +576,7 @@ public final class DictionaryUtil {
         if (ObjectUtils.isEmpty(parentDicCode)) {
             fullCode = codeStr;
         } else {
-            fullCode = parentDicCode + Constant.RegularAbout.SPOT + codeStr;
+            fullCode = parentDicCode + split + codeStr;
         }
 
         // 翻译后值
@@ -585,18 +585,10 @@ public final class DictionaryUtil {
         if (dicCoverCache != null && dicCoverCache.containsKey(fullCode)) {
             targetName = dicCoverCache.get(fullCode);
         } else {
-            if (isFull) {
-                if (dictionary.directionType() == DirectionType.CodeToName) {
-                    targetName = coverDicName(fullCode, DEFAULT_NAME, true, split);
-                } else {
-                    targetName = coverDicCode(fullCode, DEFAULT_NAME, true, split);
-                }
+            if (dictionary.directionType() == DirectionType.CodeToName) {
+                targetName = coverDicName(fullCode, DEFAULT_NAME, isFull, split);
             } else {
-                if (dictionary.directionType() == DirectionType.CodeToName) {
-                    targetName = coverDicName(fullCode);
-                } else {
-                    targetName = coverDicCode(fullCode);
-                }
+                targetName = coverDicCode(fullCode, DEFAULT_NAME, isFull, split);
             }
             if (dicCoverCache != null) {
                 dicCoverCache.put(fullCode, targetName);
