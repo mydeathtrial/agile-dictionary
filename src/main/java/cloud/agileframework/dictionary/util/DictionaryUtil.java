@@ -557,26 +557,32 @@ public final class DictionaryUtil {
         String split = dictionary.split();
 
         // 组装要翻译的内容
-        String codeStr = Arrays.stream(dictionary.fieldName()).map(column -> {
+        // 处理布尔类型
+        Set<String> codes = Arrays.stream(dictionary.fieldName()).flatMap(column -> {
             Object code = ObjectUtil.getFieldValue(node, column);
+
+            String value;
             // 处理布尔类型
             if (ObjectUtils.isEmpty(code)) {
                 return null;
             } else if (code instanceof Boolean) {
-                return Boolean.TRUE.equals(code) ? "1" : "0";
+                value = Boolean.TRUE.equals(code) ? "1" : "0";
             } else if (code.getClass().isEnum()) {
-                return ((Enum) code).name();
+                value = ((Enum<?>) code).name();
             } else {
-                return code.toString();
+                value = code.toString();
             }
-        }).filter(Objects::nonNull).collect(Collectors.joining(split));
+            return Arrays.stream(value.split("[,]"));
+        }).filter(Objects::nonNull).collect(Collectors.toSet());
 
         // 组装要翻译的内容
         String fullCode;
         if (ObjectUtils.isEmpty(parentDicCode)) {
-            fullCode = codeStr;
+            fullCode = String.join(split, codes);
         } else {
-            fullCode = parentDicCode + split + codeStr;
+            fullCode = codes.stream()
+                    .map(code -> parentDicCode + split + code)
+                    .collect(Collectors.joining(Constant.RegularAbout.COMMA));
         }
 
         // 翻译后值
