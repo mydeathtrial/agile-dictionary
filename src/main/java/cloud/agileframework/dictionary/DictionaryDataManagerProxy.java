@@ -109,10 +109,7 @@ public class DictionaryDataManagerProxy {    private final DictionaryDataManager
         //先删掉旧的
         DictionaryUtil.getCache().removeFromMap(cacheKey, function.apply(self));
 
-        //更新子
-        updateChild(cacheKey, self, function);
-
-        //更新父
+        //更新自己
         Map<String, DictionaryData> map = DictionaryUtil.getCache().get(cacheKey, Map.class);
         assert map != null;
         DictionaryData parent = map.values().stream()
@@ -121,14 +118,20 @@ public class DictionaryDataManagerProxy {    private final DictionaryDataManager
         if (parent != null) {
             self.setFullCode(parent.getFullCode() + DictionaryEngine.DEFAULT_SPLIT_CHAR + self.getCode());
             self.setFullName(parent.getFullName() + DictionaryEngine.DEFAULT_SPLIT_CHAR + self.getName());
+        } else {
+            self.setFullCode(self.getCode());
+            self.setFullName(self.getName());
+        }
 
+        //更新子
+        updateChild(cacheKey, self, function);
+
+        //更新父
+        if (parent != null) {
             final List<DictionaryData> brothers = parent.getChildren();
             brothers.removeIf(dic -> dic.getId().equals(self.getId()));
             brothers.add(self);
             refreshParent(cacheKey, parent, function);
-        } else {
-            self.setFullCode(self.getCode());
-            self.setFullName(self.getName());
         }
 
         //缓存同步当前节点
@@ -162,11 +165,16 @@ public class DictionaryDataManagerProxy {    private final DictionaryDataManager
             return;
         }
         parent.getChildren().forEach(child -> {
+            //删除旧的
+            DictionaryUtil.getCache().removeFromMap(cacheKey, function.apply(child));
+
+            //更新
             child.setFullCode(parent.getFullCode() + DictionaryEngine.DEFAULT_SPLIT_CHAR + child.getCode());
-            child.setFullCode(parent.getFullName() + DictionaryEngine.DEFAULT_SPLIT_CHAR + child.getName());
+            child.setFullName(parent.getFullName() + DictionaryEngine.DEFAULT_SPLIT_CHAR + child.getName());
             updateChild(cacheKey, child, function);
+
             //缓存同步
-            DictionaryUtil.getCache().addToMap(cacheKey, function.apply(parent), parent);
+            DictionaryUtil.getCache().addToMap(cacheKey, function.apply(child), child);
         });
     }
 }
