@@ -575,6 +575,15 @@ public final class DictionaryUtil {
             return Arrays.stream(value.split("[,]"));
         }).filter(Objects::nonNull).collect(Collectors.toSet());
 
+        if (codes.isEmpty()) {
+            final String defaultValue = dictionary.defaultValue();
+            if (!Dictionary.NULL.equals(defaultValue)) {
+                // 赋值
+                ObjectUtil.setValue(node, field, defaultValue);
+            }
+            return;
+        }
+
         // 组装要翻译的内容
         String fullCode;
         if (ObjectUtils.isEmpty(parentDicCode)) {

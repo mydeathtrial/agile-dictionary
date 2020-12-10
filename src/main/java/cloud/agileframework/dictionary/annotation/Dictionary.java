@@ -17,6 +17,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Dictionary {
+
+    String NULL = "null";
+
     /**
      * 字典码
      */
@@ -41,4 +44,9 @@ public @interface Dictionary {
      * 字典转换方向
      */
     DirectionType directionType() default DirectionType.CodeToName;
+
+    /**
+     * 为空时默认值
+     */
+    String defaultValue() default NULL;
 }
