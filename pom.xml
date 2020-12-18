@@ -4,10 +4,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Agile字典解析器</name>
+    <name>agile-dictionary</name>
     <groupId>cloud.agileframework</groupId>
     <artifactId>agile-dictionary</artifactId>
-    <version>2.0.8.5</version>
+    <version>2.0.9</version>
     <description>Data dictionary parsing tool</description>
     <url>https://github.com/mydeathtrial/agile-dictionary</url>
 
@@ -91,7 +91,12 @@
         <dependency>
             <groupId>cloud.agileframework</groupId>
             <artifactId>agile-cache</artifactId>
-            <version>2.0.8.3</version>
+            <version>2.0.9</version>
+        </dependency>
+        <dependency>
+            <groupId>cloud.agileframework</groupId>
+            <artifactId>common-util</artifactId>
+            <version>2.0.9</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
