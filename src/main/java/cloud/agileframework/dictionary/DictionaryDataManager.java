@@ -15,26 +15,26 @@ public interface DictionaryDataManager {
      *
      * @return 字典数据集合
      */
-    List<DictionaryData> all();
+    List<DictionaryDataBase> all();
 
     /**
      * 新增字典
      *
-     * @param dictionaryData 字典
+     * @param dictionaryDataBase 字典
      */
-    void add(DictionaryData dictionaryData);
+    void add(DictionaryDataBase dictionaryDataBase);
 
     /**
      * 删除字典
      *
-     * @param dictionaryData 字典
+     * @param dictionaryDataBase 字典
      */
-    void delete(DictionaryData dictionaryData);
+    void delete(DictionaryDataBase dictionaryDataBase);
 
     /**
      * 更新字典
      *
-     * @param dictionaryData 字典数据
+     * @param dictionaryDataBase 字典数据
      */
-    void update(DictionaryData dictionaryData);
+    void update(DictionaryDataBase dictionaryDataBase);
 }

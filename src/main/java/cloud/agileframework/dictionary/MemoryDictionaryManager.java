@@ -17,27 +17,27 @@ public class MemoryDictionaryManager implements DictionaryDataManager {
     /**
      * 字典数据缓存
      */
-    private static final Set<DictionaryData> CACHE = Sets.newHashSet();
+    private static final Set<DictionaryDataBase> CACHE = Sets.newHashSet();
 
 
     @Override
-    public List<DictionaryData> all() {
+    public List<DictionaryDataBase> all() {
         return new ArrayList<>(CACHE);
     }
 
     @Override
-    public void add(DictionaryData dictionaryData) {
-        CACHE.add(dictionaryData);
+    public void add(DictionaryDataBase dictionaryDataBase) {
+        CACHE.add(dictionaryDataBase);
     }
 
     @Override
-    public void delete(DictionaryData dictionaryData) {
-        CACHE.removeIf(n -> dictionaryData.getId().equals(n.getId()));
+    public void delete(DictionaryDataBase dictionaryDataBase) {
+        CACHE.removeIf(n -> dictionaryDataBase.getId().equals(n.getId()));
     }
 
     @Override
-    public void update(DictionaryData dictionaryData) {
-        delete(dictionaryData);
-        add(dictionaryData);
+    public void update(DictionaryDataBase dictionaryDataBase) {
+        delete(dictionaryDataBase);
+        add(dictionaryDataBase);
     }
 }

@@ -1,13 +1,11 @@
 package cloud.agileframework.dictionary.util;
 
-import cloud.agileframework.cache.support.AgileCache;
-import cloud.agileframework.cache.util.CacheUtil;
 import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.clazz.ClassUtil;
 import cloud.agileframework.common.util.clazz.TypeReference;
 import cloud.agileframework.common.util.object.ObjectUtil;
 import cloud.agileframework.common.util.string.StringUtil;
-import cloud.agileframework.dictionary.DictionaryData;
+import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.DictionaryEngine;
 import cloud.agileframework.dictionary.annotation.Dictionary;
 import cloud.agileframework.dictionary.annotation.DirectionType;
@@ -42,15 +40,10 @@ import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHA
  */
 public final class DictionaryUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(DictionaryUtil.class);
-    private static final String DEFAULT_CACHE_NAME = "dictionary-cache";
     private static final String CODE_FORMAT = "%s.%s";
     private static final String DEFAULT_NAME = "$DEFAULT_NAME";
 
     private DictionaryUtil() {
-    }
-
-    public static AgileCache getCache() {
-        return CacheUtil.getCache(DEFAULT_CACHE_NAME);
     }
 
     /**
@@ -59,8 +52,8 @@ public final class DictionaryUtil {
      * @param fullCode 全路径字典码
      * @return bean
      */
-    public static DictionaryData coverDicBean(String fullCode) {
-        return getDictionary(fullCode, DictionaryEngine.CODE_CACHE, "not found dictionary of fullCode {}", Constant.RegularAbout.SPOT);
+    public static DictionaryDataBase coverDicBean(String fullCode) {
+        return getDictionary(fullCode, DictionaryEngine.CacheType.CODE_CACHE, "not found dictionary of fullCode {}", Constant.RegularAbout.SPOT);
     }
 
     /**
@@ -70,8 +63,8 @@ public final class DictionaryUtil {
      * @param splitChar 自定义分隔符
      * @return bean
      */
-    public static DictionaryData coverDicBean(String fullCode, String splitChar) {
-        return getDictionary(fullCode, DictionaryEngine.CODE_CACHE, "not found dictionary of fullCode {}", splitChar);
+    public static DictionaryDataBase coverDicBean(String fullCode, String splitChar) {
+        return getDictionary(fullCode, DictionaryEngine.CacheType.CODE_CACHE, "not found dictionary of fullCode {}", splitChar);
     }
 
     /**
@@ -80,8 +73,8 @@ public final class DictionaryUtil {
      * @param fullName 全路径字典值
      * @return bean
      */
-    public static DictionaryData coverDicBeanByFullName(String fullName) {
-        return getDictionary(fullName, DictionaryEngine.NAME_CACHE, "not found dictionary of fullName {}", Constant.RegularAbout.SPOT);
+    public static DictionaryDataBase coverDicBeanByFullName(String fullName) {
+        return getDictionary(fullName, DictionaryEngine.CacheType.NAME_CACHE, "not found dictionary of fullName {}", Constant.RegularAbout.SPOT);
     }
 
 
@@ -92,8 +85,8 @@ public final class DictionaryUtil {
      * @param splitChar 自定义分隔符
      * @return bean
      */
-    public static DictionaryData coverDicBeanByFullName(String fullName, String splitChar) {
-        return getDictionary(fullName, DictionaryEngine.NAME_CACHE, "not found dictionary of fullName {}", splitChar);
+    public static DictionaryDataBase coverDicBeanByFullName(String fullName, String splitChar) {
+        return getDictionary(fullName, DictionaryEngine.CacheType.NAME_CACHE, "not found dictionary of fullName {}", splitChar);
     }
 
     /**
@@ -103,11 +96,11 @@ public final class DictionaryUtil {
      * @param name       子字典值
      * @return 字典数据
      */
-    public static DictionaryData coverDicBeanByParent(String parentCode, String name) {
+    public static DictionaryDataBase coverDicBeanByParent(String parentCode, String name) {
         if (StringUtils.isEmpty(parentCode) || StringUtils.isEmpty(name)) {
             return null;
         }
-        DictionaryData dic = coverDicBean(parentCode);
+        DictionaryDataBase dic = coverDicBean(parentCode);
         if (dic == null) {
             return null;
         }
@@ -119,21 +112,26 @@ public final class DictionaryUtil {
      * 根据全路径字典值或字典码，查找缓存中的字典数据
      *
      * @param fullIndex    全路径字典值或字典码
-     * @param cacheKey     缓存key值
+     * @param cacheType    缓存类型
      * @param errorMessage 日志
      * @return 字典数据
      */
-    private static DictionaryData getDictionary(String fullIndex, String cacheKey, String errorMessage, String splitChar) {
+    private static DictionaryDataBase getDictionary(String fullIndex, DictionaryEngine.CacheType cacheType, String errorMessage, String splitChar) {
         if (StringUtils.isEmpty(fullIndex)) {
             return null;
         }
         // 字典分隔符同义转换为点号
         fullIndex = fullIndex.replace(splitChar, DEFAULT_SPLIT_CHAR);
 
+        DictionaryDataBase entity;
+        if (DictionaryEngine.CacheType.CODE_CACHE == cacheType) {
+            entity = DictionaryEngine.getCodeMemory().get(fullIndex);
+        } else {
+            entity = DictionaryEngine.getNameMemory().get(fullIndex);
+        }
         // 直接从缓存中查找对应字典码
-        DictionaryData entity = getCache().getFromMap(cacheKey, fullIndex, DictionaryData.class);
         if (entity == null) {
-            LOGGER.error(errorMessage, fullIndex.replace(DEFAULT_SPLIT_CHAR, "/"));
+            LOGGER.error(errorMessage, fullIndex);
             return null;
         }
         return entity;
@@ -199,9 +197,19 @@ public final class DictionaryUtil {
             return defaultValue;
         }
 
-        codes = parentCode + splitChar + codes;
-        codes = codes.replace(Constant.RegularAbout.COMMA, Constant.RegularAbout.COMMA + parentCode + splitChar);
-        return coverDicName(codes, defaultValue, isFull, splitChar);
+        DictionaryDataBase parent = coverDicBean(parentCode, splitChar);
+        if (parent == null) {
+            return defaultValue;
+        }
+        if (isFull) {
+            defaultValue = parent.getFullName() + splitChar + defaultValue;
+        }
+
+        String finalDefaultValue = defaultValue;
+
+        return Arrays.stream(codes.split(Constant.RegularAbout.COMMA))
+                .map(code -> coverDicName(parent.getFullCode() + splitChar + code, finalDefaultValue, isFull, splitChar))
+                .collect(Collectors.joining(Constant.RegularAbout.COMMA));
     }
 
 
@@ -220,7 +228,7 @@ public final class DictionaryUtil {
         }
         StringBuilder builder = new StringBuilder();
         Arrays.stream(fullCodes.split(Constant.RegularAbout.COMMA)).forEach(c -> {
-            DictionaryData targetEntity = coverDicBean(c, splitChar);
+            DictionaryDataBase targetEntity = coverDicBean(c, splitChar);
             if (builder.length() > 0) {
                 builder.append(Constant.RegularAbout.COMMA);
             }
@@ -301,9 +309,17 @@ public final class DictionaryUtil {
             return defaultCode;
         }
 
-        names = parentName + splitChar + names;
-        names = names.replace(Constant.RegularAbout.COMMA, Constant.RegularAbout.COMMA + parentName + splitChar);
-        return coverDicCode(names, defaultCode, isFull, splitChar);
+        DictionaryDataBase parent = coverDicBeanByFullName(parentName, splitChar);
+        if (parent == null) {
+            return defaultCode;
+        }
+        if (isFull) {
+            defaultCode = parent.getFullName() + splitChar + defaultCode;
+        }
+        String finalDefaultCode = defaultCode;
+        return Arrays.stream(names.split(Constant.RegularAbout.COMMA))
+                .map(code -> coverDicCode(parent.getFullName() + splitChar + code, finalDefaultCode, isFull, splitChar))
+                .collect(Collectors.joining(Constant.RegularAbout.COMMA));
     }
 
 
@@ -320,7 +336,7 @@ public final class DictionaryUtil {
         }
         StringBuilder builder = new StringBuilder();
         Arrays.stream(fulNames.split(Constant.RegularAbout.COMMA)).forEach(c -> {
-            DictionaryData targetEntity = coverDicBeanByFullName(c, splitChar);
+            DictionaryDataBase targetEntity = coverDicBeanByFullName(c, splitChar);
             if (builder.length() > 0) {
                 builder.append(Constant.RegularAbout.COMMA);
             }
@@ -558,24 +574,24 @@ public final class DictionaryUtil {
 
         // 组装要翻译的内容
         // 处理布尔类型
-        Set<String> codes = Arrays.stream(dictionary.fieldName()).flatMap(column -> {
-            Object code = ObjectUtil.getFieldValue(node, column);
+        List<String> indexes = Arrays.stream(dictionary.fieldName()).flatMap(column -> {
+            Object index = ObjectUtil.getFieldValue(node, column);
 
             String value;
             // 处理布尔类型
-            if (ObjectUtils.isEmpty(code)) {
+            if (ObjectUtils.isEmpty(index)) {
                 return null;
-            } else if (code instanceof Boolean) {
-                value = Boolean.TRUE.equals(code) ? "1" : "0";
-            } else if (code.getClass().isEnum()) {
-                value = ((Enum<?>) code).name();
+            } else if (index instanceof Boolean) {
+                value = Boolean.TRUE.equals(index) ? "1" : "0";
+            } else if (index.getClass().isEnum()) {
+                value = ((Enum<?>) index).name();
             } else {
-                value = code.toString();
+                value = index.toString();
             }
             return Arrays.stream(value.split("[,]"));
-        }).filter(Objects::nonNull).collect(Collectors.toSet());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
 
-        if (codes.isEmpty()) {
+        if (indexes.isEmpty()) {
             final String defaultValue = dictionary.defaultValue();
             if (!Dictionary.NULL.equals(defaultValue)) {
                 // 赋值
@@ -585,11 +601,11 @@ public final class DictionaryUtil {
         }
 
         // 组装要翻译的内容
-        String fullCode;
+        String fullIndex;
         if (ObjectUtils.isEmpty(parentDicCode)) {
-            fullCode = String.join(split, codes);
+            fullIndex = String.join(split, indexes);
         } else {
-            fullCode = codes.stream()
+            fullIndex = indexes.stream()
                     .map(code -> parentDicCode + split + code)
                     .collect(Collectors.joining(Constant.RegularAbout.COMMA));
         }
@@ -597,16 +613,16 @@ public final class DictionaryUtil {
         // 翻译后值
         String targetName;
 
-        if (dicCoverCache != null && dicCoverCache.containsKey(fullCode)) {
-            targetName = dicCoverCache.get(fullCode);
+        if (dicCoverCache != null && dicCoverCache.containsKey(fullIndex)) {
+            targetName = dicCoverCache.get(fullIndex);
         } else {
             if (dictionary.directionType() == DirectionType.CodeToName) {
-                targetName = coverDicName(fullCode, DEFAULT_NAME, isFull, split);
+                targetName = coverDicName(fullIndex, DEFAULT_NAME, isFull, split);
             } else {
-                targetName = coverDicCode(fullCode, DEFAULT_NAME, isFull, split);
+                targetName = coverDicCode(fullIndex, DEFAULT_NAME, isFull, split);
             }
             if (dicCoverCache != null) {
-                dicCoverCache.put(fullCode, targetName);
+                dicCoverCache.put(fullIndex, targetName);
             }
         }
 

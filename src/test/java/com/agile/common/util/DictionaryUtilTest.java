@@ -4,7 +4,7 @@ import cloud.agileframework.cache.support.AgileCache;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
 import com.agile.App;
-import cloud.agileframework.dictionary.DictionaryData;
+import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.DictionaryDataManagerProxy;
 import cloud.agileframework.dictionary.DictionaryEngine;
 import com.google.common.collect.Maps;
@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,31 +32,16 @@ public class DictionaryUtilTest {
     @Autowired
     private DictionaryDataManagerProxy manager;
 
-    @Before
-    public void init() {
-        manager.add(new DictionaryDataBase("1", null, "性别", "sex"));
-//        manager.add(new DictionaryDataBase("2", null, "对错", "isTrue"));
-//        manager.add(new DictionaryDataBase("3", "1", "男", "boy"));
-        manager.add(new DictionaryDataBase("4", "1", "女", "girl"));
-//        manager.add(new DictionaryDataBase("5", "2", "对", "1"));
-//        manager.add(new DictionaryDataBase("6", "2", "错", "2"));
-//
-//        manager.add(new DictionaryDataBase("7", null, "中国", "7"));
-//        manager.add(new DictionaryDataBase("8", "7", "黑龙江", "8"));
-//        manager.add(new DictionaryDataBase("9", "8", "哈尔滨", "9"));
-    }
-
     @Test
     public void getCache() {
-        AgileCache cache = DictionaryUtil.getCache();
-        Map code = cache.get(DictionaryEngine.CODE_CACHE, Map.class);
+        List<DictionaryDataBase> code = DictionaryEngine.getAllMemory();
         log.info(code.toString());
     }
 
     @Test
     public void coverDicBean() {
-        DictionaryData dic1 = DictionaryUtil.coverDicBean("sex.boy");
-        DictionaryData dic2 = DictionaryUtil.coverDicBean("sex#boy", "#");
+        DictionaryDataBase dic1 = DictionaryUtil.coverDicBean("sex.boy");
+        DictionaryDataBase dic2 = DictionaryUtil.coverDicBean("sex#boy", "#");
         log.info(dic1.getName());
         log.info(dic2.getName());
         IntStream.range(0,10).forEach(a->{
@@ -70,19 +56,19 @@ public class DictionaryUtilTest {
 
     @Test
     public void coverDicBeanByFullName() {
-        DictionaryData dic1 = DictionaryUtil.coverDicBeanByFullName("性别.男");
+        DictionaryDataBase dic1 = DictionaryUtil.coverDicBeanByFullName("性别.男");
         log.info(dic1.getFullCode());
     }
 
     @Test
     public void testCoverDicBeanByFullName() {
-        DictionaryData dic1 = DictionaryUtil.coverDicBeanByFullName("性别|男", "|");
+        DictionaryDataBase dic1 = DictionaryUtil.coverDicBeanByFullName("性别|男", "|");
         log.info(dic1.getFullCode());
     }
 
     @Test
     public void coverDicBeanByParent() {
-        DictionaryData dic1 = DictionaryUtil.coverDicBeanByParent("sex", "男");
+        DictionaryDataBase dic1 = DictionaryUtil.coverDicBeanByParent("sex", "男");
         log.info(dic1.getFullName());
     }
 
@@ -98,11 +84,11 @@ public class DictionaryUtilTest {
 
     @Test
     public void coverDicNameByParent() {
-        String name = DictionaryUtil.coverDicNameByParent("sex", "男,女");
+        String name = DictionaryUtil.coverDicNameByParent("sex", "boy,girl");
         log.info(name);
-        String name2 = DictionaryUtil.coverDicNameByParent("sex", "中性,男,女", "no");
+        String name2 = DictionaryUtil.coverDicNameByParent("sex", "neutral,boy,girl", "中性");
         log.info(name2);
-        String name3 = DictionaryUtil.coverDicNameByParent("sex", "中性,男,女", "no", true, "#");
+        String name3 = DictionaryUtil.coverDicNameByParent("sex", "neutral,boy,girl", "中性", true, "#");
         log.info(name3);
     }
 
@@ -203,5 +189,10 @@ public class DictionaryUtilTest {
         IntStream.range(0,1000).forEach(a-> list.add(Data3.builder().status("sex.boy").build()));
         DictionaryUtil.cover(list);
         System.out.println(System.currentTimeMillis() - start);
+    }
+
+    @Test
+    public void add(){
+        manager.add(new DictionaryDataBase("31", "3", "男1", "boy1"));
     }
 }

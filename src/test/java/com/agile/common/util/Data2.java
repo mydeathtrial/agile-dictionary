@@ -34,6 +34,6 @@ public class Data2 {
 
     //中国/黑龙江/哈尔滨
     //哈尔滨
-    @Dictionary(fieldName = {"region"})
+    @Dictionary(fieldName = {"country","city","region"},isFull = true)
     private String regionValue;
 }

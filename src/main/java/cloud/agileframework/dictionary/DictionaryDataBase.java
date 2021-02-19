@@ -1,8 +1,9 @@
 package cloud.agileframework.dictionary;
 
-import com.google.common.collect.Lists;
-import lombok.Data;
+import cloud.agileframework.common.util.collection.TreeBase;
+import lombok.EqualsAndHashCode;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -12,35 +13,40 @@ import java.util.List;
  * @version 1.0
  * @since 1.0
  */
-@Data
-public class DictionaryDataBase implements DictionaryData {
-    private String id;
-    private String parentId;
-    private String name;
+@EqualsAndHashCode(callSuper = true)
+public class DictionaryDataBase extends TreeBase<String> implements Serializable {
+
     private String code;
     private String fullName;
     private String fullCode;
-    private List<DictionaryData> children = Lists.newArrayList();
 
     public DictionaryDataBase() {
+        super();
     }
 
     public DictionaryDataBase(String id, String parentId, String name, String code) {
-        this.id = id;
-        this.parentId = parentId;
-        this.name = name;
+        super();
+        setId(id);
+        setParentId(parentId);
+        setName(name);
         this.code = code;
     }
 
-    @Override
     public String getFullName() {
         if (fullName == null) {
-            return name;
+            return super.getName();
         }
         return fullName;
     }
 
-    @Override
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
     public String getFullCode() {
         if (fullCode == null) {
             return code;
@@ -48,16 +54,29 @@ public class DictionaryDataBase implements DictionaryData {
         return fullCode;
     }
 
+    public void setFullCode(String fullCode) {
+        this.fullCode = fullCode;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    @Override
+    public List<DictionaryDataBase> getChildren() {
+        return (List<DictionaryDataBase>) super.getChildren();
+    }
+
     @Override
     public String toString() {
-        return "DictionaryData{" +
-                "id='" + id + '\'' +
-                ", parentId='" + parentId + '\'' +
-                ", name='" + name + '\'' +
+        return "DictionaryDataBase{" +
+                "id='" + super.getId() + '\'' +
+                ", parentId='" + super.getParentId() + '\'' +
+                ", name='" + super.getName() + '\'' +
                 ", code='" + code + '\'' +
                 ", fullName='" + fullName + '\'' +
                 ", fullCode='" + fullCode + '\'' +
-                ", children=" + children +
+                ", children=" + super.getChildren() +
                 '}';
     }
 }

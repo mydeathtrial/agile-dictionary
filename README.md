@@ -55,7 +55,7 @@ country代表国家、city代表城市、region代表地区。
 
 * **自定义持久化数据方式**
 字典的持久化方式默认直接使用内存形式，用户可以通过实现`cloud.agileframework.dictionary.DictionaryDataManager`，实现自定义的字典数据持久化方式，如使用mysql存储字典数据，字典的数据结构
-需符合接口`cloud.agileframework.dictionary.DictionaryData`规范，当切换mysql时，开发人员只需要将字典表的orm映射继承自该接口，并实现接口方法即可完成mysql切换。
+需符合接口`cloud.agileframework.dictionary.DictionaryDataBase`规范，当切换mysql时，开发人员只需要将字典表的orm映射继承自该接口，并实现接口方法即可完成mysql切换。
 
 * **组件开关**
 内置组件开启，配置：agile.dictionary.enable=true，默认为开启，用户也可使用springboot组件排除方式实现排除加载
@@ -92,7 +92,7 @@ country代表国家、city代表城市、region代表地区。
      * @param fullCode 全路径字典码,如status.yes
      * @return bean
      */
-    public static DictionaryData coverDicBean(String fullCode)
+    public static DictionaryDataBase coverDicBean(String fullCode)
 
 
     /**
@@ -102,7 +102,7 @@ country代表国家、city代表城市、region代表地区。
      * @param splitChar 自定义分隔符,如-
      * @return bean
      */
-    public static DictionaryData coverDicBean(String fullCode, String splitChar)
+    public static DictionaryDataBase coverDicBean(String fullCode, String splitChar)
 
     /**
      * 转换字典对象
@@ -110,7 +110,7 @@ country代表国家、city代表城市、region代表地区。
      * @param fullName 全路径字典值
      * @return bean
      */
-    public static DictionaryData coverDicBeanByFullName(String fullName)
+    public static DictionaryDataBase coverDicBeanByFullName(String fullName)
 
     /**
      * 转换字典对象
@@ -119,7 +119,7 @@ country代表国家、city代表城市、region代表地区。
      * @param splitChar 自定义分隔符
      * @return bean
      */
-    public static DictionaryData coverDicBeanByFullName(String fullName, String splitChar) 
+    public static DictionaryDataBase coverDicBeanByFullName(String fullName, String splitChar) 
 
     /**
      * 根据父级树形字典码与子树形name获取字典
@@ -128,7 +128,7 @@ country代表国家、city代表城市、region代表地区。
      * @param name       子字典值
      * @return 字典数据
      */
-    public static DictionaryData coverDicBeanByParent(String parentCode, String name) 
+    public static DictionaryDataBase coverDicBeanByParent(String parentCode, String name) 
 
     /**
      * 编码转字典值
@@ -325,7 +325,7 @@ DictionaryDataManager：字典数据管理器（类似xxxService，用于提供�
 DictionaryDataBase：字典数据结构化基类（类似于xxxDo，一般用于数据库字典表的ORM映射）
 默认的持久化方式为内存形式，当开发人员需要自定义持久化方式时，可直接实现或继承以上两个接口，并将实现类注入到spring容器中即可
 ```
-public interface DictionaryData extends Serializable {
+public interface DictionaryDataBase extends Serializable {
     /**
      * 字典唯一标识
      *
@@ -387,7 +387,7 @@ public interface DictionaryData extends Serializable {
      *
      * @return 子字典集
      */
-    List<DictionaryData> getChildren();
+    List<DictionaryDataBase> getChildren();
 
 
 }
@@ -396,13 +396,13 @@ public interface DictionaryDataManager {
      * 获取所有字典数据
      * @return 字典数据集合
      */
-    List<DictionaryData> all();
+    List<DictionaryDataBase> all();
 
     /**
      * 新增字典
-     * @param dictionaryData 字典
+     * @param DictionaryDataBase 字典
      */
-    void add(DictionaryData dictionaryData);
+    void add(DictionaryDataBase DictionaryDataBase);
 
     /**
      * 删除字典
@@ -412,9 +412,9 @@ public interface DictionaryDataManager {
 
     /**
      * 更新字典
-     * @param dictionaryData 字典数据
+     * @param DictionaryDataBase 字典数据
      */
-    void update(DictionaryData dictionaryData);
+    void update(DictionaryDataBase DictionaryDataBase);
 }
 ```
 

@@ -5,7 +5,8 @@ import cloud.agileframework.dictionary.DictionaryDataManagerProxy;
 import cloud.agileframework.dictionary.DictionaryEngine;
 import cloud.agileframework.dictionary.DictionaryProperties;
 import cloud.agileframework.dictionary.MemoryDictionaryManager;
-import org.springframework.beans.factory.annotation.Autowired;
+import cloud.agileframework.dictionary.sync.SyncCache;
+import com.google.common.collect.Maps;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -13,8 +14,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
+
+import java.util.Map;
 
 /**
  * @author 佟盟
@@ -25,19 +26,16 @@ import org.springframework.core.annotation.Order;
  */
 @Configuration
 @AutoConfigureBefore(name = "cloud.agileframework.jpa.config.DaoAutoConfiguration.class")
-@ConditionalOnProperty(name = "enable", prefix = "agile.dictionary")
+@ConditionalOnProperty(name = "enable", prefix = "agile.dictionary", matchIfMissing = true)
 @EnableConfigurationProperties(DictionaryProperties.class)
 public class DictionaryAutoConfiguration {
-    @Autowired
-    private DictionaryProperties dictionaryProperties;
-
     /**
      * 字典引擎
      *
      * @return 注入字典引擎
      */
     @Bean
-    DictionaryEngine dictionaryEngine() {
+    DictionaryEngine dictionaryEngine(DictionaryProperties dictionaryProperties) {
         return new DictionaryEngine(dictionaryProperties.getRootParentId());
     }
 
@@ -61,5 +59,29 @@ public class DictionaryAutoConfiguration {
     @ConditionalOnBean(DictionaryDataManager.class)
     DictionaryDataManagerProxy dictionaryDataManagerProxy(DictionaryDataManager dictionaryDataManager) {
         return new DictionaryDataManagerProxy(dictionaryDataManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(SyncCache.class)
+    SyncCache syncCache() {
+        return new SyncCache() {
+            private final Map<String, Object> cache = Maps.newConcurrentMap();
+
+            @Override
+            public void notice(int newCacheVersion) {
+                //默认不做任何动作
+            }
+
+            @Override
+            public void put(String key, Object value) {
+                cache.put(key, value);
+            }
+
+            @Override
+            public Object get(String key) {
+                return cache.get(key);
+            }
+
+        };
     }
 }
