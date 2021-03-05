@@ -8,5 +8,5 @@ package com.agile.common.util;
  * @since 1.0
  */
 public enum SexEnum {
-    boy,girl
+    boy, girl
 }

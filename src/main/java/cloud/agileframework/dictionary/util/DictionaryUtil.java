@@ -616,7 +616,7 @@ public final class DictionaryUtil {
         if (dicCoverCache != null && dicCoverCache.containsKey(fullIndex)) {
             targetName = dicCoverCache.get(fullIndex);
         } else {
-            if (dictionary.directionType() == DirectionType.CodeToName) {
+            if (dictionary.directionType() == DirectionType.CODE_TO_NAME) {
                 targetName = coverDicName(fullIndex, DEFAULT_NAME, isFull, split);
             } else {
                 targetName = coverDicCode(fullIndex, DEFAULT_NAME, isFull, split);

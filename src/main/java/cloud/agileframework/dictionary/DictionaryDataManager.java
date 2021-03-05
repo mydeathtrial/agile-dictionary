@@ -22,19 +22,19 @@ public interface DictionaryDataManager {
      *
      * @param dictionaryDataBase 字典
      */
-    void add(DictionaryDataBase dictionaryDataBase);
+    <D extends DictionaryDataBase> void add(D dictionaryDataBase);
 
     /**
      * 删除字典
      *
      * @param dictionaryDataBase 字典
      */
-    void delete(DictionaryDataBase dictionaryDataBase);
+    <D extends DictionaryDataBase> void delete(D dictionaryDataBase);
 
     /**
      * 更新字典
      *
      * @param dictionaryDataBase 字典数据
      */
-    void update(DictionaryDataBase dictionaryDataBase);
+    <D extends DictionaryDataBase> void update(D dictionaryDataBase);
 }

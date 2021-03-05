@@ -7,7 +7,7 @@ package cloud.agileframework.dictionary.sync;
  * @version 1.0
  * @since 1.0
  */
-public class DictionarySyncException extends Exception{
+public class DictionarySyncException extends Exception {
 
     public DictionarySyncException(String message) {
         super(message);

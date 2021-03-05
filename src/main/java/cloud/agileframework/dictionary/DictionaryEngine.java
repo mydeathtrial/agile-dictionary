@@ -66,7 +66,7 @@ public class DictionaryEngine implements ApplicationRunner {
                 //如果有缓存，直接用
                 boolean success = cacheSync.cacheToMemory();
 
-                if(success){
+                if (success) {
                     return;
                 }
 

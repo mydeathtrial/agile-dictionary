@@ -1,23 +1,21 @@
 package com.agile.common.util;
 
-import cloud.agileframework.cache.support.AgileCache;
-import cloud.agileframework.dictionary.DictionaryDataBase;
-import cloud.agileframework.dictionary.util.DictionaryUtil;
-import com.agile.App;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.DictionaryDataManagerProxy;
 import cloud.agileframework.dictionary.DictionaryEngine;
+import cloud.agileframework.dictionary.util.DictionaryUtil;
+import com.agile.App;
+import com.agile.DictionaryDataMemory;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Lists;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,11 +42,11 @@ public class DictionaryUtilTest {
         DictionaryDataBase dic2 = DictionaryUtil.coverDicBean("sex#boy", "#");
         log.info(dic1.getName());
         log.info(dic2.getName());
-        IntStream.range(0,10).forEach(a->{
-            new Thread(){
+        IntStream.range(0, 10).forEach(a -> {
+            new Thread() {
                 @Override
                 public void run() {
-                    log.info(getId()+DictionaryUtil.coverDicBean("sex.boy").getName());
+                    log.info(getId() + DictionaryUtil.coverDicBean("sex.boy").getName());
                 }
             }.run();
         });
@@ -183,16 +181,17 @@ public class DictionaryUtilTest {
     }
 
     @Test
-    public void time(){
+    public void time() {
         long start = System.currentTimeMillis();
         ArrayList<Object> list = Lists.newArrayList();
-        IntStream.range(0,1000).forEach(a-> list.add(Data3.builder().status("sex.boy").build()));
+        IntStream.range(0, 1000).forEach(a -> list.add(Data3.builder().status("sex.boy").build()));
         DictionaryUtil.cover(list);
         System.out.println(System.currentTimeMillis() - start);
     }
 
     @Test
-    public void add(){
-        manager.add(new DictionaryDataBase("31", "3", "男1", "boy1"));
+    public void add() throws IOException {
+        final DictionaryDataBase dictionaryData = new DictionaryDataMemory("31", "3", "男1", "boy1");
+        manager.add(dictionaryData);
     }
 }

@@ -67,7 +67,7 @@ public class DictionaryDataManagerProxy {
      * @param dictionaryData 字典
      */
     public synchronized void add(DictionaryDataBase dictionaryData) {
-        syncCache.sync(()-> addData(dictionaryData),true);
+        syncCache.sync(() -> addData(dictionaryData), true);
     }
 
     /**
@@ -144,7 +144,7 @@ public class DictionaryDataManagerProxy {
      * @param dictionaryData 字典
      */
     public synchronized void delete(DictionaryDataBase dictionaryData) {
-        syncCache.sync(()-> deleteCache(dictionaryData),true);
+        syncCache.sync(() -> deleteCache(dictionaryData), true);
     }
 
     /**
@@ -180,7 +180,7 @@ public class DictionaryDataManagerProxy {
      * @param dictionaryData 字典
      */
     public synchronized void update(DictionaryDataBase dictionaryData) {
-        syncCache.sync(()-> updateCache(dictionaryData),true);
+        syncCache.sync(() -> updateCache(dictionaryData), true);
     }
 
     /**

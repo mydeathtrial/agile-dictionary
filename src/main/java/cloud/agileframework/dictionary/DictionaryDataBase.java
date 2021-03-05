@@ -2,6 +2,9 @@ package cloud.agileframework.dictionary;
 
 import cloud.agileframework.common.util.collection.TreeBase;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.List;
@@ -13,10 +16,15 @@ import java.util.List;
  * @version 1.0
  * @since 1.0
  */
+@Setter
+@ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class DictionaryDataBase extends TreeBase<String> implements Serializable {
 
+    @Getter
     private String code;
+    @Getter
+    private String name;
     private String fullName;
     private String fullCode;
 
@@ -34,17 +42,9 @@ public class DictionaryDataBase extends TreeBase<String> implements Serializable
 
     public String getFullName() {
         if (fullName == null) {
-            return super.getName();
+            return getName();
         }
         return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getCode() {
-        return code;
     }
 
     public String getFullCode() {
@@ -54,29 +54,13 @@ public class DictionaryDataBase extends TreeBase<String> implements Serializable
         return fullCode;
     }
 
-    public void setFullCode(String fullCode) {
-        this.fullCode = fullCode;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
+    @Override
+    public String getParentId() {
+        return super.getParentId();
     }
 
     @Override
     public List<DictionaryDataBase> getChildren() {
         return (List<DictionaryDataBase>) super.getChildren();
-    }
-
-    @Override
-    public String toString() {
-        return "DictionaryDataBase{" +
-                "id='" + super.getId() + '\'' +
-                ", parentId='" + super.getParentId() + '\'' +
-                ", name='" + super.getName() + '\'' +
-                ", code='" + code + '\'' +
-                ", fullName='" + fullName + '\'' +
-                ", fullCode='" + fullCode + '\'' +
-                ", children=" + super.getChildren() +
-                '}';
     }
 }

@@ -21,10 +21,10 @@ public class Data4 {
     private String city;
     private String region;
 
-    @Dictionary(fieldName = {"country"}, directionType = DirectionType.NameToCode)
+    @Dictionary(fieldName = {"country"}, directionType = DirectionType.NAME_TO_CODE)
     private Integer countryValue;
-    @Dictionary(fieldName = {"country", "city"}, directionType = DirectionType.NameToCode)
+    @Dictionary(fieldName = {"country", "city"}, directionType = DirectionType.NAME_TO_CODE)
     private Integer cityValue;
-    @Dictionary(fieldName = {"country", "city", "region"}, directionType = DirectionType.NameToCode)
+    @Dictionary(fieldName = {"country", "city", "region"}, directionType = DirectionType.NAME_TO_CODE)
     private Integer regionValue;
 }

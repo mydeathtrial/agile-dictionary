@@ -43,7 +43,7 @@ public @interface Dictionary {
     /**
      * 字典转换方向
      */
-    DirectionType directionType() default DirectionType.CodeToName;
+    DirectionType directionType() default DirectionType.CODE_TO_NAME;
 
     /**
      * 为空时默认值

@@ -21,6 +21,6 @@ public class Data3 {
 
     @Dictionary(fieldName = "status")
     private String text;
-    @Dictionary(fieldName = "status",isFull = true)
+    @Dictionary(fieldName = "status", isFull = true)
     private String fullText;
 }

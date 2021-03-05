@@ -1,7 +1,6 @@
 package com.agile.common.util;
 
 import cloud.agileframework.dictionary.annotation.Dictionary;
-import cloud.agileframework.dictionary.annotation.DirectionType;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
@@ -29,11 +28,11 @@ public class Data2 {
     @Dictionary(fieldName = {"country"})
     private String countryValue;
 
-    @Dictionary(fieldName = {"country","city"})
+    @Dictionary(fieldName = {"country", "city"})
     private String cityValue;
 
     //中国/黑龙江/哈尔滨
     //哈尔滨
-    @Dictionary(fieldName = {"country","city","region"},isFull = true)
+    @Dictionary(fieldName = {"country", "city", "region"}, isFull = true)
     private String regionValue;
 }

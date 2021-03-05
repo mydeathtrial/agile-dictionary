@@ -8,5 +8,12 @@ package cloud.agileframework.dictionary.annotation;
  * @since 1.0
  */
 public enum DirectionType {
-    NameToCode,CodeToName
+    /**
+     * 字典值转字典码
+     */
+    NAME_TO_CODE,
+    /**
+     * 字典码转字典值
+     */
+    CODE_TO_NAME
 }
