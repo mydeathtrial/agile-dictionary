@@ -37,4 +37,12 @@ public interface DictionaryDataManager {
      * @param dictionaryDataBase 字典数据
      */
     <D extends DictionaryDataBase> void update(D dictionaryDataBase);
+
+    /**
+     * 唯一的数据源标识
+     * @return 用于Convert注解中dataSource声明，将数据按照数据源标识划分成不同存储区域
+     */
+    default String dataSource() {
+        return DictionaryEngine.DICTIONARY_DATA_CACHE;
+    }
 }

@@ -1,5 +1,7 @@
 package cloud.agileframework.dictionary.annotation;
 
+import cloud.agileframework.dictionary.DictionaryEngine;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -49,4 +51,9 @@ public @interface Dictionary {
      * 为空时默认值
      */
     String defaultValue() default NULL;
+
+    /**
+     * 数据源标识
+     */
+    String dataSource() default DictionaryEngine.DICTIONARY_DATA_CACHE;
 }

@@ -1,12 +1,15 @@
 package cloud.agileframework.dictionary;
 
+import cloud.agileframework.cache.support.AgileCache;
+import cloud.agileframework.cache.util.CacheUtil;
 import cloud.agileframework.common.util.collection.TreeUtil;
-import cloud.agileframework.dictionary.sync.SyncCache;
-import com.google.common.collect.Lists;
+import cloud.agileframework.spring.util.BeanUtil;
 import com.google.common.collect.Maps;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeansException;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
@@ -21,25 +24,22 @@ import java.util.Map;
  * @since 1.0
  */
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class DictionaryEngine implements ApplicationRunner {
+public class DictionaryEngine implements ApplicationRunner, ApplicationContextAware {
 
     public static final String DEFAULT_SPLIT_CHAR = "$SPLIT$";
     public static final String CHANNEL = "dictionary-channel";
-    private final String rootValue;
-    private static final Map<String, DictionaryDataBase> CODE_MEMORY = Maps.newConcurrentMap();
-    private static final Map<String, DictionaryDataBase> NAME_MEMORY = Maps.newConcurrentMap();
-    private static final List<DictionaryDataBase> ALL_MEMORY = Lists.newArrayList();
-    /**
-     * 缓存同步工具
-     */
-    @Autowired
-    private SyncCache cacheSync;
+    public static final String ALL_MEMORY = "ALL_MEMORY";
+    public static final String CODE_MEMORY = "CODE_MEMORY";
+    public static final String NAME_MEMORY = "NAME_MEMORY";
+    public static final String ROOT_VALUE = BeanUtil.getBean(DictionaryProperties.class).getRootParentId();
+    public static final String DICTIONARY_DATA_CACHE = "DICTIONARY_DATA_CACHE";
 
-    /**
-     * 字典持久层操作工具
-     */
-    @Autowired
-    private DictionaryDataManager dictionaryDataManager;
+    private ApplicationContext applicationContext;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 
     /**
      * 缓存种类
@@ -55,57 +55,61 @@ public class DictionaryEngine implements ApplicationRunner {
         NAME_CACHE
     }
 
-    public DictionaryEngine(String rootValue) {
-        this.rootValue = rootValue;
-    }
-
     @Override
     public void run(ApplicationArguments args) {
-        cacheSync.sync(() -> {
-            try {
-                //如果有缓存，直接用
-                boolean success = cacheSync.cacheToMemory();
-
-                if (success) {
-                    return;
-                }
-
-                //如果缓存中没有，则初始化
-                List<DictionaryDataBase> list = dictionaryDataManager.all();
-
-                list.forEach(dic -> {
-                    dic.setFullCode(dic.getCode());
-                    dic.setFullName(dic.getName());
+        applicationContext.getBeanProvider(DictionaryDataManager.class)
+                .orderedStream()
+                .forEach(cm -> {
+                    try {
+                        parseDataSource(cm);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
                 });
 
-                TreeUtil.createTree(list,
-                        "id",
-                        "parentId",
-                        "children",
-                        "code",
-                        rootValue,
-                        DEFAULT_SPLIT_CHAR,
-                        "fullName", "fullCode"
-                );
-
-                ALL_MEMORY.addAll(list);
-
-                cacheSync.memoryToCache();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }, false);
     }
 
-    public static Map<String, DictionaryDataBase> getCodeMemory() {
-        return CODE_MEMORY;
+    private void parseDataSource(DictionaryDataManager dictionaryDataManager) throws IllegalAccessException {
+
+        if (isFinish(dictionaryDataManager.dataSource())) {
+            return;
+        }
+        //如果缓存中没有，则初始化
+        List<DictionaryDataBase> list = dictionaryDataManager.all();
+
+        list.forEach(dic -> {
+            dic.setFullCode(dic.getCode());
+            dic.setFullName(dic.getName());
+        });
+
+        TreeUtil.createTree(list,
+                "id",
+                "parentId",
+                "children",
+                "code",
+                ROOT_VALUE,
+                DEFAULT_SPLIT_CHAR,
+                "fullName", "fullCode"
+        );
+
+        String dataSource = dictionaryDataManager.dataSource();
+        AgileCache cache = CacheUtil.getCache(dataSource);
+        cache.put(ALL_MEMORY, list);
+
+        Map<String, DictionaryDataBase> codeMap = Maps.newHashMap();
+        Map<String, DictionaryDataBase> nameMap = Maps.newHashMap();
+
+        list.forEach(dic -> {
+            codeMap.put(dic.getFullCode(), dic);
+            nameMap.put(dic.getFullName(), dic);
+        });
+
+        cache.put(CODE_MEMORY, codeMap);
+        cache.put(NAME_MEMORY, nameMap);
     }
 
-    public static Map<String, DictionaryDataBase> getNameMemory() {
-        return NAME_MEMORY;
-    }
-
-    public static List<DictionaryDataBase> getAllMemory() {
-        return ALL_MEMORY;
+    private boolean isFinish(String dataSource) {
+        AgileCache cache = CacheUtil.getCache(dataSource);
+        return cache.containKey(ALL_MEMORY);
     }
 }

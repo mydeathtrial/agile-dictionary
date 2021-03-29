@@ -19,11 +19,6 @@ public class DictionaryProperties {
     private boolean enable = true;
 
     /**
-     * 是否开启缓存同步
-     */
-    private boolean syncCache = false;
-
-    /**
      * 跟父id值
      */
     private String rootParentId;

@@ -1,16 +1,16 @@
 package com.agile.common.util;
 
 import cloud.agileframework.dictionary.DictionaryDataBase;
-import cloud.agileframework.dictionary.DictionaryDataManagerProxy;
-import cloud.agileframework.dictionary.DictionaryEngine;
+import cloud.agileframework.dictionary.MemoryDictionaryManager;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
 import com.agile.App;
 import com.agile.DictionaryDataMemory;
 import com.google.common.collect.Maps;
-import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -22,17 +22,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-@Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = App.class)
 public class DictionaryUtilTest {
 
+    Logger log = LoggerFactory.getLogger(this.getClass());
+
     @Autowired
-    private DictionaryDataManagerProxy manager;
+    private MemoryDictionaryManager manager;
 
     @Test
     public void getCache() {
-        List<DictionaryDataBase> code = DictionaryEngine.getAllMemory();
+        List<DictionaryDataBase> code = manager.sync().all();
         log.info(code.toString());
     }
 
@@ -112,7 +113,7 @@ public class DictionaryUtilTest {
 
     @Test
     public void coverMapDictionary() throws NoSuchFieldException, IllegalAccessException {
-        List<Object> list = Lists.newArrayList();
+        List<Map<String, Object>> list = Lists.newArrayList();
         HashMap<String, Object> map = Maps.newHashMap();
         map.put("code", "boy");
         list.add(map);
@@ -120,8 +121,6 @@ public class DictionaryUtilTest {
         HashMap<String, Object> map2 = Maps.newHashMap();
         map2.put("code", "girl");
         list.add(map2);
-
-        list.add(Data5.builder().code(SexEnum.boy).build());
 
         Map<String, Object> o = DictionaryUtil.coverMapDictionary(map, new String[]{"sex"}, "_value", new String[]{"code"});
         log.info(o.toString());
@@ -131,33 +130,6 @@ public class DictionaryUtilTest {
 
         List<Map<String, Object>> toList2 = DictionaryUtil.coverMapDictionary(list, "sex", "_value", "code");
         log.info(toList2.toString());
-    }
-
-    @Test
-    public void coverBeanDictionary() throws NoSuchFieldException, IllegalAccessException {
-        List<Object> list = Lists.newArrayList();
-        HashMap<String, Object> map = Maps.newHashMap();
-        map.put("sex", "boy");
-        list.add(map);
-
-        HashMap<String, Object> map2 = Maps.newHashMap();
-        map2.put("sex", "no");
-        list.add(map2);
-
-        list.add(Data1.builder().sex("boy").build());
-        list.add(Data1.builder().sex("no").build());
-
-        Data1 o = DictionaryUtil.coverBeanDictionary(Data1.builder().sex("boy").build(), new String[]{"sex"}, new String[]{"sex"}, new String[]{"text"});
-        log.info(o.toString());
-
-        Data1 o1 = DictionaryUtil.coverBeanDictionary(Data1.builder().sex("no").build(), new String[]{"sex"}, new String[]{"sex"}, new String[]{"text"}, new String[]{"default"});
-        log.info(o1.toString());
-
-        List<Object> list1 = DictionaryUtil.coverBeanDictionary(list, "sex", "sex", "text");
-        log.info(list1.toString());
-
-        List<Object> list2 = DictionaryUtil.coverBeanDictionary(list, new String[]{"sex"}, new String[]{"sex"}, new String[]{"text"}, new String[]{"default"});
-        log.info(list2.toString());
     }
 
     @Test
@@ -192,6 +164,6 @@ public class DictionaryUtilTest {
     @Test
     public void add() throws IOException {
         final DictionaryDataBase dictionaryData = new DictionaryDataMemory("31", "3", "男1", "boy1");
-        manager.add(dictionaryData);
+        manager.sync().add(dictionaryData);
     }
 }

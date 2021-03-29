@@ -13,7 +13,7 @@ import java.util.Set;
  * @version 1.0
  * @since 1.0
  */
-public class MemoryDictionaryManager implements DictionaryDataManager {
+public class MemoryDictionaryManager extends AbstractDictionaryDataManager {
     /**
      * 字典数据缓存
      */
@@ -23,6 +23,11 @@ public class MemoryDictionaryManager implements DictionaryDataManager {
     @Override
     public List<DictionaryDataBase> all() {
         return new ArrayList<>(CACHE);
+    }
+
+    @Override
+    public String dataSource() {
+        return DictionaryEngine.DICTIONARY_DATA_CACHE;
     }
 
     @Override
