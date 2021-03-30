@@ -210,7 +210,8 @@ public abstract class AbstractDictionaryDataManager implements DictionaryDataMan
             }
 
             AbstractDictionaryDataManager.this.update(dictionaryData);
-            updateCache(dictionaryData);
+            DictionaryDataBase currentData = findOne(dictionaryData);
+            updateCache(currentData);
 
             //更新增子
             Optional.ofNullable(dictionaryData.getChildren()).ifPresent(children -> children.forEach(this::updateData));
