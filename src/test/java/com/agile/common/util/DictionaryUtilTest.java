@@ -7,6 +7,7 @@ import com.agile.App;
 import com.agile.DictionaryDataMemory;
 import com.google.common.collect.Maps;
 import org.assertj.core.util.Lists;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -20,7 +21,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.IntStream;
+
+import static cloud.agileframework.dictionary.MemoryDictionaryManager.CACHE;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = App.class)
@@ -33,7 +40,7 @@ public class DictionaryUtilTest {
 
     @Test
     public void getCache() {
-        List<DictionaryDataBase> code = manager.sync().all();
+        SortedSet<DictionaryDataBase> code = manager.sync().all();
         log.info(code.toString());
     }
 
@@ -161,9 +168,58 @@ public class DictionaryUtilTest {
         System.out.println(System.currentTimeMillis() - start);
     }
 
+    @Before
+    public void init(){
+        manager.sync().add(new DictionaryDataMemory("1", null, "性别", "sex",3));
+        manager.sync().add(new DictionaryDataMemory("2", null, "对错", "isTrue",3));
+        manager.sync().add(new DictionaryDataMemory("3", "1", "男", "boy",6));
+        manager.sync().add(new DictionaryDataMemory("4", "1", "女", "girl",5));
+        manager.sync().add(new DictionaryDataMemory("5", "2", "对", "1",2));
+        manager.sync().add(new DictionaryDataMemory("6", "2", "错", "2",8));
+        manager.sync().add(new DictionaryDataMemory("7", null, "中国", "7",9));
+        manager.sync().add(new DictionaryDataMemory("8", "7", "黑龙江", "8",0));
+        manager.sync().add(new DictionaryDataMemory("9", "8", "哈尔滨", "9",1));
+    }
+
     @Test
     public void add() throws IOException {
         final DictionaryDataBase dictionaryData = new DictionaryDataMemory("31", "3", "男1", "boy1");
         manager.sync().add(dictionaryData);
+
+
+        int i = 1;
+        while (i>0){
+            dictionaryData.setName("男-"+i);
+            dictionaryData.setCode("boy-"+i);
+            manager.sync().update(dictionaryData);
+            i--;
+        }
+
+        DictionaryDataBase a = DictionaryUtil.findById(manager.dataSource(), "9");
+        a.setName("tudou");
+        a.setCode("1212");
+        manager.sync().update(a);
+
+        manager.sync().delete(DictionaryUtil.findById(manager.dataSource(), dictionaryData.getId()).getFullCode());
+
+//        System.in.read();
+    }
+
+    @Test
+    public void tree() throws IOException{
+        SortedSet<DictionaryDataBase> a = manager.sync().tree();
+        System.out.println(a);
+    }
+
+    static {
+        CACHE.add(new DictionaryDataMemory("1", null, "性别", "sex",3));
+        CACHE.add(new DictionaryDataMemory("2", null, "对错", "isTrue",3));
+        CACHE.add(new DictionaryDataMemory("3", "1", "男", "boy",6));
+        CACHE.add(new DictionaryDataMemory("4", "1", "女", "girl",5));
+        CACHE.add(new DictionaryDataMemory("5", "2", "对", "1",2));
+        CACHE.add(new DictionaryDataMemory("6", "2", "错", "2",8));
+        CACHE.add(new DictionaryDataMemory("7", null, "中国", "7",9));
+        CACHE.add(new DictionaryDataMemory("8", "7", "黑龙江", "8",0));
+        CACHE.add(new DictionaryDataMemory("9", "8", "哈尔滨", "9",1));
     }
 }

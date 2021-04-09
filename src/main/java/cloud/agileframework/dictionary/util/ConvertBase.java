@@ -5,6 +5,7 @@ import cloud.agileframework.cache.util.CacheUtil;
 import cloud.agileframework.common.util.clazz.ClassUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.DictionaryEngine;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +81,7 @@ class ConvertBase {
             LOGGER.error(errorMessage, fullIndex);
             return null;
         }
-        return entity;
+        return SerializationUtils.clone(entity);
     }
 
     /**

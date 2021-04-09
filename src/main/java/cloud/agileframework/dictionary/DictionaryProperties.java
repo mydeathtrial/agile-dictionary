@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * @author 佟盟
  * 日期 2020-11-10 17:24
- * 描述 TODO
+ * 描述 字典开关
  * @version 1.0
  * @since 1.0
  */
@@ -17,9 +17,4 @@ public class DictionaryProperties {
      * Agile字典支持
      */
     private boolean enable = true;
-
-    /**
-     * 跟父id值
-     */
-    private String rootParentId;
 }

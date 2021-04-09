@@ -9,50 +9,59 @@ import java.util.List;
  * @version 1.0
  * @since 1.0
  */
-public interface DictionaryDataManager {
+public interface DictionaryDataManager<D extends DictionaryDataBase> {
     /**
      * 获取所有字典数据
      *
      * @return 字典数据集合
      */
-    List<DictionaryDataBase> all();
+    List<D> all();
 
     /**
      * 新增字典
      *
      * @param dictionaryDataBase 字典
      */
-    <D extends DictionaryDataBase> void add(D dictionaryDataBase);
+    void add(D dictionaryDataBase);
 
     /**
      * 删除字典
      *
      * @param dictionaryDataBase 字典
      */
-    <D extends DictionaryDataBase> void delete(D dictionaryDataBase);
+    void delete(D dictionaryDataBase);
 
     /**
      * 更新字典
      *
      * @param dictionaryDataBase 字典数据
      */
-    <D extends DictionaryDataBase> void update(D dictionaryDataBase);
-
-    /**
-     * 根据字典数据查询出来的持久层字典数据
-     *
-     * @param dictionaryDataBase 字典数据
-     * @return 持久层字典数据
-     */
-    default <D extends DictionaryDataBase> D findOne(D dictionaryDataBase){
-        return dictionaryDataBase;
+    default D update(D dictionaryDataBase) {
+        return updateOfNotNull(dictionaryDataBase);
     }
 
     /**
+     * 更新字典，只更新非空字段
+     *
+     * @param dictionaryDataBase 字典数据
+     */
+    D updateOfNotNull(D dictionaryDataBase);
+
+    /**
      * 唯一的数据源标识
+     *
      * @return 用于Convert注解中dataSource声明，将数据按照数据源标识划分成不同存储区域
      */
     default String dataSource() {
         return DictionaryEngine.DICTIONARY_DATA_CACHE;
+    }
+
+    /**
+     * 取根节点数据的parentId值
+     *
+     * @return 默认返回空
+     */
+    default String rootParentId() {
+        return null;
     }
 }

@@ -8,6 +8,8 @@ import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
+import java.util.TreeSet;
 
 /**
  * @author 佟盟
@@ -18,8 +20,7 @@ import java.util.List;
  */
 @Setter
 @ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-public class DictionaryDataBase extends TreeBase<String> implements Serializable {
+public class DictionaryDataBase extends TreeBase<String> {
 
     @Getter
     private String code;
@@ -41,16 +42,10 @@ public class DictionaryDataBase extends TreeBase<String> implements Serializable
     }
 
     public String getFullName() {
-        if (fullName == null) {
-            return getName();
-        }
         return fullName;
     }
 
     public String getFullCode() {
-        if (fullCode == null) {
-            return code;
-        }
         return fullCode;
     }
 
@@ -60,7 +55,27 @@ public class DictionaryDataBase extends TreeBase<String> implements Serializable
     }
 
     @Override
-    public List<DictionaryDataBase> getChildren() {
-        return (List<DictionaryDataBase>) super.getChildren();
+    public TreeSet<DictionaryDataBase> getChildren() {
+        return (TreeSet<DictionaryDataBase>) super.getChildren();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DictionaryDataBase)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        DictionaryDataBase that = (DictionaryDataBase) o;
+        return Objects.equals(getCode(), that.getCode()) && Objects.equals(getName(), that.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getCode(), getName());
     }
 }

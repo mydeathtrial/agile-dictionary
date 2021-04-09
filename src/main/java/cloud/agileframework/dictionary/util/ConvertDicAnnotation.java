@@ -77,7 +77,10 @@ class ConvertDicAnnotation extends ConvertDicMap {
         if (dicCoverCache == null) {
             dicCoverCache = Maps.newConcurrentMap();
         }
-        Collections.synchronizedCollection(collection).parallelStream().forEach(ConvertDicAnnotation::cover);
+        Collection<T> c = Collections.synchronizedCollection(collection);
+        synchronized (c){
+            c.parallelStream().forEach(ConvertDicAnnotation::cover);
+        }
         dicCoverCache.clear();
     }
 

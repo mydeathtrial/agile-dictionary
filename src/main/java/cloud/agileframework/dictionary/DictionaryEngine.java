@@ -2,9 +2,14 @@ package cloud.agileframework.dictionary;
 
 import cloud.agileframework.cache.support.AgileCache;
 import cloud.agileframework.cache.util.CacheUtil;
+import cloud.agileframework.common.util.clazz.TypeReference;
 import cloud.agileframework.common.util.collection.TreeUtil;
+import cloud.agileframework.dictionary.util.DictionaryUtil;
 import cloud.agileframework.spring.util.BeanUtil;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -13,8 +18,13 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * @author 佟盟
@@ -27,11 +37,8 @@ import java.util.Map;
 public class DictionaryEngine implements ApplicationRunner, ApplicationContextAware {
 
     public static final String DEFAULT_SPLIT_CHAR = "$SPLIT$";
-    public static final String CHANNEL = "dictionary-channel";
-    public static final String ALL_MEMORY = "ALL_MEMORY";
     public static final String CODE_MEMORY = "CODE_MEMORY";
     public static final String NAME_MEMORY = "NAME_MEMORY";
-    public static final String ROOT_VALUE = BeanUtil.getBean(DictionaryProperties.class).getRootParentId();
     public static final String DICTIONARY_DATA_CACHE = "DICTIONARY_DATA_CACHE";
 
     private ApplicationContext applicationContext;
@@ -69,37 +76,51 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
 
     }
 
-    private void parseDataSource(DictionaryDataManager dictionaryDataManager) throws IllegalAccessException {
+    /**
+     * 处理单个数据源，每个字典管理器都会对应一个数据源
+     * @param dictionaryDataManager 字典管理其
+     * @throws IllegalAccessException 错误的访问权限
+     */
+    private void parseDataSource(DictionaryDataManager<?> dictionaryDataManager) throws IllegalAccessException {
 
-        if (isFinish(dictionaryDataManager.dataSource())) {
+        //如果缓存中没有，则初始化
+        SortedSet<DictionaryDataBase> treeSet = Sets.newTreeSet(dictionaryDataManager.all());
+
+        //判断是否重复处理
+        if (isFinish(dictionaryDataManager.dataSource(), treeSet)) {
             return;
         }
-        //如果缓存中没有，则初始化
-        List<DictionaryDataBase> list = dictionaryDataManager.all();
 
-        list.forEach(dic -> {
+        //初始化全字典值与字典码默认值
+        treeSet.forEach(dic -> {
             dic.setFullCode(dic.getCode());
             dic.setFullName(dic.getName());
         });
 
-        TreeUtil.createTree(list,
-                "id",
-                "parentId",
-                "children",
-                "code",
-                ROOT_VALUE,
-                DEFAULT_SPLIT_CHAR,
-                "fullName", "fullCode"
-        );
+//        List<Long> l = Lists.newArrayList();
+//        //构建树形结构，过程中重新计算全字典值与全字典码
+//        int i = 10000;
+//        while (i>0){
+//            long a = System.currentTimeMillis();
+            TreeUtil.createTree(treeSet,
+                    dictionaryDataManager.rootParentId(),
+                    DEFAULT_SPLIT_CHAR,
+                    "fullName", "fullCode"
+            );
+//            i--;
+//            l.add(System.currentTimeMillis()-a);
+//        }
+//        System.out.println(new BigDecimal(l.stream().reduce(Long::sum).get()).divide(new BigDecimal(10000)));
 
+
+        //做缓存同步
         String dataSource = dictionaryDataManager.dataSource();
         AgileCache cache = CacheUtil.getCache(dataSource);
-        cache.put(ALL_MEMORY, list);
 
         Map<String, DictionaryDataBase> codeMap = Maps.newHashMap();
         Map<String, DictionaryDataBase> nameMap = Maps.newHashMap();
 
-        list.forEach(dic -> {
+        treeSet.forEach(dic -> {
             codeMap.put(dic.getFullCode(), dic);
             nameMap.put(dic.getFullName(), dic);
         });
@@ -108,8 +129,15 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
         cache.put(NAME_MEMORY, nameMap);
     }
 
-    private boolean isFinish(String dataSource) {
-        AgileCache cache = CacheUtil.getCache(dataSource);
-        return cache.containKey(ALL_MEMORY);
+    /**
+     * 判断本次新产生的数据是否做过缓存同步，避免重复处理
+     *
+     * @param dataSource 数据源
+     * @param newData    新产生的数据
+     * @return true 已处理过
+     */
+    private boolean isFinish(String dataSource, SortedSet<DictionaryDataBase> newData) {
+        SortedSet<DictionaryDataBase> old = DictionaryUtil.findAll(dataSource);
+        return Objects.equals(newData, old);
     }
 }
