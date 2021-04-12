@@ -348,9 +348,13 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
     }
 
     D findOne(String id) {
-        return CacheUtil.getCache(dataSource())
+        final Map<String, DictionaryDataBase> cacheData = CacheUtil.getCache(dataSource())
                 .get(DictionaryEngine.CODE_MEMORY, new TypeReference<Map<String, DictionaryDataBase>>() {
-                }).values().parallelStream().filter(data -> data.getId().equals(id)).map(a -> (D) a).findFirst().orElse(null);
+                });
+        if(cacheData == null){
+            return null;
+        }
+        return cacheData.values().parallelStream().filter(data -> data.getId().equals(id)).map(a -> (D) a).findFirst().orElse(null);
     }
 
 }

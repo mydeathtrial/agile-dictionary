@@ -2,14 +2,11 @@ package cloud.agileframework.dictionary;
 
 import cloud.agileframework.cache.support.AgileCache;
 import cloud.agileframework.cache.util.CacheUtil;
-import cloud.agileframework.common.util.clazz.TypeReference;
 import cloud.agileframework.common.util.collection.TreeUtil;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
-import cloud.agileframework.spring.util.BeanUtil;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -18,13 +15,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * @author 佟盟
@@ -78,6 +70,7 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
 
     /**
      * 处理单个数据源，每个字典管理器都会对应一个数据源
+     *
      * @param dictionaryDataManager 字典管理其
      * @throws IllegalAccessException 错误的访问权限
      */
@@ -97,21 +90,13 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
             dic.setFullName(dic.getName());
         });
 
-//        List<Long> l = Lists.newArrayList();
-//        //构建树形结构，过程中重新计算全字典值与全字典码
-//        int i = 10000;
-//        while (i>0){
-//            long a = System.currentTimeMillis();
-            TreeUtil.createTree(treeSet,
-                    dictionaryDataManager.rootParentId(),
-                    DEFAULT_SPLIT_CHAR,
-                    "fullName", "fullCode"
-            );
-//            i--;
-//            l.add(System.currentTimeMillis()-a);
-//        }
-//        System.out.println(new BigDecimal(l.stream().reduce(Long::sum).get()).divide(new BigDecimal(10000)));
+        //构建树形结构，过程中重新计算全字典值与全字典码
 
+        TreeUtil.createTree(treeSet,
+                dictionaryDataManager.rootParentId(),
+                DEFAULT_SPLIT_CHAR,
+                "fullName", "fullCode"
+        );
 
         //做缓存同步
         String dataSource = dictionaryDataManager.dataSource();
@@ -138,6 +123,6 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
      */
     private boolean isFinish(String dataSource, SortedSet<DictionaryDataBase> newData) {
         SortedSet<DictionaryDataBase> old = DictionaryUtil.findAll(dataSource);
-        return Objects.equals(newData, old);
+        return CollectionUtils.isEqualCollection(newData, old);
     }
 }
