@@ -1,13 +1,10 @@
 package cloud.agileframework.dictionary;
 
 import cloud.agileframework.common.util.collection.TreeBase;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serializable;
-import java.util.List;
 import java.util.Objects;
 import java.util.TreeSet;
 
@@ -57,6 +54,10 @@ public class DictionaryDataBase extends TreeBase<String> {
     @Override
     public TreeSet<DictionaryDataBase> getChildren() {
         return (TreeSet<DictionaryDataBase>) super.getChildren();
+    }
+
+    public void setChildren(TreeSet<DictionaryDataBase> children) {
+        super.setChildren(children);
     }
 
     @Override

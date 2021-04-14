@@ -7,6 +7,7 @@ import cloud.agileframework.dictionary.DictionaryEngine;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHAR;
@@ -79,6 +80,33 @@ class ConvertDicCode extends ConvertDicBean {
                 defaultCode,
                 isFull,
                 splitChar);
+    }
+
+    /**
+     * 根据父节点code与节点名（可包含逗号）翻译code
+     *
+     * @param datasource 数据源
+     * @param parentCode 父节点code
+     * @param names      节点名（可包含逗号）
+     * @return code（可包含逗号）
+     */
+    public static String coverDicCodeByParentCode(String datasource, String parentCode, String names) {
+        return Arrays.stream(names.split(Constant.RegularAbout.COMMA))
+                .map(name -> coverDicBeanByParent(datasource, parentCode, name))
+                .filter(Objects::nonNull)
+                .map(DictionaryDataBase::getCode)
+                .collect(Collectors.joining(Constant.RegularAbout.COMMA));
+    }
+
+    /**
+     * 根据父节点code与节点名（可包含逗号）翻译code
+     *
+     * @param parentCode 父节点code
+     * @param names      节点名（可包含逗号）
+     * @return code（可包含逗号）
+     */
+    public static String coverDicCodeByParentCode(String parentCode, String names) {
+        return coverDicCodeByParentCode(DictionaryEngine.DICTIONARY_DATA_CACHE, parentCode, names);
     }
 
     /**

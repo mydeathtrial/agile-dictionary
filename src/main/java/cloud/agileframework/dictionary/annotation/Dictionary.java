@@ -53,6 +53,13 @@ public @interface Dictionary {
     String defaultValue() default NULL;
 
     /**
+     * 是否是主键
+     *
+     * 如果是主键，则直接调用findById
+     */
+    boolean id() default false;
+
+    /**
      * 数据源标识
      */
     String dataSource() default DictionaryEngine.DICTIONARY_DATA_CACHE;

@@ -4,6 +4,7 @@ import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.clazz.ClassUtil;
 import cloud.agileframework.common.util.object.ObjectUtil;
 import cloud.agileframework.common.util.string.StringUtil;
+import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.annotation.Dictionary;
 import cloud.agileframework.dictionary.annotation.DirectionType;
 import com.google.common.collect.Maps;
@@ -78,7 +79,7 @@ class ConvertDicAnnotation extends ConvertDicMap {
             dicCoverCache = Maps.newConcurrentMap();
         }
         Collection<T> c = Collections.synchronizedCollection(collection);
-        synchronized (c){
+        synchronized (c) {
             c.parallelStream().forEach(ConvertDicAnnotation::cover);
         }
         dicCoverCache.clear();
@@ -93,13 +94,16 @@ class ConvertDicAnnotation extends ConvertDicMap {
      * @param <T>        对象类型
      */
     private static <T> void parseNodeField(Dictionary dictionary, Field field, T node) {
+        //如果是id，则直接调用主键查询
+        final String[] fieldNames = dictionary.fieldName();
+
         String parentDicCode = dictionary.dicCode();
         boolean isFull = dictionary.isFull();
         String split = dictionary.split();
 
         // 组装要翻译的内容
         // 处理布尔类型
-        List<String> indexes = Arrays.stream(dictionary.fieldName()).flatMap(column -> {
+        List<String> indexes = Arrays.stream(fieldNames).flatMap(column -> {
             Object index = ObjectUtil.getFieldValue(node, column);
 
             String value;
@@ -141,10 +145,30 @@ class ConvertDicAnnotation extends ConvertDicMap {
         if (dicCoverCache != null && dicCoverCache.containsKey(fullIndex)) {
             targetName = dicCoverCache.get(fullIndex);
         } else {
-            if (dictionary.directionType() == DirectionType.CODE_TO_NAME) {
-                targetName = ConvertDicName.coverDicName(dictionary.dataSource(), fullIndex, DEFAULT_NAME, isFull, split);
+            if (dictionary.directionType() == DirectionType.CODE_TO_NAME && !dictionary.id()) {
+                String defaultValue = dictionary.defaultValue();
+                defaultValue = Dictionary.NULL.equals(defaultValue) ? DEFAULT_NAME : null;
+                targetName = ConvertDicName.coverDicName(dictionary.dataSource(), fullIndex, defaultValue, isFull, split);
+            } else if (dictionary.directionType() == DirectionType.CODE_TO_NAME) {
+                targetName = Arrays.stream(fullIndex.split(Constant.RegularAbout.COMMA))
+                        .map(id -> {
+                            DictionaryDataBase dic = DictionaryUtil.findById(dictionary.dataSource(), id);
+                            String defaultValue = dictionary.defaultValue();
+                            defaultValue = DEFAULT_NAME.equals(defaultValue) ? id : defaultValue;
+                            return dic == null ? defaultValue : dic.getName();
+                        }).collect(Collectors.joining(Constant.RegularAbout.COMMA));
+            } else if (dictionary.directionType() == DirectionType.NAME_TO_CODE && !dictionary.id()) {
+                String defaultValue = dictionary.defaultValue();
+                defaultValue = Dictionary.NULL.equals(defaultValue) ? DEFAULT_NAME : null;
+                targetName = ConvertDicCode.coverDicCode(dictionary.dataSource(), fullIndex, defaultValue, isFull, split);
             } else {
-                targetName = ConvertDicCode.coverDicCode(dictionary.dataSource(), fullIndex, DEFAULT_NAME, isFull, split);
+                targetName = Arrays.stream(fullIndex.split(Constant.RegularAbout.COMMA))
+                        .map(id -> {
+                            DictionaryDataBase dic = DictionaryUtil.findById(dictionary.dataSource(), id);
+                            String defaultValue = dictionary.defaultValue();
+                            defaultValue = DEFAULT_NAME.equals(defaultValue) ? id : defaultValue;
+                            return dic == null ? defaultValue : dic.getCode();
+                        }).collect(Collectors.joining(Constant.RegularAbout.COMMA));
             }
             if (dicCoverCache != null) {
                 dicCoverCache.put(fullIndex, targetName);
