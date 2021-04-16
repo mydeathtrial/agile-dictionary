@@ -6,7 +6,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.util.Objects;
-import java.util.TreeSet;
 
 /**
  * @author 佟盟
@@ -17,7 +16,7 @@ import java.util.TreeSet;
  */
 @Setter
 @ToString(callSuper = true)
-public class DictionaryDataBase extends TreeBase<String> {
+public class DictionaryDataBase extends TreeBase<String, DictionaryDataBase> {
 
     @Getter
     private String code;
@@ -49,15 +48,6 @@ public class DictionaryDataBase extends TreeBase<String> {
     @Override
     public String getParentId() {
         return super.getParentId();
-    }
-
-    @Override
-    public TreeSet<DictionaryDataBase> getChildren() {
-        return (TreeSet<DictionaryDataBase>) super.getChildren();
-    }
-
-    public void setChildren(TreeSet<DictionaryDataBase> children) {
-        super.setChildren(children);
     }
 
     @Override
