@@ -34,6 +34,9 @@
 * **级联字典值码翻译**
   以“国家”、“城市”、“地区”一类的级联字典为例子，其数据结构中往往同时存在这三个属性，翻译子字典时需要依赖父字典值。在字典注解中提供了该功能的支持，用法如下： country代表国家、city代表城市、region代表地区。
 
+* **隔离数据源**
+  支持同时存在多数据源（多套字典）。
+
 ```
     private String country;
     private String city;
@@ -75,7 +78,7 @@
 
 您可以从[最新稳定版本]下载包(https://github.com/mydeathtrial/agile-dictionary/releases). 该包已上传至maven中央仓库，可在pom中直接声明引用
 
-以版本agile-dictionary-2.0.10.jar为例。
+以版本agile-dictionary-2.0.11.jar为例。
 
 #### 步骤 2: 添加maven依赖
 
@@ -89,7 +92,7 @@
 <dependency>
     <groupId>cloud.agileframework</groupId>
     <artifactId>agile-dictionary</artifactId>
-    <version>2.0.10</version>
+    <version>2.0.11</version>
 </dependency>
 ```
 
@@ -334,130 +337,45 @@
 
 ##### 自定义持久化方式
 
-DictionaryDataManager：字典数据管理器（类似xxxService，用于提供持久层交互API，如字典的增删改查操作）
-DictionaryDataBase：字典数据结构化基类（类似于xxxDo，一般用于数据库字典表的ORM映射）
+
 默认的持久化方式为内存形式，当开发人员需要自定义持久化方式时，可直接实现或继承以上两个接口，并将实现类注入到spring容器中即可
+自定义字典数据结构
 
 ```
-public interface DictionaryDataBase extends Serializable {
-    /**
-     * 字典唯一标识
-     *
-     * @return 字典唯一标识
-     */
-    String getId();
-
-    /**
-     * 字典父级标识
-     *
-     * @return 字典父级标识
-     */
-    String getParentId();
-
-    /**
-     * 字典编码
-     *
-     * @return 字典编码
-     */
-    String getCode();
-
-    /**
-     * 字典显示名
-     *
-     * @return 字典显示名
-     */
-    String getName();
-
-    /**
-     * 全路径字典码
-     *
-     * @return 全路径字典码
-     */
-    String getFullCode();
-
-    /**
-     * 全路径字典码
-     *
-     * @param fullCode 全路径字典码
-     */
-    void setFullCode(String fullCode);
-
-    /**
-     * 全路径字典名
-     *
-     * @return 全路径字典名
-     */
-    String getFullName();
-
-    /**
-     * 全路径字典名
-     *
-     * @param fullName 全路径字典名
-     */
-    void setFullName(String fullName);
-
-    /**
-     * 子字典集
-     *
-     * @return 子字典集
-     */
-    List<DictionaryDataBase> getChildren();
-
-
+//DictionaryDataBase：字典数据结构化基类（一般用于数据库字典表的ORM映射），提供id、parentId、children、sort等属性
+@Entity
+public class MyDictionaryDo extends DictionaryDataBase{
+    //备注
+    private String commit;
+    //
 }
-public interface DictionaryDataManager {
-    /**
-     * 获取所有字典数据
-     * @return 字典数据集合
-     */
-    List<DictionaryDataBase> all();
 
-    /**
-     * 新增字典
-     * @param DictionaryDataBase 字典
-     */
-    void add(DictionaryDataBase DictionaryDataBase);
+```
+自定义字典数据持久化操作工具
 
-    /**
-     * 删除字典
-     * @param code 字典码
-     */
-    void delete(String code);
-
-    /**
-     * 更新字典
-     * @param DictionaryDataBase 字典数据
-     */
-    void update(DictionaryDataBase DictionaryDataBase);
+```
+//AbstractDictionaryDataManager：抽象字典数据管理器（用于提供持久层交互API，如字典的增删改查操作与二级缓存同步）
+@Service
+public class MyDictionaryService extends AbstractDictionaryDataManager{
+    ...
 }
-```
 
-##### 缓存同步
+//常见的使用
+//注意，MyDictionaryService中实现的add、update...等方法为直接持久层操作，.sync()中的add、update...等方法为
+//持久层操作+同步一二级缓存操作
+@Autowired
+private MyDictionaryService service;
 
-直接调用DictionaryDataManagerProxy的增删改方法，例如：
-
-```
-private class YourBean {
-
-    @Autowird
-    private DictionaryDataManagerProxy manager;
-
-    public void add(){
-        //MemoryDictionaryData为内存方式字典，该处可改为自定义DictionaryData实现
-        manager.add(new MemoryDictionaryData("1", null, "状态", "status"));
-    }
-
-    public void delete(){
-        //MemoryDictionaryData为内存方式字典，该处可改为自定义DictionaryData实现
-        manager.delete("1");
-        //方式2
-        manager.delete(new MemoryDictionaryData("1", null, "状态", "status"));
-    }
-
-    public void update(){
-        //MemoryDictionaryData为内存方式字典，该处可改为自定义DictionaryData实现
-        manager.update(new MemoryDictionaryData("1", null, "状态", "status"));
-    }
+public void curd(MyDictionaryDo dic){
+    //新增
+    service.sync().add(dic);
+    //修改
+    service.sync().update(dic);
+    //删除
+    service.sync().delete(dic);
+    //查询
+    service.sync().all();
+    service.sync().tree();
 }
 ```
 
@@ -466,30 +384,53 @@ private class YourBean {
 字典注解支持定义翻译依据字典、翻译方向、全路径翻译、翻译分隔符等内容
 
 ```java
+@Target({ElementType.FIELD, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
 public @interface Dictionary {
-    /**
-     * 字典码
-     */
-    String dicCode() default "";
 
-    /**
-     * 指向字典字段
-     */
-    String[] fieldName();
+  String NULL = "null";
 
-    /**
-     * 是否翻译出全路径字典值
-     */
-    boolean isFull() default false;
+  /**
+   * 字典码
+   */
+  String dicCode() default "";
 
-    /**
-     * 全路径字典值分隔符
-     */
-    String split() default ".";
+  /**
+   * 指向字典字段
+   */
+  String[] fieldName();
 
-    /**
-     * 字典转换方向
-     */
-    DirectionType directionType() default DirectionType.CodeToName;
+  /**
+   * 是否翻译出全路径字典值
+   */
+  boolean isFull() default false;
+
+  /**
+   * 全路径字典值分隔符
+   */
+  String split() default ".";
+
+  /**
+   * 字典转换方向
+   */
+  DirectionType directionType() default DirectionType.CODE_TO_NAME;
+
+  /**
+   * 为空时默认值
+   */
+  String defaultValue() default NULL;
+
+  /**
+   * 是否是主键
+   *
+   * 如果是主键，则直接调用findById
+   */
+  boolean id() default false;
+
+  /**
+   * 数据源标识
+   */
+  String dataSource() default DictionaryEngine.DICTIONARY_DATA_CACHE;
 }
 ```
