@@ -2,6 +2,7 @@ package cloud.agileframework.dictionary;
 
 import cloud.agileframework.cache.sync.OpType;
 import cloud.agileframework.cache.sync.SyncCache;
+import cloud.agileframework.cache.sync.SyncKeys;
 import cloud.agileframework.cache.util.CacheUtil;
 import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.clazz.TypeReference;
@@ -70,8 +71,8 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
         }
 
         private void sync() {
-            syncCache.sync(dataSource(), DictionaryEngine.CODE_MEMORY, () -> null, OpType.WRITE);
-            syncCache.sync(dataSource(), DictionaryEngine.NAME_MEMORY, () -> null, OpType.WRITE);
+            syncCache.sync(SyncKeys.of(dataSource(), DictionaryEngine.CODE_MEMORY), OpType.WRITE);
+            syncCache.sync(SyncKeys.of(dataSource(), DictionaryEngine.NAME_MEMORY), OpType.WRITE);
         }
 
         /**
