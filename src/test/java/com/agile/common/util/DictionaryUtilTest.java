@@ -6,6 +6,7 @@ import cloud.agileframework.dictionary.util.DictionaryUtil;
 import com.agile.App;
 import com.agile.DictionaryDataMemory;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.SerializationUtils;
 import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
@@ -141,21 +142,23 @@ public class DictionaryUtilTest {
 
     @Test
     public void cover() {
-        Data3 o = Data3.builder().status("sex.boy").build();
-        DictionaryUtil.cover(o);
-        System.out.println(o.toString());
+//        Data3 o = Data3.builder().status("sex.boy").build();
+//        DictionaryUtil.cover(o);
+//        System.out.println(o.toString());
 
-        Data2 o2 = Data2.builder().country(7).city(8).region(9).build();
+        Data2 o2 = Data2.builder().country("7").city("8").region("9,9").build();
+        Data2 o3 = Data2.builder().country("7").city("8").region("9").build();
+        o2.setData2(o3);
         DictionaryUtil.cover(o2);
         System.out.println(o2.toString());
 
-        Data4 o3 = Data4.builder().country("中国").city("黑龙江").region("哈尔滨").build();
-        DictionaryUtil.cover(o3);
-        System.out.println(o3.toString());
-
-        Data5 o4 = Data5.builder().code(SexEnum.boy).build();
-        DictionaryUtil.cover(o4);
-        System.out.println(o4.toString());
+//        Data4 o3 = Data4.builder().country("中国").city("黑龙江").region("哈尔滨").build();
+//        DictionaryUtil.cover(o3);
+//        System.out.println(o3.toString());
+//
+//        Data5 o4 = Data5.builder().code(SexEnum.boy).build();
+//        DictionaryUtil.cover(o4);
+//        System.out.println(o4.toString());
 
     }
 

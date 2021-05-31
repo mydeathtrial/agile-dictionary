@@ -2,10 +2,12 @@ package cloud.agileframework.dictionary.util;
 
 import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.clazz.ClassUtil;
+import cloud.agileframework.common.util.clazz.TypeReference;
 import cloud.agileframework.common.util.object.ObjectUtil;
 import cloud.agileframework.common.util.string.StringUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.annotation.Dictionary;
+import cloud.agileframework.dictionary.annotation.DictionaryField;
 import cloud.agileframework.dictionary.annotation.DirectionType;
 import com.google.common.collect.Maps;
 import org.springframework.util.ObjectUtils;
@@ -63,6 +65,21 @@ class ConvertDicAnnotation extends ConvertDicMap {
             }
             parseNodeField(dictionary, field, o);
         });
+
+        Set<ClassUtil.Target<DictionaryField>> dictionaryTargets = ClassUtil.getAllEntityAnnotation(o.getClass(), DictionaryField.class);
+        dictionaryTargets.forEach(dictionaryTarget -> {
+            Member member = dictionaryTarget.getMember();
+            String fieldName;
+            if (member instanceof Method) {
+                fieldName = StringUtil.toLowerName(member.getName().substring(Constant.NumberAbout.THREE));
+            } else if (member instanceof Field) {
+                fieldName = member.getName();
+            } else {
+                return;
+            }
+            Object value = ObjectUtil.getFieldValue(o, fieldName);
+            cover(value);
+        });
     }
 
     /**
@@ -94,51 +111,106 @@ class ConvertDicAnnotation extends ConvertDicMap {
      * @param <T>        对象类型
      */
     private static <T> void parseNodeField(Dictionary dictionary, Field field, T node) {
-        //如果是id，则直接调用主键查询
+        //取映射字段
         final String[] fieldNames = dictionary.fieldName();
-
-        String parentDicCode = dictionary.dicCode();
-        boolean isFull = dictionary.isFull();
-        String split = dictionary.split();
-
-        // 组装要翻译的内容
-        // 处理布尔类型
-        List<String> indexes = Arrays.stream(fieldNames).flatMap(column -> {
-            Object index = ObjectUtil.getFieldValue(node, column);
-
-            String value;
-            // 处理布尔类型
-            if (ObjectUtils.isEmpty(index)) {
-                return null;
-            } else if (index instanceof Boolean) {
-                value = Boolean.TRUE.equals(index) ? "1" : "0";
-            } else if (index.getClass().isEnum()) {
-                value = ((Enum<?>) index).name();
-            } else {
-                value = index.toString();
-            }
-            return Arrays.stream(value.split("[,]"));
-        }).filter(Objects::nonNull).collect(Collectors.toList());
-
-        if (indexes.isEmpty()) {
-            final String defaultValue = dictionary.defaultValue();
-            if (!Dictionary.NULL.equals(defaultValue)) {
-                // 赋值
-                ObjectUtil.setValue(node, field, defaultValue);
-            }
+        if (fieldNames.length == 0) {
             return;
         }
 
-        // 组装要翻译的内容
-        String fullIndex;
-        if (ObjectUtils.isEmpty(parentDicCode)) {
-            fullIndex = String.join(split, indexes);
-        } else {
-            fullIndex = indexes.stream()
-                    .map(code -> parentDicCode + split + code)
-                    .collect(Collectors.joining(Constant.RegularAbout.COMMA));
+        //当前要处理的字段
+        String currentFieldName = fieldNames.length > 1 ? fieldNames[fieldNames.length - 1] : fieldNames[0];
+        Object fieldValue = ObjectUtil.getFieldValue(node, currentFieldName);
+        if (fieldValue == null) {
+            return;
         }
 
+        // 处理字典前缀
+        String parentKey = dictionary.dicCode();
+        String split = dictionary.split();
+        String prefix = ObjectUtils.isEmpty(parentKey) ? "" : parentKey + split;
+        // 如果是级联字典
+        if (fieldNames.length > 1) {
+            String prefix2 = Arrays.stream(fieldNames)
+                    .limit(fieldNames.length - 1L)
+                    .map(column -> {
+                        Object prefixFieldValue = ObjectUtil.getFieldValue(node, column);
+                        return toDitKey(prefixFieldValue);
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.joining(dictionary.split()));
+            prefix = prefix + prefix2 + split;
+        }
+
+        Object value;
+        String finalPrefix = prefix;
+        if (fieldValue.getClass().isArray() || Collection.class.isAssignableFrom(fieldValue.getClass())) {
+            List<Object> temp = ObjectUtil.to(fieldValue, new TypeReference<List<Object>>() {
+            });
+
+            List<String> tempList = temp.stream().map(ConvertDicAnnotation::toDitKey).map(a -> finalPrefix + a).collect(Collectors.toList());
+            value = parseCollection(dictionary, tempList, new TypeReference<>(field.getGenericType()));
+        } else {
+            final String temp = toDitKey(fieldValue);
+            if (temp == null) {
+                return;
+            }
+            String tempString = Arrays.stream(temp.split("[,]")).map(a -> finalPrefix + a).collect(Collectors.joining(Constant.RegularAbout.COMMA));
+            value = parseString(dictionary, tempString);
+        }
+
+        value = ObjectUtil.to(value, new TypeReference<>(field.getGenericType()));
+
+        // 赋值
+        ObjectUtil.setValue(node, field, value);
+    }
+
+    /**
+     * 处理不同类型值换成字典可以识别的值
+     *
+     * @param source 要转变的值
+     * @return 可以翻译的字符串类型值
+     */
+    private static String toDitKey(Object source) {
+        String target;
+        // 处理布尔类型
+        if (ObjectUtils.isEmpty(source)) {
+            return null;
+        } else if (source instanceof String) {
+            target = (String) source;
+        } else if (source instanceof Boolean) {
+            target = Boolean.TRUE.equals(source) ? "1" : "0";
+        } else if (source.getClass().isEnum()) {
+            target = ((Enum<?>) source).name();
+        } else {
+            target = ObjectUtil.toString(source);
+        }
+        return target;
+    }
+
+    /**
+     * 处理集合类型
+     *
+     * @param dictionary    字典注解
+     * @param fullIndexes   要翻译的集合
+     * @param typeReference 要转换的类型
+     * @param <A>           泛型
+     * @return 转换后的数据
+     */
+    private static <A> A parseCollection(Dictionary dictionary, List<String> fullIndexes, TypeReference<A> typeReference) {
+        List<String> targetNameList = fullIndexes.stream().map(fullIndex -> parseString(dictionary, fullIndex)).collect(Collectors.toList());
+        return ObjectUtil.to(targetNameList, typeReference);
+    }
+
+    /**
+     * 翻译字符串类型
+     *
+     * @param dictionary 字典注解
+     * @param fullIndex  要翻译的字符串类型值
+     * @return 翻译后的字符串
+     */
+    private static String parseString(Dictionary dictionary, String fullIndex) {
+        boolean isFull = dictionary.isFull();
+        String split = dictionary.split();
         // 翻译后值
         String targetName;
 
@@ -174,8 +246,6 @@ class ConvertDicAnnotation extends ConvertDicMap {
                 dicCoverCache.put(fullIndex, targetName);
             }
         }
-
-        // 赋值
-        ObjectUtil.setValue(node, field, targetName);
+        return targetName;
     }
 }

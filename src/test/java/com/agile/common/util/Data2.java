@@ -1,9 +1,13 @@
 package com.agile.common.util;
 
 import cloud.agileframework.dictionary.annotation.Dictionary;
+import cloud.agileframework.dictionary.annotation.DictionaryField;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author 佟盟
@@ -15,15 +19,15 @@ import lombok.ToString;
 @Data
 @Builder
 @ToString
-public class Data2 {
+public class Data2 implements Serializable {
     //CHINA
-    private Integer country;
+    private String country;
 
     //HLJ
-    private Integer city;
+    private String city;
 
     //HRB
-    private Integer region;
+    private String region;
 
     @Dictionary(fieldName = {"country"})
     private String countryValue;
@@ -34,5 +38,8 @@ public class Data2 {
     //中国/黑龙江/哈尔滨
     //哈尔滨
     @Dictionary(fieldName = {"country", "city", "region"}, isFull = true)
-    private String regionValue;
+    private List<String> regionValue;
+
+    @DictionaryField
+    private Data2 data2;
 }

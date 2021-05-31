@@ -64,7 +64,12 @@ public class DictionaryUtil extends ConvertDicAnnotation {
                 .get(DictionaryEngine.CODE_MEMORY, new TypeReference<Map<String, DictionaryDataBase>>() {
                 });
         if (map != null) {
-            treeSet = new TreeSet<>(map.values());
+            try {
+                treeSet = new TreeSet<>(map.values());
+            }catch (Exception e){
+                treeSet = Sets.newTreeSet();
+            }
+
         } else {
             treeSet = Sets.newTreeSet();
         }
