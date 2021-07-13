@@ -6,6 +6,7 @@ import cloud.agileframework.common.util.clazz.TypeReference;
 import cloud.agileframework.common.util.object.ObjectUtil;
 import cloud.agileframework.common.util.string.StringUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
+import cloud.agileframework.dictionary.DictionaryEngine;
 import cloud.agileframework.dictionary.annotation.Dictionary;
 import cloud.agileframework.dictionary.annotation.DictionaryField;
 import cloud.agileframework.dictionary.annotation.DirectionType;
@@ -213,9 +214,9 @@ class ConvertDicAnnotation extends ConvertDicMap {
         String split = dictionary.split();
         // 翻译后值
         String targetName;
-
-        if (dicCoverCache != null && dicCoverCache.containsKey(fullIndex)) {
-            targetName = dicCoverCache.get(fullIndex);
+        final String threadCacheKey = fullIndex + dictionary.hashCode();
+        if (dicCoverCache != null && dicCoverCache.containsKey(threadCacheKey)) {
+            targetName = dicCoverCache.get(threadCacheKey);
         } else {
             if (dictionary.directionType() == DirectionType.CODE_TO_NAME && !dictionary.id()) {
                 String defaultValue = dictionary.defaultValue();
@@ -227,7 +228,17 @@ class ConvertDicAnnotation extends ConvertDicMap {
                             DictionaryDataBase dic = DictionaryUtil.findById(dictionary.dataSource(), id);
                             String defaultValue = dictionary.defaultValue();
                             defaultValue = DEFAULT_NAME.equals(defaultValue) ? id : defaultValue;
-                            return dic == null ? defaultValue : dic.getName();
+
+                            String result = defaultValue;
+                            if (dic == null) {
+                                return result;
+                            }
+                            if (isFull) {
+                                result = dic.getFullName().replace(DictionaryEngine.DEFAULT_SPLIT_CHAR, dictionary.split());
+                            } else {
+                                result = dic.getName();
+                            }
+                            return result;
                         }).collect(Collectors.joining(Constant.RegularAbout.COMMA));
             } else if (dictionary.directionType() == DirectionType.NAME_TO_CODE && !dictionary.id()) {
                 String defaultValue = dictionary.defaultValue();
@@ -243,7 +254,7 @@ class ConvertDicAnnotation extends ConvertDicMap {
                         }).collect(Collectors.joining(Constant.RegularAbout.COMMA));
             }
             if (dicCoverCache != null) {
-                dicCoverCache.put(fullIndex, targetName);
+                dicCoverCache.put(threadCacheKey, targetName);
             }
         }
         return targetName;
