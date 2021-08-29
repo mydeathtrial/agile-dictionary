@@ -1,14 +1,12 @@
 package cloud.agileframework.dictionary.util;
 
-import cloud.agileframework.cache.util.CacheUtil;
-import cloud.agileframework.common.util.clazz.TypeReference;
 import cloud.agileframework.dictionary.DictionaryDataBase;
-import cloud.agileframework.dictionary.DictionaryEngine;
+import cloud.agileframework.dictionary.cache.DictionaryCacheUtil;
+import cloud.agileframework.dictionary.cache.NotFoundCacheException;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.SerializationUtils;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -59,20 +57,11 @@ public class DictionaryUtil extends ConvertDicAnnotation {
      * @return 字典集合
      */
     public static SortedSet<DictionaryDataBase> findAll(String datasource) {
-        TreeSet<DictionaryDataBase> treeSet;
-        Map<String, DictionaryDataBase> map = CacheUtil.getCache(datasource)
-                .get(DictionaryEngine.CODE_MEMORY, new TypeReference<Map<String, DictionaryDataBase>>() {
-                });
-        if (map != null) {
-            try {
-                treeSet = new TreeSet<>(map.values());
-            }catch (Exception e){
-                treeSet = Sets.newTreeSet();
-            }
-
-        } else {
-            treeSet = Sets.newTreeSet();
+        try {
+            return DictionaryCacheUtil.getDictionaryCache().getDataByDatasource(datasource);
+        } catch (NotFoundCacheException e) {
+            e.printStackTrace();
         }
-        return SerializationUtils.clone(treeSet);
+        return Sets.newTreeSet();
     }
 }

@@ -1,16 +1,11 @@
 package cloud.agileframework.dictionary;
 
-import cloud.agileframework.cache.sync.OpType;
-import cloud.agileframework.cache.sync.SyncCache;
-import cloud.agileframework.cache.sync.SyncKeys;
-import cloud.agileframework.cache.util.CacheUtil;
 import cloud.agileframework.common.constant.Constant;
-import cloud.agileframework.common.util.clazz.TypeReference;
 import cloud.agileframework.common.util.object.ObjectUtil;
+import cloud.agileframework.dictionary.cache.DictionaryCacheUtil;
+import cloud.agileframework.dictionary.cache.NotFoundCacheException;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,8 +22,6 @@ import java.util.stream.Collectors;
  * @since 1.0
  */
 public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase> implements DictionaryDataManager<D> {
-    @Autowired
-    private SyncCache syncCache;
 
     public SyncProxy sync() {
         return new SyncProxy();
@@ -66,13 +59,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
         public void add(D dictionaryData) {
             synchronized (this) {
                 addData(dictionaryData);
-                sync();
             }
-        }
-
-        private void sync() {
-            syncCache.sync(SyncKeys.of(dataSource(), DictionaryEngine.CODE_MEMORY), OpType.WRITE);
-            syncCache.sync(SyncKeys.of(dataSource(), DictionaryEngine.NAME_MEMORY), OpType.WRITE);
         }
 
         /**
@@ -117,10 +104,11 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
                 dictionaryData.setFullName(dictionaryData.getName());
             }
 
-            CacheUtil.getCache(dataSource())
-                    .addToMap(DictionaryEngine.CODE_MEMORY, dictionaryData.getFullCode(), dictionaryData);
-            CacheUtil.getCache(dataSource())
-                    .addToMap(DictionaryEngine.NAME_MEMORY, dictionaryData.getFullName(), dictionaryData);
+            try {
+                DictionaryCacheUtil.getDictionaryCache().add(dataSource(), dictionaryData);
+            } catch (NotFoundCacheException e) {
+                e.printStackTrace();
+            }
         }
 
         /**
@@ -158,7 +146,6 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
         public void delete(D dictionaryData) {
             synchronized (this) {
                 deleteData(dictionaryData);
-                sync();
             }
         }
 
@@ -187,10 +174,11 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
             if (oldData == null) {
                 return;
             }
-            CacheUtil.getCache(dataSource())
-                    .removeFromMap(DictionaryEngine.CODE_MEMORY, oldData.getFullCode());
-            CacheUtil.getCache(dataSource())
-                    .removeFromMap(DictionaryEngine.NAME_MEMORY, oldData.getFullName());
+            try {
+                DictionaryCacheUtil.getDictionaryCache().delete(dataSource(), oldData);
+            } catch (NotFoundCacheException e) {
+                e.printStackTrace();
+            }
 
             //遍历更新父节点
             DictionaryDataBase parent = findOne(oldData.getParentId());
@@ -208,7 +196,6 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
         public void update(D dictionaryData) {
             synchronized (this) {
                 updateData(dictionaryData, AbstractDictionaryDataManager.this::update, true, false);
-                sync();
             }
         }
 
@@ -220,7 +207,6 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
         public void updateOfNotNull(D dictionaryData) {
             synchronized (this) {
                 updateData(dictionaryData, AbstractDictionaryDataManager.this::updateOfNotNull, true, true);
-                sync();
             }
         }
 
@@ -304,7 +290,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
             D parent = findOne(newData.getParentId());
 
             //再把新的加回来
-            insertMemory(oldData,parent);
+            insertMemory(oldData, parent);
         }
 
 
@@ -312,12 +298,11 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
             oldData.getChildren().forEach(a -> deleteMemory((D) a));
 
             //先清除旧的数据
-            CacheUtil.getCache(dataSource())
-                    .removeFromMap(DictionaryEngine.CODE_MEMORY, oldData.getFullCode());
-
-            //先清除旧的数据
-            CacheUtil.getCache(dataSource())
-                    .removeFromMap(DictionaryEngine.NAME_MEMORY, oldData.getFullName());
+            try {
+                DictionaryCacheUtil.getDictionaryCache().delete(dataSource(), oldData);
+            } catch (NotFoundCacheException e) {
+                e.printStackTrace();
+            }
         }
 
         void insertMemory(D newData, D parent) {
@@ -336,12 +321,11 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
             newData.setFullName(newFullName);
 
             //先清除旧的数据
-            CacheUtil.getCache(dataSource())
-                    .addToMap(DictionaryEngine.CODE_MEMORY, newFullCode, newData);
-
-            //先清除旧的数据
-            CacheUtil.getCache(dataSource())
-                    .addToMap(DictionaryEngine.NAME_MEMORY, newFullName, newData);
+            try {
+                DictionaryCacheUtil.getDictionaryCache().delete(dataSource(), newData);
+            } catch (NotFoundCacheException e) {
+                e.printStackTrace();
+            }
 
             newData.getChildren().forEach(a -> insertMemory((D) a, newData));
         }
@@ -349,13 +333,18 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
     }
 
     D findOne(String id) {
-        final Map<String, DictionaryDataBase> cacheData = CacheUtil.getCache(dataSource())
-                .get(DictionaryEngine.CODE_MEMORY, new TypeReference<Map<String, DictionaryDataBase>>() {
-                });
-        if(cacheData == null){
-            return null;
+        try {
+            DictionaryCacheUtil.getDictionaryCache()
+                    .getDataByDatasource(dataSource())
+                    .parallelStream()
+                    .filter(data -> data.getId().equals(id))
+                    .map(a -> (D) a)
+                    .findFirst()
+                    .orElse(null);
+        } catch (NotFoundCacheException e) {
+            e.printStackTrace();
         }
-        return cacheData.values().parallelStream().filter(data -> data.getId().equals(id)).map(a -> (D) a).findFirst().orElse(null);
+        return null;
     }
 
 }

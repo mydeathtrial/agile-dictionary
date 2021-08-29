@@ -1,10 +1,9 @@
 package cloud.agileframework.dictionary;
 
-import cloud.agileframework.cache.support.AgileCache;
-import cloud.agileframework.cache.util.CacheUtil;
 import cloud.agileframework.common.util.collection.TreeUtil;
+import cloud.agileframework.dictionary.cache.DictionaryCacheUtil;
+import cloud.agileframework.dictionary.cache.NotFoundCacheException;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeansException;
@@ -61,7 +60,7 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
                 .forEach(cm -> {
                     try {
                         parseDataSource(cm);
-                    } catch (IllegalAccessException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 });
@@ -74,7 +73,7 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
      * @param dictionaryDataManager 字典管理其
      * @throws IllegalAccessException 错误的访问权限
      */
-    private void parseDataSource(DictionaryDataManager<?> dictionaryDataManager) throws IllegalAccessException {
+    private void parseDataSource(DictionaryDataManager<?> dictionaryDataManager) throws IllegalAccessException, NotFoundCacheException {
 
         //如果缓存中没有，则初始化
         SortedSet<DictionaryDataBase> treeSet = Sets.newTreeSet(dictionaryDataManager.all());
@@ -99,19 +98,7 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
         );
 
         //做缓存同步
-        String dataSource = dictionaryDataManager.dataSource();
-        AgileCache cache = CacheUtil.getCache(dataSource);
-
-        Map<String, DictionaryDataBase> codeMap = Maps.newHashMap();
-        Map<String, DictionaryDataBase> nameMap = Maps.newHashMap();
-
-        treeSet.forEach(dic -> {
-            codeMap.put(dic.getFullCode(), dic);
-            nameMap.put(dic.getFullName(), dic);
-        });
-
-        cache.put(CODE_MEMORY, codeMap);
-        cache.put(NAME_MEMORY, nameMap);
+        DictionaryCacheUtil.getDictionaryCache().initData(dictionaryDataManager.dataSource(),treeSet);
     }
 
     /**

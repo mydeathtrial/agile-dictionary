@@ -5,11 +5,16 @@ import cloud.agileframework.dictionary.DictionaryDataManager;
 import cloud.agileframework.dictionary.DictionaryEngine;
 import cloud.agileframework.dictionary.DictionaryProperties;
 import cloud.agileframework.dictionary.MemoryDictionaryManager;
+import cloud.agileframework.dictionary.cache.*;
+import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,7 +30,10 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(name = "enable", prefix = "agile.dictionary", matchIfMissing = true)
 @EnableConfigurationProperties(DictionaryProperties.class)
 @AutoConfigureAfter(EhCacheAutoConfiguration.class)
-public class DictionaryAutoConfiguration {
+public class DictionaryAutoConfiguration implements ApplicationContextAware {
+
+    private ApplicationContext applicationContext;
+
     /**
      * 字典引擎
      *
@@ -45,5 +53,41 @@ public class DictionaryAutoConfiguration {
     @ConditionalOnMissingBean(DictionaryDataManager.class)
     MemoryDictionaryManager dictionaryManager() {
         return new MemoryDictionaryManager();
+    }
+
+    /**
+     * 缓存戒指
+     *
+     * @return 缓存介质
+     */
+    @Bean
+    @ConditionalOnMissingBean(DictionaryCache.class)
+    DictionaryCache cacheManager(DictionaryProperties properties) throws NotFoundCacheException {
+        DictionaryCache cache;
+        switch (properties.getCacheType()) {
+            case SPRING:
+                CacheManager cacheManager;
+                try {
+                    cacheManager = applicationContext.getBean(CacheManager.class);
+                } catch (Exception e) {
+                    throw new NotFoundCacheException("At least one org.springframework.cache.CacheManager", e);
+                }
+                cache = new SpringCacheImpl(cacheManager);
+                break;
+            case AGILE_CACHE:
+                cache = new AgileCacheImpl();
+                break;
+            default:
+                cache = new MemoryCacheImpl();
+        }
+
+        //初始化字典缓存介质
+        DictionaryCacheUtil.setDictionaryCache(cache);
+        return cache;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }

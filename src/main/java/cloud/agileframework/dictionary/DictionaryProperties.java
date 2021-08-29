@@ -1,5 +1,6 @@
 package cloud.agileframework.dictionary;
 
+import cloud.agileframework.dictionary.cache.CacheType;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -17,4 +18,9 @@ public class DictionaryProperties {
      * Agile字典支持
      */
     private boolean enable = true;
+
+    /**
+     * 使用什么缓存存储字典计算结果，默认使用内存
+     */
+    private CacheType cacheType = CacheType.MEMORY;
 }

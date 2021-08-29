@@ -1,10 +1,10 @@
 package cloud.agileframework.dictionary.util;
 
-import cloud.agileframework.cache.support.AgileCache;
-import cloud.agileframework.cache.util.CacheUtil;
 import cloud.agileframework.common.util.clazz.ClassUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.DictionaryEngine;
+import cloud.agileframework.dictionary.cache.DictionaryCacheUtil;
+import cloud.agileframework.dictionary.cache.RegionEnum;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -66,12 +66,11 @@ class ConvertBase {
         fullIndex = fullIndex.replace(splitChar, DEFAULT_SPLIT_CHAR);
 
         DictionaryDataBase entity = null;
-        final AgileCache cache = CacheUtil.getCache(datasource);
         try {
             if (DictionaryEngine.CacheType.CODE_CACHE == cacheType) {
-                entity = cache.getFromMap(DictionaryEngine.CODE_MEMORY, fullIndex, DictionaryDataBase.class);
+                entity = DictionaryCacheUtil.getDictionaryCache().getByFullIndex(datasource, RegionEnum.CODE_MEMORY,fullIndex);
             } else {
-                entity = cache.getFromMap(DictionaryEngine.NAME_MEMORY, fullIndex, DictionaryDataBase.class);
+                entity = DictionaryCacheUtil.getDictionaryCache().getByFullIndex(datasource, RegionEnum.NAME_MEMORY,fullIndex);
             }
         } catch (Exception e) {
             e.printStackTrace();
