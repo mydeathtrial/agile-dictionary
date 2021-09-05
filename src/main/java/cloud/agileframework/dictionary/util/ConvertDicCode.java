@@ -175,7 +175,7 @@ class ConvertDicCode extends ConvertDicBean {
             return defaultCode;
         }
         if (isFull) {
-            defaultCode = parent.getFullName() + splitChar + defaultCode;
+            defaultCode = parent.getFullCode() + splitChar + defaultCode;
         }
         String finalDefaultCode = defaultCode;
         return Arrays.stream(names.split(Constant.RegularAbout.COMMA))

@@ -1,12 +1,10 @@
 package cloud.agileframework.dictionary.cache;
 
 import cloud.agileframework.cache.support.AgileCache;
-import cloud.agileframework.cache.sync.SyncCache;
 import cloud.agileframework.cache.util.CacheUtil;
 import cloud.agileframework.common.util.clazz.TypeReference;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import com.google.common.collect.Maps;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 
 import java.util.Map;
@@ -16,19 +14,19 @@ import java.util.Map;
  */
 public class AgileCacheImpl implements DictionaryCache {
 
-    @Autowired
-    private SyncCache syncCache;
+
+    private AgileCache getAgileCache(String datasource) {
+        return CacheUtil.getCache(datasource);
+    }
 
     @Override
-    public void initData(String datasource, RegionEnum regionEnum, Map<String, DictionaryDataBase> cacheData) throws NotFoundCacheException {
-        Map<RegionEnum, Map<String, DictionaryDataBase>> data = Maps.newHashMap();
-        data.put(regionEnum, cacheData);
-        CacheUtil.put(datasource, data);
+    public void initData(String datasource, RegionEnum regionEnum, Map<String, DictionaryDataBase> cacheData) {
+        getAgileCache(datasource).put(regionEnum, cacheData);
     }
 
     @Override
     public Map<String, DictionaryDataBase> getDataByRegion(String datasource, RegionEnum regionEnum) throws NotFoundCacheException {
-        AgileCache cache = CacheUtil.getCache(datasource);
+        AgileCache cache = getAgileCache(datasource);
         if (cache == null) {
             throw new NotFoundCacheException("Unable to get dictionary's cache");
         }
@@ -47,7 +45,7 @@ public class AgileCacheImpl implements DictionaryCache {
 
     @Override
     public DictionaryDataBase getByFullIndex(String datasource, RegionEnum regionEnum, String fullIndex) throws NotFoundCacheException {
-        AgileCache cache = CacheUtil.getCache(datasource);
+        AgileCache cache = getAgileCache(datasource);
         if (cache == null) {
             throw new NotFoundCacheException("Unable to get dictionary's cache");
         }
@@ -56,7 +54,7 @@ public class AgileCacheImpl implements DictionaryCache {
 
     @Override
     public void add(String datasource, DictionaryDataBase dictionaryData) throws NotFoundCacheException {
-        AgileCache cache = CacheUtil.getCache(datasource);
+        AgileCache cache = getAgileCache(datasource);
         if (cache == null) {
             throw new NotFoundCacheException("Unable to get dictionary's cache");
         }
@@ -66,7 +64,7 @@ public class AgileCacheImpl implements DictionaryCache {
 
     @Override
     public void delete(String datasource, DictionaryDataBase dictionaryData) throws NotFoundCacheException {
-        AgileCache cache = CacheUtil.getCache(datasource);
+        AgileCache cache = getAgileCache(datasource);
         if (cache == null) {
             throw new NotFoundCacheException("Unable to get dictionary's cache");
         }

@@ -8,6 +8,7 @@ import com.agile.DictionaryDataMemory;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.SerializationUtils;
 import org.assertj.core.util.Lists;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +19,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,9 +30,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static cloud.agileframework.dictionary.MemoryDictionaryManager.CACHE;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = App.class)
@@ -42,85 +46,79 @@ public class DictionaryUtilTest {
     @Test
     public void getCache() {
         SortedSet<DictionaryDataBase> code = manager.sync().all();
-        log.info(code.toString());
+        Assert.assertNotNull(code);
     }
 
     @Test
     public void coverDicBean() {
         DictionaryDataBase dic1 = DictionaryUtil.coverDicBean("sex.boy");
+        Assert.assertEquals(dic1.getName(),"男");
         DictionaryDataBase dic2 = DictionaryUtil.coverDicBean("sex#boy", "#");
-        log.info(dic1.getName());
-        log.info(dic2.getName());
-        IntStream.range(0, 10).forEach(a -> {
-            new Thread() {
-                @Override
-                public void run() {
-                    log.info(getId() + DictionaryUtil.coverDicBean("sex.boy").getName());
-                }
-            }.run();
-        });
+        Assert.assertEquals(dic2.getName(),"男");
+        IntStream.range(0, 10)
+                .forEach(a -> new Thread(() -> Assert.assertEquals(DictionaryUtil.coverDicBean("sex.boy").getName(),"男")).start());
     }
 
     @Test
     public void coverDicBeanByFullName() {
         DictionaryDataBase dic1 = DictionaryUtil.coverDicBeanByFullName("性别.男");
-        log.info(dic1.getFullCode());
+        Assert.assertEquals(dic1.getFullCode(),"sex$SPLIT$boy");
     }
 
     @Test
     public void testCoverDicBeanByFullName() {
         DictionaryDataBase dic1 = DictionaryUtil.coverDicBeanByFullName("性别|男", "|");
-        log.info(dic1.getFullCode());
+        Assert.assertEquals(dic1.getFullCode(),"sex$SPLIT$boy");
     }
 
     @Test
     public void coverDicBeanByParent() {
         DictionaryDataBase dic1 = DictionaryUtil.coverDicBeanByParent("sex", "男");
-        log.info(dic1.getFullName());
+        Assert.assertEquals(dic1.getFullCode(),"sex$SPLIT$boy");
     }
 
     @Test
     public void coverDicName() {
         String name = DictionaryUtil.coverDicName("sex");
-        log.info(name);
+        Assert.assertEquals(name,"性别");
         String name2 = DictionaryUtil.coverDicName("sex.boy");
-        log.info(name2);
+        Assert.assertEquals(name2,"男");
         String name3 = DictionaryUtil.coverDicName("sex.no", "未知");
-        log.info(name3);
+        Assert.assertEquals(name3,"未知");
     }
 
     @Test
     public void coverDicNameByParent() {
         String name = DictionaryUtil.coverDicNameByParent("sex", "boy,girl");
-        log.info(name);
+        Assert.assertEquals(name,"男,女");
         String name2 = DictionaryUtil.coverDicNameByParent("sex", "neutral,boy,girl", "中性");
-        log.info(name2);
+        Assert.assertEquals(name2,"中性,男,女");
         String name3 = DictionaryUtil.coverDicNameByParent("sex", "neutral,boy,girl", "中性", true, "#");
-        log.info(name3);
+        Assert.assertEquals(name3,"性别#中性,性别#男,性别#女");
     }
 
     @Test
     public void coverDicCode() {
         String code = DictionaryUtil.coverDicCode("性别.男,性别.女");
-        log.info(code);
+        Assert.assertEquals(code,"boy,girl");
         String code2 = DictionaryUtil.coverDicCode("性别.男,性别.女,性别.中性", "no");
-        log.info(code2);
+        Assert.assertEquals(code2,"boy,girl,no");
         String code3 = DictionaryUtil.coverDicCode("性别|男,性别|女,性别|中性", "no", true, "|");
-        log.info(code3);
+        Assert.assertEquals(code3,"sex|boy,sex|girl,no");
     }
 
     @Test
     public void coverDicCodeByParent() {
         String code = DictionaryUtil.coverDicCodeByParent("性别", "男,女");
-        log.info(code);
+        Assert.assertEquals(code,"boy,girl");
         String code2 = DictionaryUtil.coverDicCodeByParent("性别", "男,女,中性", "no");
-        log.info(code2);
+        Assert.assertEquals(code2,"boy,girl,no");
         String code3 = DictionaryUtil.coverDicCodeByParent("性别", "男,女,中性", "no", true, "|");
-        log.info(code3);
+        Assert.assertEquals(code3,"sex|boy,sex|girl,sex|no");
     }
 
     @Test
-    public void coverMapDictionary() throws NoSuchFieldException, IllegalAccessException {
+    public void coverMapDictionary() {
         List<Map<String, Object>> list = Lists.newArrayList();
         HashMap<String, Object> map = Maps.newHashMap();
         map.put("code", "boy");
@@ -131,98 +129,103 @@ public class DictionaryUtilTest {
         list.add(map2);
 
         Map<String, Object> o = DictionaryUtil.coverMapDictionary(map, new String[]{"sex"}, "_value", new String[]{"code"});
-        log.info(o.toString());
+        Assert.assertEquals(o.get("code_value"),"男");
 
         List<Map<String, Object>> toList1 = DictionaryUtil.coverMapDictionary(list, new String[]{"sex"}, "_value", new String[]{"code"});
-        log.info(toList1.toString());
+        Assert.assertArrayEquals(toList1.stream().map(a -> a.get("code_value")).sorted().toArray(), Arrays.stream(new String[]{"男","女"}).sorted().toArray());
 
         List<Map<String, Object>> toList2 = DictionaryUtil.coverMapDictionary(list, "sex", "_value", "code");
-        log.info(toList2.toString());
+        Assert.assertArrayEquals(toList2.stream().map(a -> a.get("code_value")).sorted().toArray(), Arrays.stream(new String[]{"男","女"}).sorted().toArray());
     }
 
     @Test
     public void cover() {
-//        Data3 o = Data3.builder().status("sex.boy").build();
-//        DictionaryUtil.cover(o);
-//        System.out.println(o.toString());
-
         Data2 o2 = Data2.builder().country("7").city("8").region("9,9").build();
         Data2 o3 = Data2.builder().country("7").city("8").region("9").build();
         o2.setData2(o3);
         DictionaryUtil.cover(o2);
-        System.out.println(o2.toString());
+        Assert.assertEquals(o2.getCountryValue(),"中国");
+        Assert.assertEquals(o2.getCityValue(),"黑龙江");
+        Assert.assertArrayEquals(o2.getRegionValue().stream().sorted().toArray(), Arrays.stream(new String[]{"中国.黑龙江.哈尔滨","中国.黑龙江.哈尔滨"}).sorted().toArray());
 
-//        Data4 o3 = Data4.builder().country("中国").city("黑龙江").region("哈尔滨").build();
-//        DictionaryUtil.cover(o3);
-//        System.out.println(o3.toString());
-//
-//        Data5 o4 = Data5.builder().code(SexEnum.boy).build();
-//        DictionaryUtil.cover(o4);
-//        System.out.println(o4.toString());
-
+        Data5 o4 = Data5.builder().code(SexEnum.boy).build();
+        DictionaryUtil.cover(o4);
+        Assert.assertEquals(o4.getText(),"男");
     }
 
     @Test
     public void time() {
-        long start = System.currentTimeMillis();
         ArrayList<Object> list = Lists.newArrayList();
         IntStream.range(0, 1000).forEach(a -> list.add(Data3.builder().status("sex.boy").build()));
+        long start = System.currentTimeMillis();
         DictionaryUtil.cover(list);
-        System.out.println(System.currentTimeMillis() - start);
+        long end = System.currentTimeMillis();
+        //计算每秒转化次数
+        double count = (BigDecimal.valueOf(1000 * 1000).divide(BigDecimal.valueOf(end - start), RoundingMode.CEILING).doubleValue());
+        Assert.assertTrue(count>6000);
     }
 
     @Before
     public void init(){
         manager.sync().add(new DictionaryDataMemory("1", null, "性别", "sex",3));
+        Assert.assertEquals(DictionaryUtil.coverDicName("sex"),"性别");
         manager.sync().add(new DictionaryDataMemory("2", null, "对错", "isTrue",3));
+        Assert.assertEquals(DictionaryUtil.coverDicName("isTrue"),"对错");
         manager.sync().add(new DictionaryDataMemory("3", "1", "男", "boy",6));
+        Assert.assertEquals(DictionaryUtil.coverDicName("sex.boy"),"男");
         manager.sync().add(new DictionaryDataMemory("4", "1", "女", "girl",5));
+        Assert.assertEquals(DictionaryUtil.coverDicName("sex.girl"),"女");
         manager.sync().add(new DictionaryDataMemory("5", "2", "对", "1",2));
+        Assert.assertEquals(DictionaryUtil.coverDicName("isTrue.1"),"对");
         manager.sync().add(new DictionaryDataMemory("6", "2", "错", "2",8));
+        Assert.assertEquals(DictionaryUtil.coverDicName("isTrue.2"),"错");
         manager.sync().add(new DictionaryDataMemory("7", null, "中国", "7",9));
+        Assert.assertEquals(DictionaryUtil.coverDicName("7"),"中国");
         manager.sync().add(new DictionaryDataMemory("8", "7", "黑龙江", "8",0));
+        Assert.assertEquals(DictionaryUtil.coverDicName("7.8"),"黑龙江");
         manager.sync().add(new DictionaryDataMemory("9", "8", "哈尔滨", "9",1));
+        Assert.assertEquals(DictionaryUtil.coverDicName("7.8.9"),"哈尔滨");
     }
 
     @Test
-    public void add() throws IOException {
+    public void add() {
         final DictionaryDataBase dictionaryData = new DictionaryDataMemory("31", "3", "男1", "boy1");
         manager.sync().add(dictionaryData);
+        Assert.assertEquals(DictionaryUtil.coverDicName("sex.boy.boy1"),"男1");
 
-
-        int i = 1;
-        while (i>0){
-            dictionaryData.setName("男-"+i);
-            dictionaryData.setCode("boy-"+i);
-            manager.sync().update(dictionaryData);
-            i--;
-        }
+        final String updatedName = "男-1";
+        dictionaryData.setName(updatedName);
+        dictionaryData.setCode("boy-1");
+        manager.sync().update(dictionaryData);
+        Assert.assertEquals(DictionaryUtil.coverDicName("sex.boy.boy-1"), updatedName);
 
         DictionaryDataBase a = DictionaryUtil.findById(manager.dataSource(), "9");
-        a.setName("tudou");
+        final String value = "tudou";
+        a.setName(value);
         a.setCode("1212");
         manager.sync().update(a);
+        Assert.assertEquals(DictionaryUtil.coverDicName("7.8.1212"), value);
 
-        manager.sync().delete(DictionaryUtil.findById(manager.dataSource(), dictionaryData.getId()).getFullCode());
-
-//        System.in.read();
+        final String fullCode = DictionaryUtil.findById(manager.dataSource(), dictionaryData.getId()).getFullCode();
+        manager.sync().delete(fullCode);
+        Assert.assertNull(DictionaryUtil.coverDicBean("fullCode"));
     }
 
     @Test
-    public void tree() throws IOException{
+    public void tree() {
         SortedSet<DictionaryDataBase> a = manager.sync().tree();
-        System.out.println(a);
+        Assert.assertFalse(a.isEmpty());
     }
 
     static {
-        CACHE.add(new DictionaryDataMemory("1", null, "性别", "sex",3));
-        CACHE.add(new DictionaryDataMemory("2", null, "对错", "isTrue",3));
-        CACHE.add(new DictionaryDataMemory("3", "1", "男", "boy",6));
-        CACHE.add(new DictionaryDataMemory("4", "1", "女", "girl",5));
-        CACHE.add(new DictionaryDataMemory("5", "2", "对", "1",2));
-        CACHE.add(new DictionaryDataMemory("6", "2", "错", "2",8));
-        CACHE.add(new DictionaryDataMemory("7", null, "中国", "7",9));
-        CACHE.add(new DictionaryDataMemory("8", "7", "黑龙江", "8",0));
-        CACHE.add(new DictionaryDataMemory("9", "8", "哈尔滨", "9",1));
+        MemoryDictionaryManager.cache().add(new DictionaryDataMemory("1", null, "性别", "sex",3));
+        MemoryDictionaryManager.cache().add(new DictionaryDataMemory("2", null, "对错", "isTrue",3));
+        MemoryDictionaryManager.cache().add(new DictionaryDataMemory("3", "1", "男", "boy",6));
+        MemoryDictionaryManager.cache().add(new DictionaryDataMemory("4", "1", "女", "girl",5));
+        MemoryDictionaryManager.cache().add(new DictionaryDataMemory("5", "2", "对", "1",2));
+        MemoryDictionaryManager.cache().add(new DictionaryDataMemory("6", "2", "错", "2",8));
+        MemoryDictionaryManager.cache().add(new DictionaryDataMemory("7", null, "中国", "7",9));
+        MemoryDictionaryManager.cache().add(new DictionaryDataMemory("8", "7", "黑龙江", "8",0));
+        MemoryDictionaryManager.cache().add(new DictionaryDataMemory("9", "8", "哈尔滨", "9",1));
     }
 }

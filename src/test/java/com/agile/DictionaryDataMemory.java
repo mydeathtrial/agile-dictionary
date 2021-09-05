@@ -2,7 +2,6 @@ package com.agile;
 
 import cloud.agileframework.dictionary.DictionaryDataBase;
 
-import static cloud.agileframework.dictionary.MemoryDictionaryManager.CACHE;
 
 /**
  * @author 佟盟

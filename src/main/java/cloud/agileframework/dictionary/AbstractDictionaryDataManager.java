@@ -322,7 +322,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
 
             //先清除旧的数据
             try {
-                DictionaryCacheUtil.getDictionaryCache().delete(dataSource(), newData);
+                DictionaryCacheUtil.getDictionaryCache().add(dataSource(), newData);
             } catch (NotFoundCacheException e) {
                 e.printStackTrace();
             }
@@ -334,7 +334,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
 
     D findOne(String id) {
         try {
-            DictionaryCacheUtil.getDictionaryCache()
+            return DictionaryCacheUtil.getDictionaryCache()
                     .getDataByDatasource(dataSource())
                     .parallelStream()
                     .filter(data -> data.getId().equals(id))

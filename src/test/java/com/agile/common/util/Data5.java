@@ -17,6 +17,7 @@ import lombok.ToString;
 @ToString
 public class Data5 {
     private SexEnum code;
+
     @Dictionary(fieldName = "code", dicCode = "sex")
     private String text;
 }

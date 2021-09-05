@@ -9,6 +9,7 @@ import cloud.agileframework.dictionary.cache.*;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -16,6 +17,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -29,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
 @AutoConfigureBefore(name = "cloud.agileframework.jpa.config.DaoAutoConfiguration.class")
 @ConditionalOnProperty(name = "enable", prefix = "agile.dictionary", matchIfMissing = true)
 @EnableConfigurationProperties(DictionaryProperties.class)
-@AutoConfigureAfter(EhCacheAutoConfiguration.class)
+@AutoConfigureAfter(name = "cloud.agileframework.cache.config.EhCacheAutoConfiguration.class")
 public class DictionaryAutoConfiguration implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
@@ -56,7 +58,7 @@ public class DictionaryAutoConfiguration implements ApplicationContextAware {
     }
 
     /**
-     * 缓存戒指
+     * 缓存介质
      *
      * @return 缓存介质
      */

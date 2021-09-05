@@ -27,9 +27,13 @@ import java.util.SortedSet;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class DictionaryEngine implements ApplicationRunner, ApplicationContextAware {
 
+    /**
+     * 字典内置层级分隔符
+     */
     public static final String DEFAULT_SPLIT_CHAR = "$SPLIT$";
-    public static final String CODE_MEMORY = "CODE_MEMORY";
-    public static final String NAME_MEMORY = "NAME_MEMORY";
+    /**
+     * 默认的字典区域（datasource）
+     */
     public static final String DICTIONARY_DATA_CACHE = "DICTIONARY_DATA_CACHE";
 
     private ApplicationContext applicationContext;
@@ -71,9 +75,8 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
      * 处理单个数据源，每个字典管理器都会对应一个数据源
      *
      * @param dictionaryDataManager 字典管理其
-     * @throws IllegalAccessException 错误的访问权限
      */
-    private void parseDataSource(DictionaryDataManager<?> dictionaryDataManager) throws IllegalAccessException, NotFoundCacheException {
+    private void parseDataSource(DictionaryDataManager<?> dictionaryDataManager) throws NotFoundCacheException {
 
         //如果缓存中没有，则初始化
         SortedSet<DictionaryDataBase> treeSet = Sets.newTreeSet(dictionaryDataManager.all());
@@ -90,7 +93,6 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
         });
 
         //构建树形结构，过程中重新计算全字典值与全字典码
-
         TreeUtil.createTree(treeSet,
                 dictionaryDataManager.rootParentId(),
                 DEFAULT_SPLIT_CHAR,

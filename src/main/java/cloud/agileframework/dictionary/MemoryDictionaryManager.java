@@ -19,8 +19,11 @@ public class MemoryDictionaryManager extends AbstractDictionaryDataManager<Dicti
     /**
      * 字典数据缓存
      */
-    public static final Set<DictionaryDataBase> CACHE = Sets.newHashSet();
+    private static final Set<DictionaryDataBase> CACHE = Sets.newHashSet();
 
+    public static Set<DictionaryDataBase> cache(){
+        return CACHE;
+    }
 
     @Override
     public List<DictionaryDataBase> all() {
