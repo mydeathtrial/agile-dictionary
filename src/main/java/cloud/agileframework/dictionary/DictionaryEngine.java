@@ -4,6 +4,7 @@ import cloud.agileframework.common.util.collection.TreeUtil;
 import cloud.agileframework.dictionary.cache.DictionaryCacheUtil;
 import cloud.agileframework.dictionary.cache.NotFoundCacheException;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeansException;
@@ -37,6 +38,11 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
     public static final String DICTIONARY_DATA_CACHE = "DICTIONARY_DATA_CACHE";
 
     private ApplicationContext applicationContext;
+
+    /**
+     * 字典数据管理器缓存
+     */
+    private static Map<String,DictionaryDataManager<? extends DictionaryDataBase>> dictionaryDataManagerMap = Maps.newConcurrentMap();
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -77,6 +83,8 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
      * @param dictionaryDataManager 字典管理其
      */
     private void parseDataSource(DictionaryDataManager<?> dictionaryDataManager) throws NotFoundCacheException {
+        //初始化缓存
+        dictionaryDataManagerMap.put(dictionaryDataManager.dataSource(),dictionaryDataManager);
 
         //如果缓存中没有，则初始化
         SortedSet<DictionaryDataBase> treeSet = Sets.newTreeSet(dictionaryDataManager.all());
@@ -113,5 +121,14 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
     private boolean isFinish(String dataSource, SortedSet<DictionaryDataBase> newData) {
         SortedSet<DictionaryDataBase> old = DictionaryUtil.findAll(dataSource);
         return CollectionUtils.isEqualCollection(newData, old);
+    }
+
+    /**
+     * 根据数据源获取对应的字典数据管理器
+     * @param datasource 数据源
+     * @return 字典数据管理器
+     */
+    public static DictionaryDataManager<? extends DictionaryDataBase> getDictionaryDataManagerMap(String datasource) {
+        return dictionaryDataManagerMap.get(datasource);
     }
 }

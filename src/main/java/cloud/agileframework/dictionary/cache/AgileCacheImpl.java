@@ -68,7 +68,7 @@ public class AgileCacheImpl implements DictionaryCache {
         if (cache == null) {
             throw new NotFoundCacheException("Unable to get dictionary's cache");
         }
-        cache.removeFromMap(RegionEnum.CODE_MEMORY.name(), dictionaryData.getFullName());
-        cache.removeFromMap(RegionEnum.NAME_MEMORY.name(), dictionaryData.getFullCode());
+        cache.removeFromMap(RegionEnum.NAME_MEMORY.name(), dictionaryData.getFullName());
+        cache.removeFromMap(RegionEnum.CODE_MEMORY.name(), dictionaryData.getFullCode());
     }
 }

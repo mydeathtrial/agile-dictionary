@@ -14,6 +14,8 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHAR;
+
 /**
  * @author 佟盟
  * 日期 2021-03-29 14:04
@@ -95,10 +97,8 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
             D parent = findOne(dictionaryData.getParentId());
 
             if (parent != null) {
-                dictionaryData.setFullCode(parent.getFullCode() + DictionaryEngine.DEFAULT_SPLIT_CHAR + dictionaryData.getCode());
-                dictionaryData.setFullName(parent.getFullName() + DictionaryEngine.DEFAULT_SPLIT_CHAR + dictionaryData.getName());
-
-                parent.getChildren().add(dictionaryData);
+                dictionaryData.setFullCode(parent.getFullCode() + DEFAULT_SPLIT_CHAR + dictionaryData.getCode());
+                dictionaryData.setFullName(parent.getFullName() + DEFAULT_SPLIT_CHAR + dictionaryData.getName());
             } else {
                 dictionaryData.setFullCode(dictionaryData.getCode());
                 dictionaryData.setFullName(dictionaryData.getName());
@@ -117,7 +117,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
          * @param fullCode 全路径字典码
          */
         public void delete(String fullCode) {
-            D dictionaryData = (D) DictionaryUtil.coverDicBean(dataSource(), fullCode, DictionaryEngine.DEFAULT_SPLIT_CHAR);
+            D dictionaryData = (D) DictionaryUtil.coverDicBean(dataSource(), fullCode, DEFAULT_SPLIT_CHAR);
             if (dictionaryData == null) {
                 throw new NoSuchElementException(String.format("Did not find dictionary [%s]", fullCode));
             }
@@ -135,7 +135,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
          * @param fullCode 全路径字典码
          */
         public void delete(String fullCode, String split) {
-            delete(fullCode.replace(split, DictionaryEngine.DEFAULT_SPLIT_CHAR));
+            delete(fullCode.replace(split, DEFAULT_SPLIT_CHAR));
         }
 
         /**
@@ -178,13 +178,6 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
                 DictionaryCacheUtil.getDictionaryCache().delete(dataSource(), oldData);
             } catch (NotFoundCacheException e) {
                 e.printStackTrace();
-            }
-
-            //遍历更新父节点
-            DictionaryDataBase parent = findOne(oldData.getParentId());
-            if (parent != null) {
-                parent.getChildren()
-                        .removeIf(dic -> dic.getId().equals(oldData.getId()));
             }
         }
 
@@ -310,8 +303,8 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
             String newFullName;
 
             if (parent != null) {
-                newFullCode = parent.getFullCode() + DictionaryEngine.DEFAULT_SPLIT_CHAR + newData.getCode();
-                newFullName = parent.getFullName() + DictionaryEngine.DEFAULT_SPLIT_CHAR + newData.getName();
+                newFullCode = parent.getFullCode() + DEFAULT_SPLIT_CHAR + newData.getCode();
+                newFullName = parent.getFullName() + DEFAULT_SPLIT_CHAR + newData.getName();
             } else {
                 newFullCode = newData.getCode();
                 newFullName = newData.getName();

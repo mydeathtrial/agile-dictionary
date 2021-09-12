@@ -2,12 +2,14 @@ package cloud.agileframework.dictionary.cache;
 
 
 import cloud.agileframework.dictionary.DictionaryDataBase;
+import cloud.agileframework.dictionary.DictionaryEngine;
 import com.google.common.collect.Maps;
-import org.apache.commons.lang3.SerializationUtils;
+import com.google.common.collect.Sets;
 
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public interface DictionaryCache {
 
@@ -57,7 +59,7 @@ public interface DictionaryCache {
      * @return 缓存的树形结构字典数据
      */
     default SortedSet<DictionaryDataBase> getDataByDatasource(String datasource) throws NotFoundCacheException{
-        return SerializationUtils.clone(new TreeSet<>(getDataByRegion(datasource, RegionEnum.CODE_MEMORY).values()));
+        return new TreeSet<>(getDataByRegion(datasource, RegionEnum.CODE_MEMORY).values());
     }
 
     /**
@@ -75,6 +77,32 @@ public interface DictionaryCache {
             return null;
         }
         return data.get(fullIndex);
+    }
+
+    /**
+     * 根据fullCode或者fullName提取字典
+     *
+     * @param datasource 字典类型
+     * @param regionEnum 字典区域类型
+     * @param fullIndex  fullCode或者fullName
+     * @return 字典
+     */
+    default TreeSet<DictionaryDataBase> likeByFullIndex(String datasource, RegionEnum regionEnum, String fullIndex) {
+        Map<String, DictionaryDataBase> data = null;
+        try {
+            data = getDataByRegion(datasource, regionEnum);
+        } catch (NotFoundCacheException e) {
+            e.printStackTrace();
+        }
+        if (data == null) {
+            return Sets.newTreeSet();
+        }
+
+        return data.entrySet()
+                .stream()
+                .filter(node->node.getKey().startsWith(fullIndex+ DictionaryEngine.DEFAULT_SPLIT_CHAR))
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toCollection(Sets::newTreeSet));
     }
 
     /**
