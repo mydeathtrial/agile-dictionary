@@ -39,8 +39,6 @@ import java.util.stream.IntStream;
 @SpringBootTest(classes = App.class)
 public class DictionaryUtilTest {
 
-    Logger log = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     private MemoryDictionaryManager manager;
 

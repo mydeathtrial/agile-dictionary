@@ -55,6 +55,12 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.objenesis</groupId>
+                <artifactId>objenesis</artifactId>
+                <version>3.2</version>
+                <scope>compile</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -89,7 +95,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>LATEST</version>
             <scope>test</scope>
         </dependency>
         <dependency>
