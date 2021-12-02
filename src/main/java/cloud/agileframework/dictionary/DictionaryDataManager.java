@@ -1,5 +1,8 @@
 package cloud.agileframework.dictionary;
 
+import cloud.agileframework.common.util.clazz.ClassUtil;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 /**
@@ -62,6 +65,12 @@ public interface DictionaryDataManager<D extends DictionaryDataBase> {
      * @return 默认返回空
      */
     default String rootParentId() {
+        Class<D> d = (Class<D>) ClassUtil.getGeneric(this.getClass(), DictionaryDataManager.class, 0);
+        try {
+            return (String) d.getMethod("rootParentId").invoke(null);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 }
