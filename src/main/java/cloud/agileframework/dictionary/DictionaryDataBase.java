@@ -4,6 +4,7 @@ import cloud.agileframework.common.util.collection.TreeBase;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Objects;
 
@@ -16,6 +17,7 @@ import java.util.Objects;
  */
 @Setter
 @ToString(callSuper = true)
+@SuperBuilder(toBuilder = true)
 public class DictionaryDataBase extends TreeBase<String, DictionaryDataBase> {
 
     @Getter
