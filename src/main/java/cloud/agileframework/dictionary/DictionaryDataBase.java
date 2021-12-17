@@ -35,7 +35,7 @@ public class DictionaryDataBase extends TreeBase<String, DictionaryDataBase> {
         super();
         setId(id);
         setParentId(parentId);
-        setName(name);
+        this.name = name;
         this.code = code;
     }
 
@@ -45,11 +45,6 @@ public class DictionaryDataBase extends TreeBase<String, DictionaryDataBase> {
 
     public String getFullCode() {
         return fullCode;
-    }
-
-    @Override
-    public String getParentId() {
-        return super.getParentId();
     }
 
     @Override
@@ -70,5 +65,15 @@ public class DictionaryDataBase extends TreeBase<String, DictionaryDataBase> {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), getCode(), getName());
+    }
+
+    @Override
+    public String getId() {
+        return super.getId();
+    }
+
+    @Override
+    public String getParentId() {
+        return super.getParentId();
     }
 }
