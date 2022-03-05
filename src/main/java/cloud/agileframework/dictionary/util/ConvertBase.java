@@ -102,12 +102,13 @@ class ConvertBase {
 		children.forEach(dic -> {
 			dic.setFullCode(dic.getCode());
 			dic.setFullName(dic.getName());
+			dic.setFullId(dic.getId());
 		});
 		children.add(entity);
 		TreeUtil.createTree(children,
 				entity.getParentId(),
 				DEFAULT_SPLIT_CHAR,
-				"fullName", "fullCode"
+				"fullName", "fullCode", "fullId"
 		);
 		String id = entity.getId();
 

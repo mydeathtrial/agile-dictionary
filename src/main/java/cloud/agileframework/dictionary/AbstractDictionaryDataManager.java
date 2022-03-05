@@ -29,6 +29,21 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
         return new SyncProxy();
     }
 
+    D findOne(String id) {
+        try {
+            return DictionaryCacheUtil.getDictionaryCache()
+                    .getDataByDatasource(dataSource())
+                    .parallelStream()
+                    .filter(data -> data.getId().equals(id))
+                    .map(a -> (D) a)
+                    .findFirst()
+                    .orElse(null);
+        } catch (NotFoundCacheException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public class SyncProxy {
         /**
          * 取所有字典，查询所有字典
@@ -99,9 +114,11 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
             if (parent != null) {
                 dictionaryData.setFullCode(parent.getFullCode() + DEFAULT_SPLIT_CHAR + dictionaryData.getCode());
                 dictionaryData.setFullName(parent.getFullName() + DEFAULT_SPLIT_CHAR + dictionaryData.getName());
+                dictionaryData.setFullId(parent.getFullId() + DEFAULT_SPLIT_CHAR + dictionaryData.getId());
             } else {
                 dictionaryData.setFullCode(dictionaryData.getCode());
                 dictionaryData.setFullName(dictionaryData.getName());
+                dictionaryData.setFullId(dictionaryData.getId());
             }
 
             try {
@@ -229,7 +246,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
 
         private void replaceProperties(D newData, DictionaryDataBase oldData, boolean ignoreNullField) {
             //更新必要字段
-            String[] requireField = {"code", "name", "sort", "parentId", "fullCode", "fullName"};
+            String[] requireField = {"code", "name", "sort", "parentId", "fullCode", "fullName","fullId"};
 
             ObjectUtil.copyProperties(newData,
                     oldData,
@@ -252,7 +269,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
             } else {
                 compare = ObjectUtil.Compare.DIFF;
             }
-            String[] exclude = {"code", "name", "sort", "parentId", "fullCode", "fullName", "children"};
+            String[] exclude = {"code", "name", "sort", "parentId", "fullCode", "fullName","fullId", "children"};
 
             //更新非必要字段
             ObjectUtil.copyProperties(newData,
@@ -301,17 +318,21 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
         void insertMemory(D newData, D parent) {
             String newFullCode;
             String newFullName;
+            String newFullId;
 
             if (parent != null) {
                 newFullCode = parent.getFullCode() + DEFAULT_SPLIT_CHAR + newData.getCode();
                 newFullName = parent.getFullName() + DEFAULT_SPLIT_CHAR + newData.getName();
+                newFullId = parent.getFullId() + DEFAULT_SPLIT_CHAR + newData.getId();
             } else {
                 newFullCode = newData.getCode();
                 newFullName = newData.getName();
+                newFullId = newData.getId();
             }
 
             newData.setFullCode(newFullCode);
             newData.setFullName(newFullName);
+            newData.setFullId(newFullId);
 
             //先清除旧的数据
             try {
@@ -323,21 +344,6 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
             newData.getChildren().forEach(a -> insertMemory((D) a, newData));
         }
 
-    }
-
-    D findOne(String id) {
-        try {
-            return DictionaryCacheUtil.getDictionaryCache()
-                    .getDataByDatasource(dataSource())
-                    .parallelStream()
-                    .filter(data -> data.getId().equals(id))
-                    .map(a -> (D) a)
-                    .findFirst()
-                    .orElse(null);
-        } catch (NotFoundCacheException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
 }

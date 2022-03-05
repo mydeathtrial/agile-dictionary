@@ -26,6 +26,7 @@ public class DictionaryDataBase extends TreeBase<String, DictionaryDataBase> {
     private String name;
     private String fullName;
     private String fullCode;
+    private String fullId;
 
     public DictionaryDataBase() {
         super();
@@ -47,6 +48,22 @@ public class DictionaryDataBase extends TreeBase<String, DictionaryDataBase> {
         return fullCode;
     }
 
+    public String getFullId() {
+        return fullId;
+    }
+
+    public String getFullName(String splitChar) {
+        return fullName.replace(DictionaryEngine.DEFAULT_SPLIT_CHAR, splitChar);
+    }
+
+    public String getFullCode(String splitChar) {
+        return fullCode.replace(DictionaryEngine.DEFAULT_SPLIT_CHAR, splitChar);
+    }
+
+    public String getFullId(String splitChar) {
+        return fullId.replace(DictionaryEngine.DEFAULT_SPLIT_CHAR, splitChar);
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) {

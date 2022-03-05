@@ -98,13 +98,14 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
         treeSet.forEach(dic -> {
             dic.setFullCode(dic.getCode());
             dic.setFullName(dic.getName());
+            dic.setFullId(dic.getId());
         });
 
         //构建树形结构，过程中重新计算全字典值与全字典码
         TreeUtil.createTree(treeSet,
                 dictionaryDataManager.rootParentId(),
                 DEFAULT_SPLIT_CHAR,
-                "fullName", "fullCode"
+                "fullName", "fullCode","fullId"
         );
 
         //做缓存同步
