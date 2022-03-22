@@ -31,7 +31,7 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
     /**
      * 字典内置层级分隔符
      */
-    public static final String DEFAULT_SPLIT_CHAR = "$SPLIT$";
+    public static final String DEFAULT_SPLIT_CHAR = "$$";
     /**
      * 默认的字典区域（datasource）
      */

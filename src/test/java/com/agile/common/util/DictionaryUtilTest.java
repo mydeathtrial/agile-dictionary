@@ -48,19 +48,19 @@ public class DictionaryUtilTest {
     @Test
     public void coverDicBeanByFullName() {
         DictionaryDataBase dic1 = DictionaryUtil.coverDicBeanByFullName("性别.男");
-        Assert.assertEquals(dic1.getFullCode(), "sex$SPLIT$boy");
+        Assert.assertEquals(dic1.getFullCode(), "sex$$boy");
     }
 
     @Test
     public void testCoverDicBeanByFullName() {
         DictionaryDataBase dic1 = DictionaryUtil.coverDicBeanByFullName("性别|男", "|");
-        Assert.assertEquals(dic1.getFullCode(), "sex$SPLIT$boy");
+        Assert.assertEquals(dic1.getFullCode(), "sex$$boy");
     }
 
     @Test
     public void coverDicBeanByParent() {
         DictionaryDataBase dic1 = DictionaryUtil.coverDicBeanByParent("sex", "男");
-        Assert.assertEquals(dic1.getFullCode(), "sex$SPLIT$boy");
+        Assert.assertEquals(dic1.getFullCode(), "sex$$boy");
     }
 
     @Test
