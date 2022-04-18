@@ -98,7 +98,9 @@ class ConvertDicAnnotation extends ConvertDicMap {
         }
         Collection<T> c = Collections.synchronizedCollection(collection);
         synchronized (c) {
-            c.parallelStream().forEach(ConvertDicAnnotation::cover);
+            for (T node : c) {
+                cover(node);
+            }
         }
         dicCoverCache.clear();
     }
