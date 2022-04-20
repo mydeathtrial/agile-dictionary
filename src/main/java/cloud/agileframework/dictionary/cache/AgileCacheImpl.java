@@ -60,6 +60,7 @@ public class AgileCacheImpl implements DictionaryCache {
         }
         cache.addToMap(RegionEnum.CODE_MEMORY.name(), dictionaryData.getFullCode(), dictionaryData);
         cache.addToMap(RegionEnum.NAME_MEMORY.name(), dictionaryData.getFullName(), dictionaryData);
+        cache.addToMap(RegionEnum.ID_MEMORY.name(),dictionaryData.getId(),dictionaryData);
     }
 
     @Override
@@ -70,5 +71,6 @@ public class AgileCacheImpl implements DictionaryCache {
         }
         cache.removeFromMap(RegionEnum.NAME_MEMORY.name(), dictionaryData.getFullName());
         cache.removeFromMap(RegionEnum.CODE_MEMORY.name(), dictionaryData.getFullCode());
+        cache.removeFromMap(RegionEnum.ID_MEMORY.name(), dictionaryData.getId());
     }
 }

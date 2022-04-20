@@ -229,7 +229,7 @@ class ConvertDicAnnotation extends ConvertDicMap {
                         .map(id -> {
                             DictionaryDataBase dic = DictionaryUtil.findById(dictionary.dataSource(), id);
                             String defaultValue = dictionary.defaultValue();
-                            defaultValue = DEFAULT_NAME.equals(defaultValue) ? id : defaultValue;
+                            defaultValue =  Dictionary.NULL.equals(defaultValue) ? id : defaultValue;
 
                             String result = defaultValue;
                             if (dic == null) {
@@ -251,7 +251,7 @@ class ConvertDicAnnotation extends ConvertDicMap {
                         .map(id -> {
                             DictionaryDataBase dic = DictionaryUtil.findById(dictionary.dataSource(), id);
                             String defaultValue = dictionary.defaultValue();
-                            defaultValue = DEFAULT_NAME.equals(defaultValue) ? id : defaultValue;
+                            defaultValue =  Dictionary.NULL.equals(defaultValue) ? id : defaultValue;
                             return dic == null ? defaultValue : dic.getCode();
                         }).collect(Collectors.joining(Constant.RegularAbout.COMMA));
             }

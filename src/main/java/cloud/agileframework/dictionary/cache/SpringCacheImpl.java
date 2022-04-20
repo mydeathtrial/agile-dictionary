@@ -21,23 +21,25 @@ public class SpringCacheImpl implements DictionaryCache {
 
     /**
      * 初始化缓存数据
+     *
      * @param regionEnum 缓存区域
-     * @param cacheData 经过计算后的字典缓存数据，这部分的key类型需要与regionEnum对应
+     * @param cacheData  经过计算后的字典缓存数据，这部分的key类型需要与regionEnum对应
      */
     public void initData(String datasource, RegionEnum regionEnum, Map<String, DictionaryDataBase> cacheData) throws NotFoundCacheException {
         Cache regionCache = getCache(datasource);
-        regionCache.put(regionEnum.name(),cacheData);
+        regionCache.put(regionEnum.name(), cacheData);
     }
 
     /**
      * 根据缓存区域获取redis缓存
+     *
      * @param datasource 字典类型，对应不同的缓存区域
      * @return 缓存
      * @throws NotFoundCacheException 无法获取对应的缓存
      */
     private Cache getCache(String datasource) throws NotFoundCacheException {
         Cache regionCache = cacheManager.getCache(datasource);
-        if(regionCache == null){
+        if (regionCache == null) {
             throw new NotFoundCacheException("Unable to get Dictionary's cache object");
         }
         return regionCache;
@@ -45,43 +47,55 @@ public class SpringCacheImpl implements DictionaryCache {
 
     /**
      * 根据缓存区域，获取经过计算的字典缓存数据
+     *
      * @param regionEnum 缓存区域
      * @return 经过计算的字典缓存数据
      */
     public Map<String, DictionaryDataBase> getDataByRegion(String datasource, RegionEnum regionEnum) throws NotFoundCacheException {
         Cache regionCache = getCache(datasource);
         Cache.ValueWrapper result = regionCache.get(regionEnum.name());
-        if(result == null){
+        if (result == null) {
             return Maps.newHashMap();
         }
-        return (Map<String, DictionaryDataBase>)result.get();
+        return (Map<String, DictionaryDataBase>) result.get();
     }
 
     @Override
     public void add(String datasource, DictionaryDataBase dictionaryData) throws NotFoundCacheException {
         Map<String, DictionaryDataBase> codeData = getDataByRegion(datasource, RegionEnum.CODE_MEMORY);
-        if(codeData == null){
+        if (codeData == null) {
             codeData = Maps.newHashMap();
         }
         codeData.put(dictionaryData.getFullCode(), dictionaryData);
-        initData(datasource,RegionEnum.CODE_MEMORY,codeData);
+        initData(datasource, RegionEnum.CODE_MEMORY, codeData);
 
         Map<String, DictionaryDataBase> nameData = getDataByRegion(datasource, RegionEnum.NAME_MEMORY);
-        if(nameData == null){
+        if (nameData == null) {
             nameData = Maps.newHashMap();
         }
         nameData.put(dictionaryData.getFullName(), dictionaryData);
-        initData(datasource,RegionEnum.NAME_MEMORY,nameData);
+        initData(datasource, RegionEnum.NAME_MEMORY, nameData);
+
+        Map<String, DictionaryDataBase> idData = getDataByRegion(datasource, RegionEnum.ID_MEMORY);
+        if (idData == null) {
+            idData = Maps.newHashMap();
+        }
+        idData.put(dictionaryData.getId(), dictionaryData);
+        initData(datasource, RegionEnum.ID_MEMORY, idData);
     }
 
     @Override
     public void delete(String datasource, DictionaryDataBase dictionaryData) throws NotFoundCacheException {
         Map<String, DictionaryDataBase> codeMap = getDataByRegion(datasource, RegionEnum.CODE_MEMORY);
         codeMap.remove(dictionaryData.getFullCode());
-        initData(datasource,RegionEnum.CODE_MEMORY,codeMap);
+        initData(datasource, RegionEnum.CODE_MEMORY, codeMap);
 
         Map<String, DictionaryDataBase> nameMap = getDataByRegion(datasource, RegionEnum.NAME_MEMORY);
         nameMap.remove(dictionaryData.getFullName());
-        initData(datasource,RegionEnum.NAME_MEMORY,nameMap);
+        initData(datasource, RegionEnum.NAME_MEMORY, nameMap);
+
+        Map<String, DictionaryDataBase> idMap = getDataByRegion(datasource, RegionEnum.ID_MEMORY);
+        idMap.remove(dictionaryData.getId());
+        initData(datasource, RegionEnum.ID_MEMORY, idMap);
     }
 }

@@ -64,6 +64,9 @@ public class MemoryCacheImpl implements DictionaryCache {
 
 		Map<String, DictionaryDataBase> nameData = regionData.computeIfAbsent(RegionEnum.NAME_MEMORY, k -> Maps.newHashMap());
 		nameData.put(dictionaryData.getFullName(), dictionaryData);
+
+		Map<String, DictionaryDataBase> idData = regionData.computeIfAbsent(RegionEnum.ID_MEMORY, k -> Maps.newHashMap());
+		idData.put(dictionaryData.getId(), dictionaryData);
 	}
 
 	@Override
@@ -79,6 +82,11 @@ public class MemoryCacheImpl implements DictionaryCache {
 
 		regionData.computeIfPresent(RegionEnum.NAME_MEMORY, (regionEnum, stringDictionaryDataBaseMap) -> {
 			stringDictionaryDataBaseMap.remove(dictionaryData.getFullName());
+			return stringDictionaryDataBaseMap;
+		});
+
+		regionData.computeIfPresent(RegionEnum.ID_MEMORY, (regionEnum, stringDictionaryDataBaseMap) -> {
+			stringDictionaryDataBaseMap.remove(dictionaryData.getId());
 			return stringDictionaryDataBaseMap;
 		});
 	}

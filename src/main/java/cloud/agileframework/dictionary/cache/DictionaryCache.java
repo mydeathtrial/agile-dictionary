@@ -23,14 +23,17 @@ public interface DictionaryCache {
         //做缓存同步
         Map<String, DictionaryDataBase> codeMap = Maps.newHashMap();
         Map<String, DictionaryDataBase> nameMap = Maps.newHashMap();
+        Map<String, DictionaryDataBase> idMap = Maps.newHashMap();
 
         treeSet.forEach(dic -> {
             codeMap.put(dic.getFullCode(), dic);
             nameMap.put(dic.getFullName(), dic);
+            idMap.put(dic.getId(), dic);
         });
 
         initData(datasource, RegionEnum.CODE_MEMORY, codeMap);
         initData(datasource, RegionEnum.NAME_MEMORY, nameMap);
+        initData(datasource, RegionEnum.ID_MEMORY, idMap);
     }
 
 

@@ -5,10 +5,12 @@ import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.DictionaryEngine;
 import cloud.agileframework.dictionary.cache.DictionaryCacheUtil;
 import cloud.agileframework.dictionary.cache.NotFoundCacheException;
+import cloud.agileframework.dictionary.cache.RegionEnum;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.SerializationUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -34,10 +36,12 @@ public class DictionaryUtil extends ConvertDicAnnotation {
 	 * @return 字典
 	 */
 	public static <D extends DictionaryDataBase> D findById(String datasource, String id) {
-		SortedSet<DictionaryDataBase> cacheData = findAll(datasource);
-		return Optional.ofNullable(cacheData)
-				.orElse(Sets.newTreeSet())
-				.stream().filter(data -> data.getId().equals(id)).map(a -> (D) a).findFirst().orElse(null);
+		try {
+			Map<String, DictionaryDataBase> idMap = DictionaryCacheUtil.getDictionaryCache().getDataByRegion(datasource, RegionEnum.ID_MEMORY);
+			return (D) idMap.get(id);
+		} catch (NotFoundCacheException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
