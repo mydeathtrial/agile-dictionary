@@ -201,6 +201,9 @@ class ConvertDicAnnotation extends ConvertDicMap {
      */
     private static <A> A parseCollection(Dictionary dictionary, List<String> fullIndexes, TypeReference<A> typeReference) {
         List<String> targetNameList = fullIndexes.stream().map(fullIndex -> parseString(dictionary, fullIndex)).collect(Collectors.toList());
+        if (typeReference.getType() == String.class) {
+            return (A) String.join(",", targetNameList);
+        }
         return ObjectUtil.to(targetNameList, typeReference);
     }
 
@@ -229,7 +232,7 @@ class ConvertDicAnnotation extends ConvertDicMap {
                         .map(id -> {
                             DictionaryDataBase dic = DictionaryUtil.findById(dictionary.dataSource(), id);
                             String defaultValue = dictionary.defaultValue();
-                            defaultValue =  Dictionary.NULL.equals(defaultValue) ? id : defaultValue;
+                            defaultValue = Dictionary.NULL.equals(defaultValue) ? id : defaultValue;
 
                             String result = defaultValue;
                             if (dic == null) {
@@ -251,7 +254,7 @@ class ConvertDicAnnotation extends ConvertDicMap {
                         .map(id -> {
                             DictionaryDataBase dic = DictionaryUtil.findById(dictionary.dataSource(), id);
                             String defaultValue = dictionary.defaultValue();
-                            defaultValue =  Dictionary.NULL.equals(defaultValue) ? id : defaultValue;
+                            defaultValue = Dictionary.NULL.equals(defaultValue) ? id : defaultValue;
                             return dic == null ? defaultValue : dic.getCode();
                         }).collect(Collectors.joining(Constant.RegularAbout.COMMA));
             }
