@@ -4,6 +4,7 @@ import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.string.StringUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.DictionaryEngine;
+import cloud.agileframework.dictionary.annotation.Dictionary;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -29,7 +30,7 @@ class ConvertDicCode extends ConvertDicBean {
     public static String coverDicCode(String fullNames) {
         return coverDicCode(DictionaryEngine.DICTIONARY_DATA_CACHE,
                 fullNames,
-                DEFAULT_NAME,
+                Dictionary.DEFAULT_NAME,
                 false,
                 Constant.RegularAbout.SPOT);
     }
@@ -117,7 +118,7 @@ class ConvertDicCode extends ConvertDicBean {
      * @return 非全路径子字典码集合，逗号分隔
      */
     public static String coverDicCodeByParent(String parentName, String names) {
-        return coverDicCodeByParent(parentName, names, DEFAULT_NAME, false, Constant.RegularAbout.SPOT);
+        return coverDicCodeByParent(parentName, names, Dictionary.DEFAULT_NAME, false, Constant.RegularAbout.SPOT);
     }
 
     /**
@@ -208,7 +209,7 @@ class ConvertDicCode extends ConvertDicBean {
                 builder.append(Constant.RegularAbout.COMMA);
             }
             if (targetEntity == null) {
-                if (DEFAULT_NAME.equals(defaultCode)) {
+                if (Dictionary.DEFAULT_NAME.equals(defaultCode)) {
                     builder.append(StringUtil.getSplitByStrLastAtomic(c, splitChar));
                 } else if (defaultCode != null) {
                     builder.append(defaultCode);

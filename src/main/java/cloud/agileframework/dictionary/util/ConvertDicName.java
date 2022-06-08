@@ -4,6 +4,7 @@ import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.string.StringUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.DictionaryEngine;
+import cloud.agileframework.dictionary.annotation.Dictionary;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -28,7 +29,7 @@ class ConvertDicName extends ConvertDicCode {
     public static String coverDicName(String fullCodes) {
         return coverDicName(DictionaryEngine.DICTIONARY_DATA_CACHE,
                 fullCodes,
-                DEFAULT_NAME,
+                Dictionary.DEFAULT_NAME,
                 false,
                 Constant.RegularAbout.SPOT);
     }
@@ -76,7 +77,7 @@ class ConvertDicName extends ConvertDicCode {
         return coverDicNameByParent(DictionaryEngine.DICTIONARY_DATA_CACHE,
                 parentCode,
                 codes,
-                DEFAULT_NAME,
+                Dictionary.DEFAULT_NAME,
                 false,
                 Constant.RegularAbout.SPOT);
     }
@@ -157,7 +158,7 @@ class ConvertDicName extends ConvertDicCode {
                 builder.append(Constant.RegularAbout.COMMA);
             }
             if (targetEntity == null) {
-                if (DEFAULT_NAME.equals(defaultName)) {
+                if (Dictionary.DEFAULT_NAME.equals(defaultName)) {
                     builder.append(StringUtil.getSplitByStrLastAtomic(c, splitChar));
                 } else if (defaultName != null) {
                     builder.append(defaultName);

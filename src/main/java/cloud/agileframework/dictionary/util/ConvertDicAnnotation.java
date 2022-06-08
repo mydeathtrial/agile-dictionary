@@ -128,7 +128,7 @@ class ConvertDicAnnotation extends ConvertDicMap {
         }
 
         // 处理字典前缀
-        String parentKey = dictionary.dicCode();
+        String parentKey = DirectionType.CODE_TO_NAME == dictionary.directionType()?dictionary.dicCode():coverDicName(dictionary.dicCode());
         String split = dictionary.split();
         String prefix = ObjectUtils.isEmpty(parentKey) ? "" : parentKey + split;
         // 如果是级联字典
@@ -225,14 +225,13 @@ class ConvertDicAnnotation extends ConvertDicMap {
         } else {
             if (dictionary.directionType() == DirectionType.CODE_TO_NAME && !dictionary.id()) {
                 String defaultValue = dictionary.defaultValue();
-                defaultValue = Dictionary.NULL.equals(defaultValue) ? DEFAULT_NAME : null;
                 targetName = ConvertDicName.coverDicName(dictionary.dataSource(), fullIndex, defaultValue, isFull, split);
             } else if (dictionary.directionType() == DirectionType.CODE_TO_NAME) {
                 targetName = Arrays.stream(fullIndex.split(Constant.RegularAbout.COMMA))
                         .map(id -> {
                             DictionaryDataBase dic = DictionaryUtil.findById(dictionary.dataSource(), id);
                             String defaultValue = dictionary.defaultValue();
-                            defaultValue = Dictionary.NULL.equals(defaultValue) ? id : defaultValue;
+                            defaultValue = Dictionary.DEFAULT_NAME.equals(defaultValue) ? id : defaultValue;
 
                             String result = defaultValue;
                             if (dic == null) {
@@ -247,14 +246,13 @@ class ConvertDicAnnotation extends ConvertDicMap {
                         }).collect(Collectors.joining(Constant.RegularAbout.COMMA));
             } else if (dictionary.directionType() == DirectionType.NAME_TO_CODE && !dictionary.id()) {
                 String defaultValue = dictionary.defaultValue();
-                defaultValue = Dictionary.NULL.equals(defaultValue) ? DEFAULT_NAME : null;
                 targetName = ConvertDicCode.coverDicCode(dictionary.dataSource(), fullIndex, defaultValue, isFull, split);
             } else {
                 targetName = Arrays.stream(fullIndex.split(Constant.RegularAbout.COMMA))
                         .map(id -> {
                             DictionaryDataBase dic = DictionaryUtil.findById(dictionary.dataSource(), id);
                             String defaultValue = dictionary.defaultValue();
-                            defaultValue = Dictionary.NULL.equals(defaultValue) ? id : defaultValue;
+                            defaultValue = Dictionary.DEFAULT_NAME.equals(defaultValue) ? id : defaultValue;
                             return dic == null ? defaultValue : dic.getCode();
                         }).collect(Collectors.joining(Constant.RegularAbout.COMMA));
             }

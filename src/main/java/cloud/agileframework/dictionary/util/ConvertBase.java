@@ -26,7 +26,7 @@ import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHA
 class ConvertBase {
 
     static final Logger LOGGER = LoggerFactory.getLogger(DictionaryUtil.class);
-    static final String DEFAULT_NAME = "$DEFAULT_NAME";
+    static final String DEFAULT_NAME = "$Dictionary.DEFAULT_NAME";
 
     /**
      * 取字典

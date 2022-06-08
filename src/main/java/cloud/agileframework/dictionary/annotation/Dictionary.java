@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Dictionary {
 
-    String NULL = "null";
+    String DEFAULT_NAME = "$Dictionary.DEFAULT_NAME";
 
     /**
      * 字典码
@@ -40,7 +40,7 @@ public @interface Dictionary {
     /**
      * 全路径字典值分隔符
      */
-    String split() default ".";
+    String split() default "$$";
 
     /**
      * 字典转换方向
@@ -50,7 +50,7 @@ public @interface Dictionary {
     /**
      * 为空时默认值
      */
-    String defaultValue() default NULL;
+    String defaultValue() default Dictionary.DEFAULT_NAME;
 
     /**
      * 是否是主键
