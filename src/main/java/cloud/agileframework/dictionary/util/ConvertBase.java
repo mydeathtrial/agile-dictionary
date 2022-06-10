@@ -83,7 +83,7 @@ class ConvertBase {
             return null;
         }
 
-        return refresh(datasource, entity);
+        return entity;
     }
 
     /**
@@ -93,32 +93,32 @@ class ConvertBase {
      * @param entity     字典
      * @return 刷新后的字典
      */
-    public static <A extends DictionaryDataBase> A refresh(String datasource, A entity) {
-        if (entity == null) {
-            return null;
-        }
-        String fullIndex = entity.getFullCode();
-        //创建子
-        TreeSet<DictionaryDataBase> children = DictionaryCacheUtil.getDictionaryCache().likeByFullIndex(datasource, RegionEnum.CODE_MEMORY, fullIndex);
-
-        //初始化全字典值与字典码默认值
-        children.forEach(dic -> {
-            dic.setFullCode(dic.getCode());
-            dic.setFullName(dic.getName());
-            dic.setFullId(dic.getId());
-        });
-        children.add(entity);
-        TreeUtil.createTree(children,
-                entity.getParentId(),
-                DEFAULT_SPLIT_CHAR,
-                "fullName", "fullCode", "fullId"
-        );
-        String id = entity.getId();
-
-        entity.setChildren(children.stream()
-                .filter(n -> id.equals(n.getParentId()))
-                .collect(Collectors.toCollection(Sets::newTreeSet))
-        );
-        return SerializationUtils.clone(entity);
-    }
+//    public static <A extends DictionaryDataBase> A refresh(String datasource, A entity) {
+//        if (entity == null) {
+//            return null;
+//        }
+//        String fullIndex = entity.getFullCode();
+//        //创建子
+//        TreeSet<DictionaryDataBase> children = DictionaryCacheUtil.getDictionaryCache().likeByFullIndex(datasource, RegionEnum.CODE_MEMORY, fullIndex);
+//
+//        //初始化全字典值与字典码默认值
+//        children.forEach(dic -> {
+//            dic.setFullCode(dic.getCode());
+//            dic.setFullName(dic.getName());
+//            dic.setFullId(dic.getId());
+//        });
+//        children.add(entity);
+//        TreeUtil.createTree(children,
+//                entity.getParentId(),
+//                DEFAULT_SPLIT_CHAR,
+//                "fullName", "fullCode", "fullId"
+//        );
+//        String id = entity.getId();
+//
+//        entity.setChildren(children.stream()
+//                .filter(n -> id.equals(n.getParentId()))
+//                .collect(Collectors.toCollection(Sets::newTreeSet))
+//        );
+//        return SerializationUtils.clone(entity);
+//    }
 }
