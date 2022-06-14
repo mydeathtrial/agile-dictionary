@@ -3,11 +3,18 @@ package cloud.agileframework.dictionary.cache;
 import cloud.agileframework.cache.support.AgileCache;
 import cloud.agileframework.cache.util.CacheUtil;
 import cloud.agileframework.common.util.clazz.TypeReference;
+import cloud.agileframework.common.util.collection.TreeUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
+import cloud.agileframework.dictionary.util.DictionaryUtil;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.springframework.cache.Cache;
 
 import java.util.Map;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHAR;
 
 /**
  * 借助agile-cache二级缓存组件实现字典缓存控制
@@ -60,7 +67,7 @@ public class AgileCacheImpl implements DictionaryCache {
         }
         cache.addToMap(RegionEnum.CODE_MEMORY.name(), dictionaryData.getFullCode(), dictionaryData);
         cache.addToMap(RegionEnum.NAME_MEMORY.name(), dictionaryData.getFullName(), dictionaryData);
-        cache.addToMap(RegionEnum.ID_MEMORY.name(),dictionaryData.getId(),dictionaryData);
+        cache.addToMap(RegionEnum.ID_MEMORY.name(), dictionaryData.getId(),dictionaryData);
     }
 
     @Override

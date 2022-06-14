@@ -37,8 +37,7 @@ public class DictionaryUtil extends ConvertDicAnnotation {
 	 */
 	public static <D extends DictionaryDataBase> D findById(String datasource, String id) {
 		try {
-			Map<String, DictionaryDataBase> idMap = DictionaryCacheUtil.getDictionaryCache().getDataByRegion(datasource, RegionEnum.ID_MEMORY);
-			return (D) idMap.get(id);
+			return DictionaryCacheUtil.getDictionaryCache().findById(datasource, id);
 		} catch (NotFoundCacheException e) {
 			throw new RuntimeException(e);
 		}

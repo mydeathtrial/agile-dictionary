@@ -1,6 +1,7 @@
 package cloud.agileframework.dictionary.cache;
 
 
+import cloud.agileframework.common.util.collection.TreeUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.DictionaryEngine;
 import com.google.common.collect.Maps;
@@ -10,6 +11,8 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHAR;
 
 public interface DictionaryCache {
 
@@ -38,10 +41,9 @@ public interface DictionaryCache {
 
 
     /**
-     *
      * @param datasource 字典分类
      * @param regionEnum 缓存区域
-     * @param cacheData 缓存的树形结构字典数据
+     * @param cacheData  缓存的树形结构字典数据
      * @throws NotFoundCacheException 没找到缓存介质
      */
     void initData(String datasource, RegionEnum regionEnum, Map<String, DictionaryDataBase> cacheData) throws NotFoundCacheException;
@@ -61,7 +63,7 @@ public interface DictionaryCache {
      * @param datasource 字典类型
      * @return 缓存的树形结构字典数据
      */
-    default SortedSet<DictionaryDataBase> getDataByDatasource(String datasource) throws NotFoundCacheException{
+    default SortedSet<DictionaryDataBase> getDataByDatasource(String datasource) throws NotFoundCacheException {
         return new TreeSet<>(getDataByRegion(datasource, RegionEnum.CODE_MEMORY).values());
     }
 
@@ -103,7 +105,7 @@ public interface DictionaryCache {
 
         return data.entrySet()
                 .stream()
-                .filter(node->node.getKey().startsWith(fullIndex+ DictionaryEngine.DEFAULT_SPLIT_CHAR))
+                .filter(node -> node.getKey().startsWith(fullIndex + DictionaryEngine.DEFAULT_SPLIT_CHAR))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toCollection(Sets::newTreeSet));
     }
@@ -119,9 +121,107 @@ public interface DictionaryCache {
 
     /**
      * 删除缓存
-     * @param datasource 字典分类
+     *
+     * @param datasource     字典分类
      * @param dictionaryData 要删除的字典数据
      * @throws NotFoundCacheException
      */
     void delete(String datasource, DictionaryDataBase dictionaryData) throws NotFoundCacheException;
+
+    default void addAndRefresh(String datasource, DictionaryDataBase dictionaryData) throws NotFoundCacheException {
+        add(datasource, dictionaryData);
+        String parentId = dictionaryData.getParentId();
+        if (parentId != null) {
+            DictionaryDataBase parent = findById(datasource, parentId);
+            refreshToRoot(datasource, parent);
+        }
+    }
+
+    default void deleteAndRefresh(String datasource, DictionaryDataBase dictionaryData) throws NotFoundCacheException {
+        delete(datasource, dictionaryData);
+        String parentId = dictionaryData.getParentId();
+        if (parentId != null) {
+            DictionaryDataBase parent = findById(datasource, parentId);
+            refreshToRoot(datasource, parent);
+        }
+    }
+
+    default <A extends DictionaryDataBase> void refreshLeaf(String datasource, A entity, A parent) throws NotFoundCacheException {
+        if (entity == null) {
+            return;
+        }
+        String newFullCode;
+        String newFullName;
+        String newFullId;
+
+        if (parent != null) {
+            newFullCode = parent.getFullCode() + DEFAULT_SPLIT_CHAR + entity.getCode();
+            newFullName = parent.getFullName() + DEFAULT_SPLIT_CHAR + entity.getName();
+            newFullId = parent.getFullId() + DEFAULT_SPLIT_CHAR + entity.getId();
+        } else {
+            newFullCode = entity.getCode();
+            newFullName = entity.getName();
+            newFullId = entity.getId();
+        }
+
+        entity.setFullCode(newFullCode);
+        entity.setFullName(newFullName);
+        entity.setFullId(newFullId);
+
+        add(datasource, entity);
+        for (DictionaryDataBase child : entity.getChildren()) {
+            refreshLeaf(datasource, (A) child, entity);
+        }
+    }
+
+    /**
+     * 刷新从entity节点到父级的所有节点
+     *
+     * @param datasource 数据源
+     * @param entity     节点
+     * @param <A>        泛型
+     * @throws NotFoundCacheException 没有找到缓存
+     */
+    default <A extends DictionaryDataBase> void refreshToRoot(String datasource, A entity) throws NotFoundCacheException {
+        if (entity == null) {
+            return;
+        }
+        String fullIndex = entity.getFullCode();
+        //创建子
+        TreeSet<DictionaryDataBase> children = likeByFullIndex(datasource, RegionEnum.CODE_MEMORY, fullIndex);
+
+        //初始化全字典值与字典码默认值
+        children.forEach(dic -> {
+            dic.setFullCode(dic.getCode());
+            dic.setFullName(dic.getName());
+            dic.setFullId(dic.getId());
+        });
+        children.add(entity);
+        TreeUtil.createTree(children,
+                entity.getParentId(),
+                DEFAULT_SPLIT_CHAR,
+                "fullName", "fullCode", "fullId"
+        );
+        String id = entity.getId();
+
+        entity.setChildren(children.stream()
+                .filter(n -> id.equals(n.getParentId()))
+                .collect(Collectors.toCollection(Sets::newTreeSet))
+        );
+        //刷新缓存
+        add(datasource, entity);
+
+        //刷新父节点
+        String parentId = entity.getParentId();
+        if (parentId != null) {
+            DictionaryDataBase parent = findById(datasource, parentId);
+            refreshToRoot(datasource, parent);
+        }
+    }
+
+    default <D extends DictionaryDataBase> D findById(String datasource, String id) throws NotFoundCacheException {
+        return (D) DictionaryCacheUtil.getDictionaryCache()
+                .getDataByRegion(datasource, RegionEnum.ID_MEMORY)
+                .get(id);
+    }
 }

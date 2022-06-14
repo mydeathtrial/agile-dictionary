@@ -4,6 +4,7 @@ import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.object.ObjectUtil;
 import cloud.agileframework.dictionary.cache.DictionaryCacheUtil;
 import cloud.agileframework.dictionary.cache.NotFoundCacheException;
+import cloud.agileframework.dictionary.cache.RegionEnum;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
 
 import java.util.NoSuchElementException;
@@ -31,13 +32,8 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
 
     D findOne(String id) {
         try {
-            return DictionaryCacheUtil.getDictionaryCache()
-                    .getDataByDatasource(dataSource())
-                    .parallelStream()
-                    .filter(data -> data.getId().equals(id))
-                    .map(a -> (D) a)
-                    .findFirst()
-                    .orElse(null);
+            return (D) DictionaryCacheUtil.getDictionaryCache()
+                    .getByFullIndex(dataSource(), RegionEnum.ID_MEMORY, id);
         } catch (NotFoundCacheException e) {
             e.printStackTrace();
         }
@@ -75,6 +71,9 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
          */
         public void add(D dictionaryData) {
             synchronized (this) {
+                if (Objects.equals(dictionaryData.getId(), dictionaryData.getParentId())) {
+                    throw new IllegalArgumentException("父主键与主键不能相同");
+                }
                 addData(dictionaryData);
             }
         }
@@ -122,7 +121,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
             }
 
             try {
-                DictionaryCacheUtil.getDictionaryCache().add(dataSource(), dictionaryData);
+                DictionaryCacheUtil.getDictionaryCache().addAndRefresh(dataSource(), dictionaryData);
             } catch (NotFoundCacheException e) {
                 e.printStackTrace();
             }
@@ -172,6 +171,9 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
          * @param dictionaryData 字典
          */
         private void deleteData(D dictionaryData) {
+            if (dictionaryData == null) {
+                return;
+            }
             //先遍历删除子
             Optional.ofNullable(dictionaryData.getChildren()).ifPresent(children -> children.stream()
                     .map(a -> (D) a)
@@ -192,7 +194,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
                 return;
             }
             try {
-                DictionaryCacheUtil.getDictionaryCache().delete(dataSource(), oldData);
+                DictionaryCacheUtil.getDictionaryCache().deleteAndRefresh(dataSource(), oldData);
             } catch (NotFoundCacheException e) {
                 e.printStackTrace();
             }
@@ -205,6 +207,9 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
          */
         public void update(D dictionaryData) {
             synchronized (this) {
+                if (Objects.equals(dictionaryData.getId(), dictionaryData.getParentId())) {
+                    throw new IllegalArgumentException("父主键与主键不能相同");
+                }
                 updateData(dictionaryData, AbstractDictionaryDataManager.this::update, true, false);
             }
         }
@@ -246,7 +251,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
 
         private void replaceProperties(D newData, DictionaryDataBase oldData, boolean ignoreNullField) {
             //更新必要字段
-            String[] requireField = {"code", "name", "sort", "parentId", "fullCode", "fullName","fullId"};
+            String[] requireField = {"code", "name", "sort", "parentId", "fullCode", "fullName", "fullId"};
 
             ObjectUtil.copyProperties(newData,
                     oldData,
@@ -269,7 +274,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
             } else {
                 compare = ObjectUtil.Compare.DIFF;
             }
-            String[] exclude = {"code", "name", "sort", "parentId", "fullCode", "fullName","fullId", "children"};
+            String[] exclude = {"code", "name", "sort", "parentId", "fullCode", "fullName", "fullId", "children"};
 
             //更新非必要字段
             ObjectUtil.copyProperties(newData,
@@ -297,10 +302,13 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
             replaceProperties(newData, oldData, ignoreNullField);
 
             //更新自己
-            D parent = findOne(newData.getParentId());
-
-            //再把新的加回来
-            insertMemory(oldData, parent);
+            D parent = findOne(oldData.getParentId());
+            try {
+                DictionaryCacheUtil.getDictionaryCache().refreshLeaf(dataSource(), oldData, parent);
+                DictionaryCacheUtil.getDictionaryCache().refreshToRoot(dataSource(), parent);
+            } catch (NotFoundCacheException e) {
+                e.printStackTrace();
+            }
         }
 
 
@@ -309,40 +317,34 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
 
             //先清除旧的数据
             try {
-                DictionaryCacheUtil.getDictionaryCache().delete(dataSource(), oldData);
+                DictionaryCacheUtil.getDictionaryCache().deleteAndRefresh(dataSource(), oldData);
             } catch (NotFoundCacheException e) {
                 e.printStackTrace();
             }
         }
-
-        void insertMemory(D newData, D parent) {
-            String newFullCode;
-            String newFullName;
-            String newFullId;
-
-            if (parent != null) {
-                newFullCode = parent.getFullCode() + DEFAULT_SPLIT_CHAR + newData.getCode();
-                newFullName = parent.getFullName() + DEFAULT_SPLIT_CHAR + newData.getName();
-                newFullId = parent.getFullId() + DEFAULT_SPLIT_CHAR + newData.getId();
-            } else {
-                newFullCode = newData.getCode();
-                newFullName = newData.getName();
-                newFullId = newData.getId();
-            }
-
-            newData.setFullCode(newFullCode);
-            newData.setFullName(newFullName);
-            newData.setFullId(newFullId);
-
-            //先清除旧的数据
-            try {
-                DictionaryCacheUtil.getDictionaryCache().add(dataSource(), newData);
-            } catch (NotFoundCacheException e) {
-                e.printStackTrace();
-            }
-
-            newData.getChildren().forEach(a -> insertMemory((D) a, newData));
-        }
+//
+//        void insertMemory(D newData, D parent) {
+//            String newFullCode;
+//            String newFullName;
+//            String newFullId;
+//
+//            if (parent != null) {
+//                newFullCode = parent.getFullCode() + DEFAULT_SPLIT_CHAR + newData.getCode();
+//                newFullName = parent.getFullName() + DEFAULT_SPLIT_CHAR + newData.getName();
+//                newFullId = parent.getFullId() + DEFAULT_SPLIT_CHAR + newData.getId();
+//            } else {
+//                newFullCode = newData.getCode();
+//                newFullName = newData.getName();
+//                newFullId = newData.getId();
+//            }
+//
+//            newData.setFullCode(newFullCode);
+//            newData.setFullName(newFullName);
+//            newData.setFullId(newFullId);
+//
+//            //先清除旧的数据
+//            newData.getChildren().forEach(a -> insertMemory((D) a, newData));
+//        }
 
     }
 
