@@ -71,7 +71,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
          */
         public void add(D dictionaryData) {
             synchronized (this) {
-                if (Objects.equals(dictionaryData.getId(), dictionaryData.getParentId())) {
+                if (dictionaryData.getId()!=null && Objects.equals(dictionaryData.getId(), dictionaryData.getParentId())) {
                     throw new IllegalArgumentException("父主键与主键不能相同");
                 }
                 addData(dictionaryData);
