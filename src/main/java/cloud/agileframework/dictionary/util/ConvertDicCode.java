@@ -11,8 +11,6 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHAR;
-
 /**
  * @author 佟盟
  * 日期 2021-03-24 19:43
@@ -216,9 +214,9 @@ class ConvertDicCode extends ConvertDicBean {
                 }
             } else {
                 if (isFull) {
-                    builder.append(targetEntity.getFullCode().replace(DEFAULT_SPLIT_CHAR, splitChar));
+                    builder.append(targetEntity.getFullCode(splitChar));
                 } else {
-                    builder.append(targetEntity.getCode().replace(DEFAULT_SPLIT_CHAR, splitChar));
+                    builder.append(targetEntity.getCode());
                 }
             }
         });

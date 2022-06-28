@@ -64,7 +64,7 @@ public interface DictionaryCache {
      * @return 缓存的树形结构字典数据
      */
     default SortedSet<DictionaryDataBase> getDataByDatasource(String datasource) throws NotFoundCacheException {
-        return new TreeSet<>(getDataByRegion(datasource, RegionEnum.CODE_MEMORY).values());
+        return new TreeSet<>(getDataByRegion(datasource, RegionEnum.ID_MEMORY).values());
     }
 
     /**
@@ -188,7 +188,7 @@ public interface DictionaryCache {
         }
         String fullIndex = entity.getFullCode();
         //创建子
-        TreeSet<DictionaryDataBase> children = likeByFullIndex(datasource, RegionEnum.CODE_MEMORY, fullIndex);
+        TreeSet<DictionaryDataBase> children = likeByFullIndex(datasource, RegionEnum.ID_MEMORY, fullIndex);
 
         //初始化全字典值与字典码默认值
         children.forEach(dic -> {

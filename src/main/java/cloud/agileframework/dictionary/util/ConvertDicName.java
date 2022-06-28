@@ -165,9 +165,9 @@ class ConvertDicName extends ConvertDicCode {
                 }
             } else {
                 if (isFull) {
-                    builder.append(targetEntity.getFullName().replace(DEFAULT_SPLIT_CHAR, splitChar));
+                    builder.append(targetEntity.getFullName(splitChar));
                 } else {
-                    builder.append(targetEntity.getName().replace(DEFAULT_SPLIT_CHAR, splitChar));
+                    builder.append(targetEntity.getName());
                 }
             }
         });

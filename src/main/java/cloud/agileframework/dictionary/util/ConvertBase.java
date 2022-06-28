@@ -6,7 +6,6 @@ import cloud.agileframework.dictionary.DictionaryEngine;
 import cloud.agileframework.dictionary.cache.DictionaryCacheUtil;
 import cloud.agileframework.dictionary.cache.RegionEnum;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +98,7 @@ class ConvertBase {
         }
         String fullIndex = entity.getFullCode();
         //创建子
-        TreeSet<DictionaryDataBase> children = DictionaryCacheUtil.getDictionaryCache().likeByFullIndex(datasource, RegionEnum.CODE_MEMORY, fullIndex);
+        TreeSet<DictionaryDataBase> children = DictionaryCacheUtil.getDictionaryCache().likeByFullIndex(datasource, RegionEnum.ID_MEMORY, fullIndex);
 
         //初始化全字典值与字典码默认值
         children.forEach(dic -> {

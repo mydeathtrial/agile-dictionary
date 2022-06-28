@@ -6,11 +6,10 @@ import cloud.agileframework.common.util.clazz.TypeReference;
 import cloud.agileframework.common.util.object.ObjectUtil;
 import cloud.agileframework.common.util.string.StringUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
-import cloud.agileframework.dictionary.DictionaryEngine;
 import cloud.agileframework.dictionary.annotation.Dictionary;
 import cloud.agileframework.dictionary.annotation.DictionaryField;
-import cloud.agileframework.dictionary.annotation.DirectionType;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Field;
@@ -128,9 +127,26 @@ class ConvertDicAnnotation extends ConvertDicMap {
         }
 
         // 处理字典前缀
-        String parentKey = DirectionType.CODE_TO_NAME == dictionary.directionType()?dictionary.dicCode():coverDicName(dictionary.dicCode());
         String split = dictionary.split();
-        String prefix = ObjectUtils.isEmpty(parentKey) ? "" : parentKey + split;
+        String prefix = "";
+        DictionaryDataBase parent = StringUtils.isBlank(dictionary.dicCode())?null:coverDicBean(dictionary.dicCode());
+        if(parent!=null){
+            switch (dictionary.directionType()) {
+                case CODE_TO_NAME:
+                case ID_TO_NAME:
+                    prefix = parent.getFullName(split) + split;
+                    break;
+                case CODE_TO_ID:
+                case NAME_TO_ID:
+                    prefix = parent.getFullId(split) + split;
+                    break;
+                case NAME_TO_CODE:
+                case ID_TO_CODE:
+                    prefix = parent.getFullCode(split) + split;
+                    break;
+                default:
+            }
+        }
         // 如果是级联字典
         if (fieldNames.length > 1) {
             String prefix2 = Arrays.stream(fieldNames)
@@ -215,6 +231,10 @@ class ConvertDicAnnotation extends ConvertDicMap {
      * @return 翻译后的字符串
      */
     private static String parseString(Dictionary dictionary, String fullIndex) {
+        if (dictionary == null || fullIndex == null) {
+            return null;
+        }
+
         boolean isFull = dictionary.isFull();
         String split = dictionary.split();
         // 翻译后值
@@ -223,39 +243,74 @@ class ConvertDicAnnotation extends ConvertDicMap {
         if (dicCoverCache != null && dicCoverCache.containsKey(threadCacheKey)) {
             targetName = dicCoverCache.get(threadCacheKey);
         } else {
-            if (dictionary.directionType() == DirectionType.CODE_TO_NAME && !dictionary.id()) {
-                String defaultValue = dictionary.defaultValue();
-                targetName = ConvertDicName.coverDicName(dictionary.dataSource(), fullIndex, defaultValue, isFull, split);
-            } else if (dictionary.directionType() == DirectionType.CODE_TO_NAME) {
-                targetName = Arrays.stream(fullIndex.split(Constant.RegularAbout.COMMA))
-                        .map(id -> {
-                            DictionaryDataBase dic = DictionaryUtil.findById(dictionary.dataSource(), id);
-                            String defaultValue = dictionary.defaultValue();
-                            defaultValue = Dictionary.DEFAULT_NAME.equals(defaultValue) ? id : defaultValue;
+            String defaultValue = dictionary.defaultValue();
+            StringBuilder builder = new StringBuilder();
+            Arrays.stream(fullIndex.split(Constant.RegularAbout.COMMA)).forEach(c -> {
+                DictionaryDataBase targetEntity = null;
 
-                            String result = defaultValue;
-                            if (dic == null) {
-                                return result;
-                            }
-                            if (isFull) {
-                                result = dic.getFullName().replace(DictionaryEngine.DEFAULT_SPLIT_CHAR, dictionary.split());
-                            } else {
-                                result = dic.getName();
-                            }
-                            return result;
-                        }).collect(Collectors.joining(Constant.RegularAbout.COMMA));
-            } else if (dictionary.directionType() == DirectionType.NAME_TO_CODE && !dictionary.id()) {
-                String defaultValue = dictionary.defaultValue();
-                targetName = ConvertDicCode.coverDicCode(dictionary.dataSource(), fullIndex, defaultValue, isFull, split);
-            } else {
-                targetName = Arrays.stream(fullIndex.split(Constant.RegularAbout.COMMA))
-                        .map(id -> {
-                            DictionaryDataBase dic = DictionaryUtil.findById(dictionary.dataSource(), id);
-                            String defaultValue = dictionary.defaultValue();
-                            defaultValue = Dictionary.DEFAULT_NAME.equals(defaultValue) ? id : defaultValue;
-                            return dic == null ? defaultValue : dic.getCode();
-                        }).collect(Collectors.joining(Constant.RegularAbout.COMMA));
-            }
+                switch (dictionary.directionType()) {
+                    case CODE_TO_NAME:
+                    case CODE_TO_ID:
+                        targetEntity = coverDicBean(dictionary.dataSource(), c, split);
+                        break;
+                    case NAME_TO_CODE:
+                    case NAME_TO_ID:
+                        targetEntity = coverDicBeanByFullName(dictionary.dataSource(), c, split);
+                        break;
+                    case ID_TO_NAME:
+                    case ID_TO_CODE:
+                        targetEntity = DictionaryUtil.findById(dictionary.dataSource(), c);
+                        break;
+                    default:
+                }
+                if (builder.length() > 0) {
+                    builder.append(Constant.RegularAbout.COMMA);
+                }
+                if (targetEntity == null) {
+                    if (Dictionary.DEFAULT_NAME.equals(defaultValue)) {
+                        builder.append(StringUtil.getSplitByStrLastAtomic(c, split));
+                    } else if (defaultValue != null) {
+                        builder.append(defaultValue);
+                    }
+                } else {
+                    if (isFull) {
+                        switch (dictionary.directionType()) {
+                            case CODE_TO_NAME:
+                            case ID_TO_NAME:
+                                builder.append(targetEntity.getFullName(split));
+                                break;
+                            case CODE_TO_ID:
+                            case NAME_TO_ID:
+                                builder.append(targetEntity.getFullId(split));
+                                break;
+                            case NAME_TO_CODE:
+                            case ID_TO_CODE:
+                                builder.append(targetEntity.getFullCode(split));
+                                break;
+                            default:
+                        }
+
+                    } else {
+                        switch (dictionary.directionType()) {
+                            case CODE_TO_NAME:
+                            case ID_TO_NAME:
+                                builder.append(targetEntity.getName());
+                                break;
+                            case CODE_TO_ID:
+                            case NAME_TO_ID:
+                                builder.append(targetEntity.getId());
+                                break;
+                            case NAME_TO_CODE:
+                            case ID_TO_CODE:
+                                builder.append(targetEntity.getCode());
+                                break;
+                            default:
+                        }
+                    }
+                }
+            });
+            targetName = builder.toString();
+
             if (dicCoverCache != null) {
                 dicCoverCache.put(threadCacheKey, targetName);
             }

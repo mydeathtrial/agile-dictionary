@@ -15,5 +15,21 @@ public enum DirectionType {
     /**
      * 字典码转字典值
      */
-    CODE_TO_NAME
+    CODE_TO_NAME,
+    /**
+     * 主键转名
+     */
+    ID_TO_NAME,
+    /**
+     * 主键转码
+     */
+    ID_TO_CODE,
+    /**
+     * 名转主键
+     */
+    NAME_TO_ID,
+    /**
+     * 码转主键
+     */
+    CODE_TO_ID
 }
