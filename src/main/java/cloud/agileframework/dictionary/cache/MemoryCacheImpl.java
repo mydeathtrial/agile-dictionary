@@ -6,8 +6,10 @@ import com.google.common.collect.Sets;
 
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class MemoryCacheImpl implements DictionaryCache {
+	public static final MemoryCacheImpl INSTANT = new MemoryCacheImpl();
 
 	/**
 	 * 缓存数据存储介质
@@ -50,10 +52,10 @@ public class MemoryCacheImpl implements DictionaryCache {
 	}
 
 	@Override
-	public void add(String datasource, DictionaryDataBase dictionaryData) throws NotFoundCacheException {
+	public synchronized void add(String datasource, DictionaryDataBase dictionaryData) throws NotFoundCacheException {
 		Map<RegionEnum, Map<String, DictionaryDataBase>> regionData = REGION_DATA.get(datasource);
 		if (regionData == null) {
-			SortedSet<DictionaryDataBase> sortedSet = Sets.newTreeSet();
+			SortedSet<DictionaryDataBase> sortedSet = new ConcurrentSkipListSet<>();
 			sortedSet.add(dictionaryData);
 			initData(datasource, sortedSet);
 			return;
@@ -65,12 +67,15 @@ public class MemoryCacheImpl implements DictionaryCache {
 		Map<String, DictionaryDataBase> nameData = regionData.computeIfAbsent(RegionEnum.NAME_MEMORY, k -> Maps.newHashMap());
 		nameData.put(dictionaryData.getFullName(), dictionaryData);
 
+		Map<String, DictionaryDataBase> fullIdData = regionData.computeIfAbsent(RegionEnum.FULL_ID_MEMORY, k -> Maps.newHashMap());
+		fullIdData.put(dictionaryData.getFullId(), dictionaryData);
+
 		Map<String, DictionaryDataBase> idData = regionData.computeIfAbsent(RegionEnum.ID_MEMORY, k -> Maps.newHashMap());
 		idData.put(dictionaryData.getId(), dictionaryData);
 	}
 
 	@Override
-	public void delete(String datasource, DictionaryDataBase dictionaryData) throws NotFoundCacheException {
+	public synchronized void delete(String datasource, DictionaryDataBase dictionaryData) throws NotFoundCacheException {
 		Map<RegionEnum, Map<String, DictionaryDataBase>> regionData = REGION_DATA.get(datasource);
 		if (regionData == null) {
 			return;
@@ -82,6 +87,11 @@ public class MemoryCacheImpl implements DictionaryCache {
 
 		regionData.computeIfPresent(RegionEnum.NAME_MEMORY, (regionEnum, stringDictionaryDataBaseMap) -> {
 			stringDictionaryDataBaseMap.remove(dictionaryData.getFullName());
+			return stringDictionaryDataBaseMap;
+		});
+
+		regionData.computeIfPresent(RegionEnum.FULL_ID_MEMORY, (regionEnum, stringDictionaryDataBaseMap) -> {
+			stringDictionaryDataBaseMap.remove(dictionaryData.getFullId());
 			return stringDictionaryDataBaseMap;
 		});
 

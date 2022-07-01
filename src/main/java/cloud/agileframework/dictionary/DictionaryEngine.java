@@ -17,6 +17,7 @@ import org.springframework.core.annotation.Order;
 
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * @author 佟盟
@@ -83,11 +84,14 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
      * @param dictionaryDataManager 字典管理其
      */
     private void parseDataSource(DictionaryDataManager<?> dictionaryDataManager) throws NotFoundCacheException {
+        //设置缓存操作
+        DictionaryCacheUtil.setDictionaryCache(dictionaryDataManager.dataSource(), dictionaryDataManager.cache());
+        
         //初始化缓存
         dictionaryDataManagerMap.put(dictionaryDataManager.dataSource(),dictionaryDataManager);
 
         //如果缓存中没有，则初始化
-        SortedSet<DictionaryDataBase> treeSet = Sets.newTreeSet(dictionaryDataManager.all());
+        SortedSet<DictionaryDataBase> treeSet = new ConcurrentSkipListSet<>(dictionaryDataManager.all());
 
         //判断是否重复处理
         if (isFinish(dictionaryDataManager.dataSource(), treeSet)) {
@@ -109,7 +113,7 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
         );
 
         //做缓存同步
-        DictionaryCacheUtil.getDictionaryCache().initData(dictionaryDataManager.dataSource(),treeSet);
+        dictionaryDataManager.cache().initData(dictionaryDataManager.dataSource(),treeSet);
     }
 
     /**

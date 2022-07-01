@@ -4,6 +4,7 @@ import cloud.agileframework.common.util.collection.TreeUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.DictionaryEngine;
 import cloud.agileframework.dictionary.cache.DictionaryCacheUtil;
+import cloud.agileframework.dictionary.cache.NotFoundCacheException;
 import cloud.agileframework.dictionary.cache.RegionEnum;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Collectors;
 
 import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHAR;
@@ -67,11 +69,11 @@ class ConvertBase {
         DictionaryDataBase entity = null;
         try {
             if (DictionaryEngine.CacheType.CODE_CACHE == cacheType) {
-                entity = DictionaryCacheUtil.getDictionaryCache().getByFullIndex(datasource, RegionEnum.CODE_MEMORY, fullIndex);
+                entity = DictionaryCacheUtil.getDictionaryCache(datasource).getByFullIndex(datasource, RegionEnum.CODE_MEMORY, fullIndex);
             } else if (DictionaryEngine.CacheType.NAME_CACHE == cacheType) {
-                entity = DictionaryCacheUtil.getDictionaryCache().getByFullIndex(datasource, RegionEnum.NAME_MEMORY, fullIndex);
+                entity = DictionaryCacheUtil.getDictionaryCache(datasource).getByFullIndex(datasource, RegionEnum.NAME_MEMORY, fullIndex);
             } else {
-                entity = DictionaryCacheUtil.getDictionaryCache().getByFullIndex(datasource, RegionEnum.ID_MEMORY, fullIndex);
+                entity = DictionaryCacheUtil.getDictionaryCache(datasource).getByFullIndex(datasource, RegionEnum.ID_MEMORY, fullIndex);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -82,42 +84,6 @@ class ConvertBase {
             return null;
         }
 
-        return entity;
-    }
-
-    /**
-     * 刷新字典entity数据
-     *
-     * @param datasource 数据源
-     * @param entity     字典
-     * @return 刷新后的字典
-     */
-    public static <A extends DictionaryDataBase> A refresh(String datasource, A entity) {
-        if (entity == null) {
-            return null;
-        }
-        String fullIndex = entity.getFullCode();
-        //创建子
-        TreeSet<DictionaryDataBase> children = DictionaryCacheUtil.getDictionaryCache().likeByFullIndex(datasource, RegionEnum.ID_MEMORY, fullIndex);
-
-        //初始化全字典值与字典码默认值
-        children.forEach(dic -> {
-            dic.setFullCode(dic.getCode());
-            dic.setFullName(dic.getName());
-            dic.setFullId(dic.getId());
-        });
-        children.add(entity);
-        TreeUtil.createTree(children,
-                entity.getParentId(),
-                DEFAULT_SPLIT_CHAR,
-                "fullName", "fullCode", "fullId"
-        );
-        String id = entity.getId();
-
-        entity.setChildren(children.stream()
-                .filter(n -> id.equals(n.getParentId()))
-                .collect(Collectors.toCollection(Sets::newTreeSet))
-        );
         return entity;
     }
 }

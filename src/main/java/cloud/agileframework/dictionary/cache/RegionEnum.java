@@ -8,5 +8,6 @@ public enum RegionEnum {
     CODE_MEMORY,
     //以fullName为key的缓存数据
     NAME_MEMORY,
-    ID_MEMORY
+    ID_MEMORY,
+    FULL_ID_MEMORY
 }

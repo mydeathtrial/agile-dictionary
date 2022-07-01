@@ -32,9 +32,7 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(name = "enable", prefix = "agile.dictionary", matchIfMissing = true)
 @EnableConfigurationProperties(DictionaryProperties.class)
 @AutoConfigureAfter(name = "cloud.agileframework.cache.config.EhCacheAutoConfiguration.class")
-public class DictionaryAutoConfiguration implements ApplicationContextAware {
-
-    private ApplicationContext applicationContext;
+public class DictionaryAutoConfiguration {
 
     /**
      * 字典引擎
@@ -55,41 +53,5 @@ public class DictionaryAutoConfiguration implements ApplicationContextAware {
     @ConditionalOnMissingBean(DictionaryDataManager.class)
     MemoryDictionaryManager dictionaryManager() {
         return new MemoryDictionaryManager();
-    }
-
-    /**
-     * 缓存介质
-     *
-     * @return 缓存介质
-     */
-    @Bean
-    @ConditionalOnMissingBean(DictionaryCache.class)
-    DictionaryCache cacheManager(DictionaryProperties properties) throws NotFoundCacheException {
-        DictionaryCache cache;
-        switch (properties.getCacheType()) {
-            case SPRING:
-                CacheManager cacheManager;
-                try {
-                    cacheManager = applicationContext.getBean(CacheManager.class);
-                } catch (Exception e) {
-                    throw new NotFoundCacheException("At least one org.springframework.cache.CacheManager", e);
-                }
-                cache = new SpringCacheImpl(cacheManager);
-                break;
-            case AGILE_CACHE:
-                cache = new AgileCacheImpl();
-                break;
-            default:
-                cache = new MemoryCacheImpl();
-        }
-
-        //初始化字典缓存介质
-        DictionaryCacheUtil.setDictionaryCache(cache);
-        return cache;
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
     }
 }

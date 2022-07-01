@@ -1,5 +1,6 @@
 package cloud.agileframework.dictionary.cache;
 
+import cloud.agileframework.cache.util.BeanUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import com.google.common.collect.Maps;
 import org.springframework.cache.Cache;
@@ -13,6 +14,7 @@ import java.util.Map;
  * Spring方式的缓存介质，通过向Spring容器注入CacheManager实现字典数据缓存控制
  */
 public class SpringCacheImpl implements DictionaryCache {
+    public static final SpringCacheImpl INSTANT = new SpringCacheImpl(BeanUtil.getApplicationContext().getBean(CacheManager.class));
     private final CacheManager cacheManager;
 
     public SpringCacheImpl(CacheManager cacheManager) {
@@ -76,6 +78,13 @@ public class SpringCacheImpl implements DictionaryCache {
         nameData.put(dictionaryData.getFullName(), dictionaryData);
         initData(datasource, RegionEnum.NAME_MEMORY, nameData);
 
+        Map<String, DictionaryDataBase> fullIdData = getDataByRegion(datasource, RegionEnum.FULL_ID_MEMORY);
+        if (fullIdData == null) {
+            fullIdData = Maps.newHashMap();
+        }
+        fullIdData.put(dictionaryData.getFullId(), dictionaryData);
+        initData(datasource, RegionEnum.FULL_ID_MEMORY, fullIdData);
+
         Map<String, DictionaryDataBase> idData = getDataByRegion(datasource, RegionEnum.ID_MEMORY);
         if (idData == null) {
             idData = Maps.newHashMap();
@@ -93,6 +102,10 @@ public class SpringCacheImpl implements DictionaryCache {
         Map<String, DictionaryDataBase> nameMap = getDataByRegion(datasource, RegionEnum.NAME_MEMORY);
         nameMap.remove(dictionaryData.getFullName());
         initData(datasource, RegionEnum.NAME_MEMORY, nameMap);
+
+        Map<String, DictionaryDataBase> fullIdMap = getDataByRegion(datasource, RegionEnum.FULL_ID_MEMORY);
+        fullIdMap.remove(dictionaryData.getFullId());
+        initData(datasource, RegionEnum.FULL_ID_MEMORY, fullIdMap);
 
         Map<String, DictionaryDataBase> idMap = getDataByRegion(datasource, RegionEnum.ID_MEMORY);
         idMap.remove(dictionaryData.getId());

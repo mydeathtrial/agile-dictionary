@@ -1,6 +1,9 @@
 package cloud.agileframework.dictionary;
 
 import cloud.agileframework.common.util.clazz.ClassUtil;
+import cloud.agileframework.dictionary.cache.AgileCacheImpl;
+import cloud.agileframework.dictionary.cache.DictionaryCache;
+import cloud.agileframework.dictionary.cache.MemoryCacheImpl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -59,6 +62,15 @@ public interface DictionaryDataManager<D extends DictionaryDataBase> {
         return DictionaryEngine.DICTIONARY_DATA_CACHE;
     }
 
+    /**
+     * 初始化字典缓存介质
+     * 
+     * @return 多次调用必须返回同一个对象
+     */
+    default DictionaryCache cache(){
+        return MemoryCacheImpl.INSTANT;
+    }
+    
     /**
      * 取根节点数据的parentId值
      *

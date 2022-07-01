@@ -3,24 +3,17 @@ package cloud.agileframework.dictionary.cache;
 import cloud.agileframework.cache.support.AgileCache;
 import cloud.agileframework.cache.util.CacheUtil;
 import cloud.agileframework.common.util.clazz.TypeReference;
-import cloud.agileframework.common.util.collection.TreeUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
-import cloud.agileframework.dictionary.util.DictionaryUtil;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.springframework.cache.Cache;
 
 import java.util.Map;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHAR;
 
 /**
  * 借助agile-cache二级缓存组件实现字典缓存控制
  */
 public class AgileCacheImpl implements DictionaryCache {
-
+    public static final AgileCacheImpl INSTANT = new AgileCacheImpl();
 
     private AgileCache getAgileCache(String datasource) {
         return CacheUtil.getCache(datasource);
@@ -60,24 +53,26 @@ public class AgileCacheImpl implements DictionaryCache {
     }
 
     @Override
-    public void add(String datasource, DictionaryDataBase dictionaryData) throws NotFoundCacheException {
+    public synchronized void add(String datasource, DictionaryDataBase dictionaryData) throws NotFoundCacheException {
         AgileCache cache = getAgileCache(datasource);
         if (cache == null) {
             throw new NotFoundCacheException("Unable to get dictionary's cache");
         }
         cache.addToMap(RegionEnum.CODE_MEMORY.name(), dictionaryData.getFullCode(), dictionaryData);
         cache.addToMap(RegionEnum.NAME_MEMORY.name(), dictionaryData.getFullName(), dictionaryData);
+        cache.addToMap(RegionEnum.FULL_ID_MEMORY.name(), dictionaryData.getFullId(),dictionaryData);
         cache.addToMap(RegionEnum.ID_MEMORY.name(), dictionaryData.getId(),dictionaryData);
     }
 
     @Override
-    public void delete(String datasource, DictionaryDataBase dictionaryData) throws NotFoundCacheException {
+    public synchronized void delete(String datasource, DictionaryDataBase dictionaryData) throws NotFoundCacheException {
         AgileCache cache = getAgileCache(datasource);
         if (cache == null) {
             throw new NotFoundCacheException("Unable to get dictionary's cache");
         }
         cache.removeFromMap(RegionEnum.NAME_MEMORY.name(), dictionaryData.getFullName());
         cache.removeFromMap(RegionEnum.CODE_MEMORY.name(), dictionaryData.getFullCode());
+        cache.removeFromMap(RegionEnum.FULL_ID_MEMORY.name(), dictionaryData.getFullId());
         cache.removeFromMap(RegionEnum.ID_MEMORY.name(), dictionaryData.getId());
     }
 }

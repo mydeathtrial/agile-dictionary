@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 class ConvertDicAnnotation extends ConvertDicMap {
     private static Map<String, String> dicCoverCache;
 
+
     /**
      * 字典自动转换，针对Dictionary注解进行解析
      *
@@ -48,6 +49,7 @@ class ConvertDicAnnotation extends ConvertDicMap {
             cover((Collection<?>) o);
         }
         Set<ClassUtil.Target<Dictionary>> targets = ClassUtil.getAllEntityAnnotation(o.getClass(), Dictionary.class);
+
         targets.forEach(target -> {
             Dictionary dictionary = target.getAnnotation();
             Member member = target.getMember();
@@ -96,10 +98,56 @@ class ConvertDicAnnotation extends ConvertDicMap {
             dicCoverCache = Maps.newConcurrentMap();
         }
         Collection<T> c = Collections.synchronizedCollection(collection);
+        
         synchronized (c) {
-            for (T node : c) {
-                cover(node);
-            }
+//            for(T o:c){
+//                cover(o);
+//            }
+            collection.parallelStream().forEach(o->cover(o));
+            
+//            if (ObjectUtils.isEmpty(c)) {
+//                return;
+//            }
+//            Class<?> type = c.iterator().next().getClass();
+//            Set<ClassUtil.Target<Dictionary>> targets = ClassUtil.getAllEntityAnnotation(type, Dictionary.class);
+//
+//            targets.forEach(target -> {
+//                Dictionary dictionary = target.getAnnotation();
+//                Member member = target.getMember();
+//                Field field;
+//                if (member instanceof Method) {
+//                    String fieldName = StringUtil.toLowerName(member.getName().substring(Constant.NumberAbout.THREE));
+//                    field = ClassUtil.getField(type, fieldName);
+//                    if (ObjectUtils.isEmpty(field)) {
+//                        return;
+//                    }
+//                } else if (member instanceof Field) {
+//                    field = (Field) member;
+//                } else {
+//                    return;
+//                }
+//                for (T node : c) {
+//                    parseNodeField(dictionary, field, node);
+//                }
+//                
+//            });
+//
+//            Set<ClassUtil.Target<DictionaryField>> dictionaryTargets = ClassUtil.getAllEntityAnnotation(type, DictionaryField.class);
+//            dictionaryTargets.forEach(dictionaryTarget -> {
+//                Member member = dictionaryTarget.getMember();
+//                String fieldName;
+//                if (member instanceof Method) {
+//                    fieldName = StringUtil.toLowerName(member.getName().substring(Constant.NumberAbout.THREE));
+//                } else if (member instanceof Field) {
+//                    fieldName = member.getName();
+//                } else {
+//                    return;
+//                }
+//                for (T node : c) {
+//                    Object value = ObjectUtil.getFieldValue(node, fieldName);
+//                    cover(value);
+//                }
+//            });
         }
         dicCoverCache.clear();
     }
@@ -129,19 +177,19 @@ class ConvertDicAnnotation extends ConvertDicMap {
         // 处理字典前缀
         String split = dictionary.split();
         String prefix = "";
-        DictionaryDataBase parent = StringUtils.isBlank(dictionary.dicCode())?null:coverDicBean(dictionary.dicCode());
-        if(parent!=null){
+        DictionaryDataBase parent = StringUtils.isBlank(dictionary.dicCode()) ? null : coverDicBean(dictionary.dicCode());
+        if (parent != null) {
             switch (dictionary.directionType()) {
-                case CODE_TO_NAME:
-                case ID_TO_NAME:
+                case NAME_TO_CODE:
+                case NAME_TO_ID:
                     prefix = parent.getFullName(split) + split;
                     break;
-                case CODE_TO_ID:
-                case NAME_TO_ID:
+                case ID_TO_NAME:
+                case ID_TO_CODE:
                     prefix = parent.getFullId(split) + split;
                     break;
-                case NAME_TO_CODE:
-                case ID_TO_CODE:
+                case CODE_TO_ID:
+                case CODE_TO_NAME:
                     prefix = parent.getFullCode(split) + split;
                     break;
                 default:

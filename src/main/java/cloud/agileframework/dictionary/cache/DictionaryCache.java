@@ -9,7 +9,7 @@ import com.google.common.collect.Sets;
 
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Collectors;
 
 import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHAR;
@@ -64,7 +64,7 @@ public interface DictionaryCache {
      * @return 缓存的树形结构字典数据
      */
     default SortedSet<DictionaryDataBase> getDataByDatasource(String datasource) throws NotFoundCacheException {
-        return new TreeSet<>(getDataByRegion(datasource, RegionEnum.ID_MEMORY).values());
+        return new ConcurrentSkipListSet<>(getDataByRegion(datasource, RegionEnum.ID_MEMORY).values());
     }
 
     /**
@@ -92,7 +92,7 @@ public interface DictionaryCache {
      * @param fullIndex  fullCode或者fullName
      * @return 字典
      */
-    default TreeSet<DictionaryDataBase> likeByFullIndex(String datasource, RegionEnum regionEnum, String fullIndex) {
+    default ConcurrentSkipListSet<DictionaryDataBase> likeByFullIndex(String datasource, RegionEnum regionEnum, String fullIndex) {
         Map<String, DictionaryDataBase> data = null;
         try {
             data = getDataByRegion(datasource, regionEnum);
@@ -100,14 +100,14 @@ public interface DictionaryCache {
             e.printStackTrace();
         }
         if (data == null) {
-            return Sets.newTreeSet();
+            return new ConcurrentSkipListSet<>();
         }
 
         return data.entrySet()
                 .stream()
                 .filter(node -> node.getKey().startsWith(fullIndex + DictionaryEngine.DEFAULT_SPLIT_CHAR))
                 .map(Map.Entry::getValue)
-                .collect(Collectors.toCollection(Sets::newTreeSet));
+                .collect(Collectors.toCollection(ConcurrentSkipListSet::new));
     }
 
     /**
@@ -186,9 +186,9 @@ public interface DictionaryCache {
         if (entity == null) {
             return;
         }
-        String fullIndex = entity.getFullCode();
+        String fullIndex = entity.getFullId();
         //创建子
-        TreeSet<DictionaryDataBase> children = likeByFullIndex(datasource, RegionEnum.ID_MEMORY, fullIndex);
+        ConcurrentSkipListSet<DictionaryDataBase> children = likeByFullIndex(datasource, RegionEnum.FULL_ID_MEMORY, fullIndex);
 
         //初始化全字典值与字典码默认值
         children.forEach(dic -> {
@@ -206,7 +206,7 @@ public interface DictionaryCache {
 
         entity.setChildren(children.stream()
                 .filter(n -> id.equals(n.getParentId()))
-                .collect(Collectors.toCollection(Sets::newTreeSet))
+                .collect(Collectors.toCollection(ConcurrentSkipListSet::new))
         );
         //刷新缓存
         add(datasource, entity);
@@ -220,8 +220,35 @@ public interface DictionaryCache {
     }
 
     default <D extends DictionaryDataBase> D findById(String datasource, String id) throws NotFoundCacheException {
-        return (D) DictionaryCacheUtil.getDictionaryCache()
-                .getDataByRegion(datasource, RegionEnum.ID_MEMORY)
+        return (D)getDataByRegion(datasource, RegionEnum.ID_MEMORY)
                 .get(id);
+    }
+
+    default void refresh(String datasource) {
+//        SortedSet<DictionaryDataBase> treeSet;
+//        try {
+//            treeSet = getDataByDatasource(datasource);
+//        } catch (NotFoundCacheException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        //初始化全字典值与字典码默认值
+//        treeSet.forEach(dic -> {
+//            dic.setFullCode(dic.getCode());
+//            dic.setFullName(dic.getName());
+//            dic.setFullId(dic.getId());
+//        });
+//
+//        //构建树形结构，过程中重新计算全字典值与全字典码
+//        TreeUtil.createTree(treeSet,
+//                DictionaryEngine.getDictionaryDataManagerMap(datasource).rootParentId(),
+//                DEFAULT_SPLIT_CHAR,
+//                "fullName", "fullCode", "fullId"
+//        );
+//        try {
+//            initData(datasource,treeSet);
+//        } catch (NotFoundCacheException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 }

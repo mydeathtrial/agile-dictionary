@@ -11,7 +11,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -32,8 +32,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
 
     D findOne(String id) {
         try {
-            return (D) DictionaryCacheUtil.getDictionaryCache()
-                    .getByFullIndex(dataSource(), RegionEnum.ID_MEMORY, id);
+            return (D) cache().getByFullIndex(dataSource(), RegionEnum.ID_MEMORY, id);
         } catch (NotFoundCacheException e) {
             e.printStackTrace();
         }
@@ -61,7 +60,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
             return all()
                     .stream()
                     .filter(dic -> Objects.equals(dic.getParentId(), root))
-                    .collect(Collectors.toCollection(TreeSet::new));
+                    .collect(Collectors.toCollection(ConcurrentSkipListSet::new));
         }
 
         /**
@@ -75,6 +74,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
                     throw new IllegalArgumentException("父主键与主键不能相同");
                 }
                 addData(dictionaryData);
+                cache().refresh(dataSource());
             }
         }
 
@@ -121,7 +121,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
             }
 
             try {
-                DictionaryCacheUtil.getDictionaryCache().addAndRefresh(dataSource(), dictionaryData);
+                cache().addAndRefresh(dataSource(), dictionaryData);
             } catch (NotFoundCacheException e) {
                 e.printStackTrace();
             }
@@ -162,6 +162,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
         public void delete(D dictionaryData) {
             synchronized (this) {
                 deleteData(dictionaryData);
+                cache().refresh(dataSource());
             }
         }
 
@@ -194,7 +195,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
                 return;
             }
             try {
-                DictionaryCacheUtil.getDictionaryCache().deleteAndRefresh(dataSource(), oldData);
+                cache().deleteAndRefresh(dataSource(), oldData);
             } catch (NotFoundCacheException e) {
                 e.printStackTrace();
             }
@@ -211,6 +212,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
                     throw new IllegalArgumentException("父主键与主键不能相同");
                 }
                 updateData(dictionaryData, AbstractDictionaryDataManager.this::update, true, false);
+                cache().refresh(dataSource());
             }
         }
 
@@ -222,6 +224,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
         public void updateOfNotNull(D dictionaryData) {
             synchronized (this) {
                 updateData(dictionaryData, AbstractDictionaryDataManager.this::updateOfNotNull, true, true);
+                cache().refresh(dataSource());
             }
         }
 
@@ -304,8 +307,8 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
             //更新自己
             D parent = findOne(oldData.getParentId());
             try {
-                DictionaryCacheUtil.getDictionaryCache().refreshLeaf(dataSource(), oldData, parent);
-                DictionaryCacheUtil.getDictionaryCache().refreshToRoot(dataSource(), parent);
+                cache().refreshLeaf(dataSource(), oldData, parent);
+                cache().refreshToRoot(dataSource(), parent);
             } catch (NotFoundCacheException e) {
                 e.printStackTrace();
             }
@@ -317,34 +320,11 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
 
             //先清除旧的数据
             try {
-                DictionaryCacheUtil.getDictionaryCache().deleteAndRefresh(dataSource(), oldData);
+                cache().deleteAndRefresh(dataSource(), oldData);
             } catch (NotFoundCacheException e) {
                 e.printStackTrace();
             }
         }
-//
-//        void insertMemory(D newData, D parent) {
-//            String newFullCode;
-//            String newFullName;
-//            String newFullId;
-//
-//            if (parent != null) {
-//                newFullCode = parent.getFullCode() + DEFAULT_SPLIT_CHAR + newData.getCode();
-//                newFullName = parent.getFullName() + DEFAULT_SPLIT_CHAR + newData.getName();
-//                newFullId = parent.getFullId() + DEFAULT_SPLIT_CHAR + newData.getId();
-//            } else {
-//                newFullCode = newData.getCode();
-//                newFullName = newData.getName();
-//                newFullId = newData.getId();
-//            }
-//
-//            newData.setFullCode(newFullCode);
-//            newData.setFullName(newFullName);
-//            newData.setFullId(newFullId);
-//
-//            //先清除旧的数据
-//            newData.getChildren().forEach(a -> insertMemory((D) a, newData));
-//        }
 
     }
 

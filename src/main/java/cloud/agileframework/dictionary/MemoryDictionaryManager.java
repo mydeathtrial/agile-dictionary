@@ -1,8 +1,16 @@
 package cloud.agileframework.dictionary;
 
+import cloud.agileframework.cache.util.BeanUtil;
 import cloud.agileframework.common.util.object.ObjectUtil;
+import cloud.agileframework.dictionary.cache.AgileCacheImpl;
+import cloud.agileframework.dictionary.cache.DictionaryCache;
+import cloud.agileframework.dictionary.cache.MemoryCacheImpl;
+import cloud.agileframework.dictionary.cache.SpringCacheImpl;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
 import com.google.common.collect.Sets;
+import org.springframework.cache.ehcache.EhCacheCacheManager;
+import org.springframework.cache.jcache.JCacheCacheManager;
+import org.springframework.data.redis.cache.RedisCacheManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +29,7 @@ public class MemoryDictionaryManager extends AbstractDictionaryDataManager<Dicti
      */
     private static final Set<DictionaryDataBase> CACHE = Sets.newHashSet();
 
-    public static Set<DictionaryDataBase> cache(){
+    public static Set<DictionaryDataBase> store(){
         return CACHE;
     }
 
@@ -58,5 +66,10 @@ public class MemoryDictionaryManager extends AbstractDictionaryDataManager<Dicti
         ObjectUtil.copyProperties(dictionaryDataBase,dic, ObjectUtil.Compare.DIFF_SOURCE_NOT_NULL);
         update(dic);
         return dic;
+    }
+
+    @Override
+    public DictionaryCache cache() {
+        return MemoryCacheImpl.INSTANT;
     }
 }

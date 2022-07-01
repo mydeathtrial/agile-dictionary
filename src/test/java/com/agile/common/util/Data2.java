@@ -32,12 +32,12 @@ public class Data2 implements Serializable {
     @Dictionary(fieldName = {"country"})
     private String countryValue;
 
-    @Dictionary(fieldName = {"country", "city"})
+    @Dictionary(fieldName = {"country", "city"},split = ".")
     private String cityValue;
 
     //中国/黑龙江/哈尔滨
     //哈尔滨
-    @Dictionary(fieldName = {"country", "city", "region"}, isFull = true)
+    @Dictionary(fieldName = {"country", "city", "region"}, isFull = true,split = ".")
     private List<String> regionValue;
 
     @DictionaryField
