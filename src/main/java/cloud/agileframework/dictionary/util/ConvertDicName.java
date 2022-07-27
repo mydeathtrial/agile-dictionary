@@ -5,6 +5,7 @@ import cloud.agileframework.common.util.string.StringUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.DictionaryEngine;
 import cloud.agileframework.dictionary.annotation.Dictionary;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -171,6 +172,10 @@ class ConvertDicName extends ConvertDicCode {
                 }
             }
         });
+        if (Dictionary.NULL.equals(defaultName) &&
+                ArrayUtils.contains(StringUtils.split(builder.toString(), splitChar), Dictionary.NULL)) {
+            return null;
+        }
         return builder.toString();
     }
 }

@@ -19,6 +19,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Dictionary {
+    String NULL = "NULL";
 
     String DEFAULT_NAME = "$Dictionary.DEFAULT_NAME";
 

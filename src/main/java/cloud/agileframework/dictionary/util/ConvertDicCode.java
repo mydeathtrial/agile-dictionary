@@ -5,6 +5,7 @@ import cloud.agileframework.common.util.string.StringUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.DictionaryEngine;
 import cloud.agileframework.dictionary.annotation.Dictionary;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -209,7 +210,7 @@ class ConvertDicCode extends ConvertDicBean {
             if (targetEntity == null) {
                 if (Dictionary.DEFAULT_NAME.equals(defaultCode)) {
                     builder.append(StringUtil.getSplitByStrLastAtomic(c, splitChar));
-                } else if (defaultCode != null) {
+                } else if (defaultCode != null && !Dictionary.NULL.equals(defaultCode)) {
                     builder.append(defaultCode);
                 }
             } else {
@@ -220,6 +221,10 @@ class ConvertDicCode extends ConvertDicBean {
                 }
             }
         });
+        if (Dictionary.NULL.equals(defaultCode) &&
+                ArrayUtils.contains(StringUtils.split(builder.toString(), splitChar), Dictionary.NULL)) {
+            return null;
+        }
         return builder.toString();
     }
 }
