@@ -1,18 +1,15 @@
 package cloud.agileframework.dictionary.cache;
 
 
+import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.collection.TreeUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
-import cloud.agileframework.dictionary.DictionaryEngine;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Collectors;
-
-import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHAR;
 
 public interface DictionaryCache {
 
@@ -105,7 +102,7 @@ public interface DictionaryCache {
 
         return data.entrySet()
                 .stream()
-                .filter(node -> node.getKey().startsWith(fullIndex + DictionaryEngine.DEFAULT_SPLIT_CHAR))
+                .filter(node -> node.getKey().startsWith(fullIndex + Constant.AgileAbout.DIC_SPLIT))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toCollection(ConcurrentSkipListSet::new));
     }
@@ -155,9 +152,9 @@ public interface DictionaryCache {
         String newFullId;
 
         if (parent != null) {
-            newFullCode = parent.getFullCode() + DEFAULT_SPLIT_CHAR + entity.getCode();
-            newFullName = parent.getFullName() + DEFAULT_SPLIT_CHAR + entity.getName();
-            newFullId = parent.getFullId() + DEFAULT_SPLIT_CHAR + entity.getId();
+            newFullCode = parent.getFullCode() + Constant.AgileAbout.DIC_SPLIT + entity.getCode();
+            newFullName = parent.getFullName() + Constant.AgileAbout.DIC_SPLIT + entity.getName();
+            newFullId = parent.getFullId() + Constant.AgileAbout.DIC_SPLIT + entity.getId();
         } else {
             newFullCode = entity.getCode();
             newFullName = entity.getName();
@@ -199,7 +196,7 @@ public interface DictionaryCache {
         children.add(entity);
         TreeUtil.createTree(children,
                 entity.getParentId(),
-                DEFAULT_SPLIT_CHAR,
+                Constant.AgileAbout.DIC_SPLIT,
                 "fullName", "fullCode", "fullId"
         );
         String id = entity.getId();
@@ -220,7 +217,7 @@ public interface DictionaryCache {
     }
 
     default <D extends DictionaryDataBase> D findById(String datasource, String id) throws NotFoundCacheException {
-        return (D)getDataByRegion(datasource, RegionEnum.ID_MEMORY)
+        return (D) getDataByRegion(datasource, RegionEnum.ID_MEMORY)
                 .get(id);
     }
 

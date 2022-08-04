@@ -3,15 +3,10 @@ package cloud.agileframework.dictionary.util;
 import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.string.StringUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
-import cloud.agileframework.dictionary.DictionaryEngine;
-import cloud.agileframework.dictionary.annotation.Dictionary;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
-
-import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHAR;
 
 /**
  * @author 佟盟
@@ -28,11 +23,11 @@ class ConvertDicName extends ConvertDicCode {
      * @return 字典值
      */
     public static String coverDicName(String fullCodes) {
-        return coverDicName(DictionaryEngine.DICTIONARY_DATA_CACHE,
+        return coverDicName(Constant.AgileAbout.DIC_DATASOURCE,
                 fullCodes,
-                Dictionary.DEFAULT_NAME,
+                Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE,
                 false,
-                Constant.RegularAbout.SPOT);
+                Constant.AgileAbout.DIC_SPLIT);
     }
 
     /**
@@ -43,11 +38,11 @@ class ConvertDicName extends ConvertDicCode {
      * @return 字典值
      */
     public static String coverDicName(String fullCodes, String defaultName) {
-        return coverDicName(DictionaryEngine.DICTIONARY_DATA_CACHE,
+        return coverDicName(Constant.AgileAbout.DIC_DATASOURCE,
                 fullCodes,
                 defaultName,
                 false,
-                Constant.RegularAbout.SPOT);
+                Constant.AgileAbout.DIC_SPLIT);
     }
 
     /**
@@ -63,7 +58,7 @@ class ConvertDicName extends ConvertDicCode {
                 fullCodes,
                 defaultName,
                 false,
-                Constant.RegularAbout.SPOT);
+                Constant.AgileAbout.DIC_SPLIT);
     }
 
 
@@ -75,12 +70,12 @@ class ConvertDicName extends ConvertDicCode {
      * @return 非全路径子字典值集合，逗号分隔
      */
     public static String coverDicNameByParent(String parentCode, String codes) {
-        return coverDicNameByParent(DictionaryEngine.DICTIONARY_DATA_CACHE,
+        return coverDicNameByParent(Constant.AgileAbout.DIC_DATASOURCE,
                 parentCode,
                 codes,
-                Dictionary.DEFAULT_NAME,
+                Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE,
                 false,
-                Constant.RegularAbout.SPOT);
+                Constant.AgileAbout.DIC_SPLIT);
     }
 
     /**
@@ -92,16 +87,16 @@ class ConvertDicName extends ConvertDicCode {
      * @return 非全路径子字典值集合，逗号分隔
      */
     public static String coverDicNameByParent(String parentCode, String codes, String defaultValue) {
-        return coverDicNameByParent(DictionaryEngine.DICTIONARY_DATA_CACHE,
+        return coverDicNameByParent(Constant.AgileAbout.DIC_DATASOURCE,
                 parentCode,
                 codes,
                 defaultValue,
                 false,
-                Constant.RegularAbout.SPOT);
+                Constant.AgileAbout.DIC_SPLIT);
     }
 
     public static String coverDicNameByParent(String parentCode, String codes, String defaultValue, boolean isFull, String splitChar) {
-        return coverDicNameByParent(DictionaryEngine.DICTIONARY_DATA_CACHE, parentCode, codes, defaultValue, isFull, splitChar);
+        return coverDicNameByParent(Constant.AgileAbout.DIC_DATASOURCE, parentCode, codes, defaultValue, isFull, splitChar);
     }
 
     /**
@@ -135,7 +130,7 @@ class ConvertDicName extends ConvertDicCode {
     }
 
     public static String coverDicName(String fullCodes, String defaultName, boolean isFull, String splitChar) {
-        return coverDicName(DictionaryEngine.DICTIONARY_DATA_CACHE, fullCodes, defaultName, isFull, splitChar);
+        return coverDicName(Constant.AgileAbout.DIC_DATASOURCE, fullCodes, defaultName, isFull, splitChar);
     }
 
     /**
@@ -159,7 +154,7 @@ class ConvertDicName extends ConvertDicCode {
                 builder.append(Constant.RegularAbout.COMMA);
             }
             if (targetEntity == null) {
-                if (Dictionary.DEFAULT_NAME.equals(defaultName)) {
+                if (Constant.AgileAbout.DIC_TRANSLATE_FAIL_VALUE.equals(defaultName)) {
                     builder.append(StringUtil.getSplitByStrLastAtomic(c, splitChar));
                 } else if (defaultName != null) {
                     builder.append(defaultName);
@@ -172,9 +167,8 @@ class ConvertDicName extends ConvertDicCode {
                 }
             }
         });
-        if (Dictionary.NULL.equals(defaultName) &&
-                ArrayUtils.contains(StringUtils.split(builder.toString(), splitChar), Dictionary.NULL)) {
-            return null;
+        if (Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE.equals(defaultName)) {
+            return parseNullValue(builder.toString());
         }
         return builder.toString();
     }

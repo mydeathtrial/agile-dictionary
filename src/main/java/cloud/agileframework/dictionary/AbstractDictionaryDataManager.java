@@ -2,7 +2,6 @@ package cloud.agileframework.dictionary;
 
 import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.object.ObjectUtil;
-import cloud.agileframework.dictionary.cache.DictionaryCacheUtil;
 import cloud.agileframework.dictionary.cache.NotFoundCacheException;
 import cloud.agileframework.dictionary.cache.RegionEnum;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
@@ -14,8 +13,6 @@ import java.util.SortedSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHAR;
 
 /**
  * @author 佟盟
@@ -70,7 +67,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
          */
         public void add(D dictionaryData) {
             synchronized (this) {
-                if (dictionaryData.getId()!=null && Objects.equals(dictionaryData.getId(), dictionaryData.getParentId())) {
+                if (dictionaryData.getId() != null && Objects.equals(dictionaryData.getId(), dictionaryData.getParentId())) {
                     throw new IllegalArgumentException("父主键与主键不能相同");
                 }
                 addData(dictionaryData);
@@ -111,9 +108,9 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
             D parent = findOne(dictionaryData.getParentId());
 
             if (parent != null) {
-                dictionaryData.setFullCode(parent.getFullCode() + DEFAULT_SPLIT_CHAR + dictionaryData.getCode());
-                dictionaryData.setFullName(parent.getFullName() + DEFAULT_SPLIT_CHAR + dictionaryData.getName());
-                dictionaryData.setFullId(parent.getFullId() + DEFAULT_SPLIT_CHAR + dictionaryData.getId());
+                dictionaryData.setFullCode(parent.getFullCode() + Constant.AgileAbout.DIC_SPLIT + dictionaryData.getCode());
+                dictionaryData.setFullName(parent.getFullName() + Constant.AgileAbout.DIC_SPLIT + dictionaryData.getName());
+                dictionaryData.setFullId(parent.getFullId() + Constant.AgileAbout.DIC_SPLIT + dictionaryData.getId());
             } else {
                 dictionaryData.setFullCode(dictionaryData.getCode());
                 dictionaryData.setFullName(dictionaryData.getName());
@@ -133,7 +130,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
          * @param fullCode 全路径字典码
          */
         public void delete(String fullCode) {
-            D dictionaryData = (D) DictionaryUtil.coverDicBean(dataSource(), fullCode, DEFAULT_SPLIT_CHAR);
+            D dictionaryData = (D) DictionaryUtil.coverDicBean(dataSource(), fullCode, Constant.AgileAbout.DIC_SPLIT);
             if (dictionaryData == null) {
                 throw new NoSuchElementException(String.format("Did not find dictionary [%s]", fullCode));
             }
@@ -151,7 +148,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
          * @param fullCode 全路径字典码
          */
         public void delete(String fullCode, String split) {
-            delete(fullCode.replace(split, DEFAULT_SPLIT_CHAR));
+            delete(fullCode.replace(split, Constant.AgileAbout.DIC_SPLIT));
         }
 
         /**

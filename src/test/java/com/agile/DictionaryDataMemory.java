@@ -15,7 +15,7 @@ public class DictionaryDataMemory extends DictionaryDataBase {
         super(id, parentId, name, code);
     }
 
-    public DictionaryDataMemory(String id, String parentId, String name, String code,Integer sort) {
+    public DictionaryDataMemory(String id, String parentId, String name, String code, Integer sort) {
         super(id, parentId, name, code);
         setSort(sort);
     }

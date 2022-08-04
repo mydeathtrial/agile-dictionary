@@ -5,6 +5,9 @@ import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.DictionaryEngine;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 /**
  * @author 佟盟
  * 日期 2021-03-24 19:00
@@ -24,11 +27,11 @@ class ConvertDicBean extends ConvertBase {
      * @return bean
      */
     public static DictionaryDataBase coverDicBean(String fullCode) {
-        return getDictionary(DictionaryEngine.DICTIONARY_DATA_CACHE,
+        return getDictionary(Constant.AgileAbout.DIC_DATASOURCE,
                 fullCode,
                 DictionaryEngine.CacheType.CODE_CACHE,
                 NOT_FOUND_DICTIONARY_OF_FULL_CODE,
-                Constant.RegularAbout.SPOT);
+                Constant.AgileAbout.DIC_SPLIT);
     }
 
     /**
@@ -39,7 +42,7 @@ class ConvertDicBean extends ConvertBase {
      * @return bean
      */
     public static DictionaryDataBase coverDicBean(String fullCode, String splitChar) {
-        return getDictionary(DictionaryEngine.DICTIONARY_DATA_CACHE,
+        return getDictionary(Constant.AgileAbout.DIC_DATASOURCE,
                 fullCode,
                 DictionaryEngine.CacheType.CODE_CACHE,
                 NOT_FOUND_DICTIONARY_OF_FULL_CODE,
@@ -70,11 +73,11 @@ class ConvertDicBean extends ConvertBase {
      * @return bean
      */
     public static DictionaryDataBase coverDicBeanByFullName(String fullName) {
-        return getDictionary(DictionaryEngine.DICTIONARY_DATA_CACHE,
+        return getDictionary(Constant.AgileAbout.DIC_DATASOURCE,
                 fullName,
                 DictionaryEngine.CacheType.NAME_CACHE,
                 NOT_FOUND_DICTIONARY_OF_FULL_NAME,
-                Constant.RegularAbout.SPOT);
+                Constant.AgileAbout.DIC_SPLIT);
     }
 
 
@@ -86,7 +89,7 @@ class ConvertDicBean extends ConvertBase {
      * @return bean
      */
     public static DictionaryDataBase coverDicBeanByFullName(String fullName, String splitChar) {
-        return getDictionary(DictionaryEngine.DICTIONARY_DATA_CACHE,
+        return getDictionary(Constant.AgileAbout.DIC_DATASOURCE,
                 fullName,
                 DictionaryEngine.CacheType.NAME_CACHE,
                 NOT_FOUND_DICTIONARY_OF_FULL_NAME,
@@ -111,7 +114,7 @@ class ConvertDicBean extends ConvertBase {
 
 
     public static DictionaryDataBase coverDicBeanByParent(String parentCode, String name) {
-        return coverDicBeanByParent(DictionaryEngine.DICTIONARY_DATA_CACHE,
+        return coverDicBeanByParent(Constant.AgileAbout.DIC_DATASOURCE,
                 parentCode,
                 name);
     }
@@ -127,15 +130,46 @@ class ConvertDicBean extends ConvertBase {
         if (StringUtils.isEmpty(parentCode) || StringUtils.isEmpty(name)) {
             return null;
         }
-        DictionaryDataBase dic = coverDicBean(datasource, parentCode, Constant.RegularAbout.SPOT);
+        DictionaryDataBase dic = coverDicBean(datasource, parentCode, Constant.AgileAbout.DIC_SPLIT);
         if (dic == null) {
             return null;
         }
 
         return getDictionary(datasource,
-                dic.getFullName() + Constant.RegularAbout.SPOT + name,
+                dic.getFullName() + Constant.AgileAbout.DIC_SPLIT + name,
                 DictionaryEngine.CacheType.NAME_CACHE,
                 NOT_FOUND_DICTIONARY_OF_FULL_NAME,
-                Constant.RegularAbout.SPOT);
+                Constant.AgileAbout.DIC_SPLIT);
+    }
+
+    /**
+     * 处理当期望转换失败时，翻译为空值的情况
+     *
+     * @param value 值
+     * @return 翻译结果值
+     */
+    protected static String parseNullValue(String value) {
+        if (value == null) {
+            return null;
+        }
+        if (!value.contains(Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE)) {
+            return value;
+        }
+        if (!value.contains(Constant.RegularAbout.COMMA)) {
+            return null;
+        } else {
+            String[] array = StringUtils.split(value, Constant.RegularAbout.COMMA);
+            boolean allNull = Arrays.stream(array).allMatch(Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE::equals);
+
+            if (allNull) {
+                return null;
+            }
+            return Arrays.stream(array).map(node -> {
+                if (Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE.equals(node)) {
+                    return Constant.RegularAbout.BLANK;
+                }
+                return node;
+            }).collect(Collectors.joining(Constant.RegularAbout.COMMA));
+        }
     }
 }

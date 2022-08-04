@@ -1,7 +1,7 @@
 package cloud.agileframework.dictionary;
 
+import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.clazz.ClassUtil;
-import cloud.agileframework.dictionary.cache.AgileCacheImpl;
 import cloud.agileframework.dictionary.cache.DictionaryCache;
 import cloud.agileframework.dictionary.cache.MemoryCacheImpl;
 
@@ -59,18 +59,18 @@ public interface DictionaryDataManager<D extends DictionaryDataBase> {
      * @return 用于Convert注解中dataSource声明，将数据按照数据源标识划分成不同存储区域
      */
     default String dataSource() {
-        return DictionaryEngine.DICTIONARY_DATA_CACHE;
+        return Constant.AgileAbout.DIC_DATASOURCE;
     }
 
     /**
      * 初始化字典缓存介质
-     * 
+     *
      * @return 多次调用必须返回同一个对象
      */
-    default DictionaryCache cache(){
+    default DictionaryCache cache() {
         return MemoryCacheImpl.INSTANT;
     }
-    
+
     /**
      * 取根节点数据的parentId值
      *

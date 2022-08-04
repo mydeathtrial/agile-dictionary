@@ -1,21 +1,13 @@
 package cloud.agileframework.dictionary.util;
 
-import cloud.agileframework.common.util.collection.TreeUtil;
+import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.DictionaryEngine;
 import cloud.agileframework.dictionary.cache.DictionaryCacheUtil;
-import cloud.agileframework.dictionary.cache.NotFoundCacheException;
 import cloud.agileframework.dictionary.cache.RegionEnum;
-import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.TreeSet;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.stream.Collectors;
-
-import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHAR;
 
 /**
  * @author 佟盟
@@ -27,7 +19,6 @@ import static cloud.agileframework.dictionary.DictionaryEngine.DEFAULT_SPLIT_CHA
 class ConvertBase {
 
     static final Logger LOGGER = LoggerFactory.getLogger(DictionaryUtil.class);
-    static final String DEFAULT_NAME = "$Dictionary.DEFAULT_NAME";
 
     /**
      * 取字典
@@ -42,7 +33,7 @@ class ConvertBase {
                                             DictionaryEngine.CacheType cacheType,
                                             String errorMessage,
                                             String splitChar) {
-        return getDictionary(DictionaryEngine.DICTIONARY_DATA_CACHE, fullIndex, cacheType, errorMessage, splitChar);
+        return getDictionary(Constant.AgileAbout.DIC_DATASOURCE, fullIndex, cacheType, errorMessage, splitChar);
     }
 
     /**
@@ -64,7 +55,7 @@ class ConvertBase {
             return null;
         }
         // 字典分隔符同义转换为点号
-        fullIndex = fullIndex.replace(splitChar, DEFAULT_SPLIT_CHAR);
+        fullIndex = fullIndex.replace(splitChar, Constant.AgileAbout.DIC_SPLIT);
 
         DictionaryDataBase entity = null;
         try {

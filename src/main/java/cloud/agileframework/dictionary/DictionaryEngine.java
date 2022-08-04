@@ -1,11 +1,11 @@
 package cloud.agileframework.dictionary;
 
+import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.collection.TreeUtil;
 import cloud.agileframework.dictionary.cache.DictionaryCacheUtil;
 import cloud.agileframework.dictionary.cache.NotFoundCacheException;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.ApplicationArguments;
@@ -29,21 +29,12 @@ import java.util.concurrent.ConcurrentSkipListSet;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class DictionaryEngine implements ApplicationRunner, ApplicationContextAware {
 
-    /**
-     * 字典内置层级分隔符
-     */
-    public static final String DEFAULT_SPLIT_CHAR = "$$";
-    /**
-     * 默认的字典区域（datasource）
-     */
-    public static final String DICTIONARY_DATA_CACHE = "DICTIONARY_DATA_CACHE";
-
     private ApplicationContext applicationContext;
 
     /**
      * 字典数据管理器缓存
      */
-    private static Map<String,DictionaryDataManager<? extends DictionaryDataBase>> dictionaryDataManagerMap = Maps.newConcurrentMap();
+    private static Map<String, DictionaryDataManager<? extends DictionaryDataBase>> dictionaryDataManagerMap = Maps.newConcurrentMap();
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -86,9 +77,9 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
     private void parseDataSource(DictionaryDataManager<?> dictionaryDataManager) throws NotFoundCacheException {
         //设置缓存操作
         DictionaryCacheUtil.setDictionaryCache(dictionaryDataManager.dataSource(), dictionaryDataManager.cache());
-        
+
         //初始化缓存
-        dictionaryDataManagerMap.put(dictionaryDataManager.dataSource(),dictionaryDataManager);
+        dictionaryDataManagerMap.put(dictionaryDataManager.dataSource(), dictionaryDataManager);
 
         //如果缓存中没有，则初始化
         SortedSet<DictionaryDataBase> treeSet = new ConcurrentSkipListSet<>(dictionaryDataManager.all());
@@ -108,12 +99,12 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
         //构建树形结构，过程中重新计算全字典值与全字典码
         TreeUtil.createTree(treeSet,
                 dictionaryDataManager.rootParentId(),
-                DEFAULT_SPLIT_CHAR,
-                "fullName", "fullCode","fullId"
+                Constant.AgileAbout.DIC_SPLIT,
+                "fullName", "fullCode", "fullId"
         );
 
         //做缓存同步
-        dictionaryDataManager.cache().initData(dictionaryDataManager.dataSource(),treeSet);
+        dictionaryDataManager.cache().initData(dictionaryDataManager.dataSource(), treeSet);
     }
 
     /**
@@ -130,6 +121,7 @@ public class DictionaryEngine implements ApplicationRunner, ApplicationContextAw
 
     /**
      * 根据数据源获取对应的字典数据管理器
+     *
      * @param datasource 数据源
      * @return 字典数据管理器
      */

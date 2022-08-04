@@ -1,5 +1,6 @@
 package cloud.agileframework.dictionary;
 
+import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.collection.TreeBase;
 import lombok.Getter;
 import lombok.Setter;
@@ -53,17 +54,17 @@ public class DictionaryDataBase extends TreeBase<String, DictionaryDataBase> {
     }
 
     public String getFullName(String splitChar) {
-        return fullName.replace(DictionaryEngine.DEFAULT_SPLIT_CHAR, splitChar);
+        return fullName.replace(Constant.AgileAbout.DIC_SPLIT, splitChar);
     }
 
     public String getFullCode(String splitChar) {
-        return fullCode.replace(DictionaryEngine.DEFAULT_SPLIT_CHAR, splitChar);
+        return fullCode.replace(Constant.AgileAbout.DIC_SPLIT, splitChar);
     }
 
     public String getFullId(String splitChar) {
-        return fullId.replace(DictionaryEngine.DEFAULT_SPLIT_CHAR, splitChar);
+        return fullId.replace(Constant.AgileAbout.DIC_SPLIT, splitChar);
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

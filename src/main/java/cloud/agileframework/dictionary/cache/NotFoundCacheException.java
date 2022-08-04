@@ -3,7 +3,7 @@ package cloud.agileframework.dictionary.cache;
 /**
  * 未找到缓存介质异常
  */
-public class NotFoundCacheException extends Exception{
+public class NotFoundCacheException extends Exception {
     public NotFoundCacheException() {
     }
 

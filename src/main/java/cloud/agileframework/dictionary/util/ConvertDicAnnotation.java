@@ -98,56 +98,9 @@ class ConvertDicAnnotation extends ConvertDicMap {
             dicCoverCache = Maps.newConcurrentMap();
         }
         Collection<T> c = Collections.synchronizedCollection(collection);
-        
+
         synchronized (c) {
-//            for(T o:c){
-//                cover(o);
-//            }
-            collection.parallelStream().forEach(o->cover(o));
-            
-//            if (ObjectUtils.isEmpty(c)) {
-//                return;
-//            }
-//            Class<?> type = c.iterator().next().getClass();
-//            Set<ClassUtil.Target<Dictionary>> targets = ClassUtil.getAllEntityAnnotation(type, Dictionary.class);
-//
-//            targets.forEach(target -> {
-//                Dictionary dictionary = target.getAnnotation();
-//                Member member = target.getMember();
-//                Field field;
-//                if (member instanceof Method) {
-//                    String fieldName = StringUtil.toLowerName(member.getName().substring(Constant.NumberAbout.THREE));
-//                    field = ClassUtil.getField(type, fieldName);
-//                    if (ObjectUtils.isEmpty(field)) {
-//                        return;
-//                    }
-//                } else if (member instanceof Field) {
-//                    field = (Field) member;
-//                } else {
-//                    return;
-//                }
-//                for (T node : c) {
-//                    parseNodeField(dictionary, field, node);
-//                }
-//                
-//            });
-//
-//            Set<ClassUtil.Target<DictionaryField>> dictionaryTargets = ClassUtil.getAllEntityAnnotation(type, DictionaryField.class);
-//            dictionaryTargets.forEach(dictionaryTarget -> {
-//                Member member = dictionaryTarget.getMember();
-//                String fieldName;
-//                if (member instanceof Method) {
-//                    fieldName = StringUtil.toLowerName(member.getName().substring(Constant.NumberAbout.THREE));
-//                } else if (member instanceof Field) {
-//                    fieldName = member.getName();
-//                } else {
-//                    return;
-//                }
-//                for (T node : c) {
-//                    Object value = ObjectUtil.getFieldValue(node, fieldName);
-//                    cover(value);
-//                }
-//            });
+            collection.parallelStream().forEach(ConvertDicAnnotation::cover);
         }
         dicCoverCache.clear();
     }
@@ -221,7 +174,7 @@ class ConvertDicAnnotation extends ConvertDicMap {
             if (temp == null) {
                 return;
             }
-            String tempString = Arrays.stream(temp.split("[,]")).map(a -> finalPrefix + a).collect(Collectors.joining(Constant.RegularAbout.COMMA));
+            String tempString = Arrays.stream(StringUtils.split(temp, Constant.RegularAbout.COMMA)).map(a -> finalPrefix + a).collect(Collectors.joining(Constant.RegularAbout.COMMA));
             value = parseString(dictionary, tempString);
         }
 
@@ -290,6 +243,9 @@ class ConvertDicAnnotation extends ConvertDicMap {
         final String threadCacheKey = fullIndex + dictionary.hashCode();
         if (dicCoverCache != null && dicCoverCache.containsKey(threadCacheKey)) {
             targetName = dicCoverCache.get(threadCacheKey);
+            if(Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE.equals(targetName)){
+                targetName = null;
+            }
         } else {
             String defaultValue = dictionary.defaultValue();
             StringBuilder builder = new StringBuilder();
@@ -315,7 +271,7 @@ class ConvertDicAnnotation extends ConvertDicMap {
                     builder.append(Constant.RegularAbout.COMMA);
                 }
                 if (targetEntity == null) {
-                    if (Dictionary.DEFAULT_NAME.equals(defaultValue)) {
+                    if (Constant.AgileAbout.DIC_TRANSLATE_FAIL_VALUE.equals(defaultValue)) {
                         builder.append(StringUtil.getSplitByStrLastAtomic(c, split));
                     } else if (defaultValue != null) {
                         builder.append(defaultValue);
@@ -357,9 +313,15 @@ class ConvertDicAnnotation extends ConvertDicMap {
                     }
                 }
             });
-            targetName = builder.toString();
 
-            if (dicCoverCache != null) {
+            targetName = builder.toString();
+            if (Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE.equals(defaultValue)) {
+                targetName = parseNullValue(targetName);
+            }
+
+            if (dicCoverCache != null && targetName==null) {
+                dicCoverCache.put(threadCacheKey, Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE);
+            }else if(dicCoverCache != null){
                 dicCoverCache.put(threadCacheKey, targetName);
             }
         }

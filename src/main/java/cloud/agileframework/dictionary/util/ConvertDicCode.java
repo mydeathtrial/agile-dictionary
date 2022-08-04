@@ -4,8 +4,6 @@ import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.string.StringUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.DictionaryEngine;
-import cloud.agileframework.dictionary.annotation.Dictionary;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -27,11 +25,11 @@ class ConvertDicCode extends ConvertDicBean {
      * @return 字典码
      */
     public static String coverDicCode(String fullNames) {
-        return coverDicCode(DictionaryEngine.DICTIONARY_DATA_CACHE,
+        return coverDicCode(Constant.AgileAbout.DIC_DATASOURCE,
                 fullNames,
-                Dictionary.DEFAULT_NAME,
+                Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE,
                 false,
-                Constant.RegularAbout.SPOT);
+                Constant.AgileAbout.DIC_SPLIT);
     }
 
     /**
@@ -42,11 +40,11 @@ class ConvertDicCode extends ConvertDicBean {
      * @return 字典码
      */
     public static String coverDicCode(String fullNames, String defaultCode) {
-        return coverDicCode(DictionaryEngine.DICTIONARY_DATA_CACHE,
+        return coverDicCode(Constant.AgileAbout.DIC_DATASOURCE,
                 fullNames,
                 defaultCode,
                 false,
-                Constant.RegularAbout.SPOT);
+                Constant.AgileAbout.DIC_SPLIT);
     }
 
     /**
@@ -62,7 +60,7 @@ class ConvertDicCode extends ConvertDicBean {
                 fullNames,
                 defaultCode,
                 false,
-                Constant.RegularAbout.SPOT);
+                Constant.AgileAbout.DIC_SPLIT);
     }
 
     /**
@@ -75,7 +73,7 @@ class ConvertDicCode extends ConvertDicBean {
      * @return 字典码
      */
     public static String coverDicCode(String fullNames, String defaultCode, boolean isFull, String splitChar) {
-        return coverDicCode(DictionaryEngine.DICTIONARY_DATA_CACHE,
+        return coverDicCode(Constant.AgileAbout.DIC_DATASOURCE,
                 fullNames,
                 defaultCode,
                 isFull,
@@ -106,7 +104,7 @@ class ConvertDicCode extends ConvertDicBean {
      * @return code（可包含逗号）
      */
     public static String coverDicCodeByParentCode(String parentCode, String names) {
-        return coverDicCodeByParentCode(DictionaryEngine.DICTIONARY_DATA_CACHE, parentCode, names);
+        return coverDicCodeByParentCode(Constant.AgileAbout.DIC_DATASOURCE, parentCode, names);
     }
 
     /**
@@ -117,7 +115,7 @@ class ConvertDicCode extends ConvertDicBean {
      * @return 非全路径子字典码集合，逗号分隔
      */
     public static String coverDicCodeByParent(String parentName, String names) {
-        return coverDicCodeByParent(parentName, names, Dictionary.DEFAULT_NAME, false, Constant.RegularAbout.SPOT);
+        return coverDicCodeByParent(parentName, names, Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE, false, Constant.AgileAbout.DIC_SPLIT);
     }
 
     /**
@@ -129,7 +127,7 @@ class ConvertDicCode extends ConvertDicBean {
      * @return 非全路径子字典码集合，逗号分隔
      */
     public static String coverDicCodeByParent(String parentName, String names, String defaultCode) {
-        return coverDicCodeByParent(parentName, names, defaultCode, false, Constant.RegularAbout.SPOT);
+        return coverDicCodeByParent(parentName, names, defaultCode, false, Constant.AgileAbout.DIC_SPLIT);
     }
 
     /**
@@ -143,7 +141,7 @@ class ConvertDicCode extends ConvertDicBean {
      * @return 非全路径子字典码集合，逗号分隔
      */
     public static String coverDicCodeByParent(String parentName, String names, String defaultCode, boolean isFull, String splitChar) {
-        return coverDicCodeByParent(DictionaryEngine.DICTIONARY_DATA_CACHE,
+        return coverDicCodeByParent(Constant.AgileAbout.DIC_DATASOURCE,
                 parentName,
                 names,
                 defaultCode,
@@ -208,9 +206,9 @@ class ConvertDicCode extends ConvertDicBean {
                 builder.append(Constant.RegularAbout.COMMA);
             }
             if (targetEntity == null) {
-                if (Dictionary.DEFAULT_NAME.equals(defaultCode)) {
+                if (Constant.AgileAbout.DIC_TRANSLATE_FAIL_VALUE.equals(defaultCode)) {
                     builder.append(StringUtil.getSplitByStrLastAtomic(c, splitChar));
-                } else if (defaultCode != null && !Dictionary.NULL.equals(defaultCode)) {
+                } else if (defaultCode != null) {
                     builder.append(defaultCode);
                 }
             } else {
@@ -221,9 +219,9 @@ class ConvertDicCode extends ConvertDicBean {
                 }
             }
         });
-        if (Dictionary.NULL.equals(defaultCode) &&
-                ArrayUtils.contains(StringUtils.split(builder.toString(), splitChar), Dictionary.NULL)) {
-            return null;
+
+        if (Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE.equals(defaultCode)) {
+            return parseNullValue(builder.toString());
         }
         return builder.toString();
     }

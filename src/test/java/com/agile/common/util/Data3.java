@@ -19,8 +19,8 @@ public class Data3 {
 
     private String status;
 
-    @Dictionary(fieldName = "status",split = ".")
+    @Dictionary(fieldName = "status", split = ".")
     private String text;
-    @Dictionary(fieldName = "status", isFull = true,split = ".")
+    @Dictionary(fieldName = "status", isFull = true, split = ".")
     private String fullText;
 }

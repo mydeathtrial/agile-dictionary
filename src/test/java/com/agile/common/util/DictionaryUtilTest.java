@@ -1,8 +1,6 @@
 package com.agile.common.util;
 
-import cloud.agileframework.common.util.number.NumberUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
-import cloud.agileframework.dictionary.DictionaryEngine;
 import cloud.agileframework.dictionary.MemoryDictionaryManager;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
 import com.agile.App;
@@ -17,9 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
 import java.util.stream.IntStream;
 
 
@@ -38,17 +39,17 @@ public class DictionaryUtilTest {
 
     @Test
     public void coverDicBean() {
-        DictionaryDataBase dic1 = DictionaryUtil.coverDicBean("sex.boy");
+        DictionaryDataBase dic1 = DictionaryUtil.coverDicBean("sex$$boy");
         Assert.assertEquals(dic1.getName(), "男");
         DictionaryDataBase dic2 = DictionaryUtil.coverDicBean("sex#boy", "#");
         Assert.assertEquals(dic2.getName(), "男");
         IntStream.range(0, 10)
-                .forEach(a -> new Thread(() -> Assert.assertEquals(DictionaryUtil.coverDicBean("sex.boy").getName(), "男")).start());
+                .forEach(a -> new Thread(() -> Assert.assertEquals(DictionaryUtil.coverDicBean("sex$$boy").getName(), "男")).start());
     }
 
     @Test
     public void coverDicBeanByFullName() {
-        DictionaryDataBase dic1 = DictionaryUtil.coverDicBeanByFullName("性别.男");
+        DictionaryDataBase dic1 = DictionaryUtil.coverDicBeanByFullName("性别$$男");
         Assert.assertEquals(dic1.getFullCode(), "sex$$boy");
     }
 
@@ -68,9 +69,9 @@ public class DictionaryUtilTest {
     public void coverDicName() {
         String name = DictionaryUtil.coverDicName("sex");
         Assert.assertEquals(name, "性别");
-        String name2 = DictionaryUtil.coverDicName("sex.boy");
+        String name2 = DictionaryUtil.coverDicName("sex$$boy");
         Assert.assertEquals(name2, "男");
-        String name3 = DictionaryUtil.coverDicName("sex.no", "未知");
+        String name3 = DictionaryUtil.coverDicName("sex$$no", "未知");
         Assert.assertEquals(name3, "未知");
     }
 
@@ -86,9 +87,9 @@ public class DictionaryUtilTest {
 
     @Test
     public void coverDicCode() {
-        String code = DictionaryUtil.coverDicCode("性别.男,性别.女");
+        String code = DictionaryUtil.coverDicCode("性别$$男,性别$$女");
         Assert.assertEquals(code, "boy,girl");
-        String code2 = DictionaryUtil.coverDicCode("性别.男,性别.女,性别.中性", "no");
+        String code2 = DictionaryUtil.coverDicCode("性别$$男,性别$$女,性别$$中性", "no");
         Assert.assertEquals(code2, "boy,girl,no");
         String code3 = DictionaryUtil.coverDicCode("性别|男,性别|女,性别|中性", "no", true, "|");
         Assert.assertEquals(code3, "sex|boy,sex|girl,no");
@@ -143,7 +144,7 @@ public class DictionaryUtilTest {
     @Test
     public void time() {
         ArrayList<Object> list = Lists.newArrayList();
-        IntStream.range(0, 1000).forEach(a -> list.add(Data3.builder().status("sex.boy").build()));
+        IntStream.range(0, 1000).forEach(a -> list.add(Data3.builder().status("sex$$boy").build()));
         long start = System.nanoTime();
         DictionaryUtil.cover(list);
         long end = System.nanoTime();
@@ -160,35 +161,35 @@ public class DictionaryUtilTest {
         manager.sync().add(new DictionaryDataMemory("2", null, "对错", "isTrue", 3));
         Assert.assertEquals(DictionaryUtil.coverDicName("isTrue"), "对错");
         manager.sync().add(new DictionaryDataMemory("3", "1", "男", "boy", 6));
-        Assert.assertEquals(DictionaryUtil.coverDicName("sex.boy"), "男");
+        Assert.assertEquals(DictionaryUtil.coverDicName("sex$$boy"), "男");
         manager.sync().add(new DictionaryDataMemory("4", "1", "女", "girl", 5));
-        Assert.assertEquals(DictionaryUtil.coverDicName("sex.girl"), "女");
+        Assert.assertEquals(DictionaryUtil.coverDicName("sex$$girl"), "女");
         manager.sync().add(new DictionaryDataMemory("5", "2", "对", "1", 2));
-        Assert.assertEquals(DictionaryUtil.coverDicName("isTrue.1"), "对");
+        Assert.assertEquals(DictionaryUtil.coverDicName("isTrue$$1"), "对");
         manager.sync().add(new DictionaryDataMemory("6", "2", "错", "2", 8));
-        Assert.assertEquals(DictionaryUtil.coverDicName("isTrue.2"), "错");
+        Assert.assertEquals(DictionaryUtil.coverDicName("isTrue$$2"), "错");
         manager.sync().add(new DictionaryDataMemory("7", null, "中国", "7", 9));
         Assert.assertEquals(DictionaryUtil.coverDicName("7"), "中国");
         manager.sync().add(new DictionaryDataMemory("8", "7", "黑龙江", "8", 0));
-        Assert.assertEquals(DictionaryUtil.coverDicName("7.8"), "黑龙江");
+        Assert.assertEquals(DictionaryUtil.coverDicName("7$$8"), "黑龙江");
         manager.sync().add(new DictionaryDataMemory("9", "8", "哈尔滨", "9", 1));
-        Assert.assertEquals(DictionaryUtil.coverDicName("7.8.9"), "哈尔滨");
+        Assert.assertEquals(DictionaryUtil.coverDicName("7$$8$$9"), "哈尔滨");
     }
 
     @Test
     public void add() throws InterruptedException {
         final DictionaryDataMemory dictionaryData = new DictionaryDataMemory("31", "3", boy1Name(), "boy1");
         manager.sync().add(dictionaryData);
-        Assert.assertEquals("新增失败", DictionaryUtil.coverDicName("sex.boy.boy1"), boy1Name());
+        Assert.assertEquals("新增失败", DictionaryUtil.coverDicName("sex$$boy$$boy1"), boy1Name());
 
         DictionaryDataBase sexDic = DictionaryUtil.coverDicBean("sex");
         DictionaryDataBase boyDic = sexDic.getChildren()
                 .stream()
-                .filter(a -> "sex.boy".equals(a.getFullCode().replace(DictionaryEngine.DEFAULT_SPLIT_CHAR, ".")))
+                .filter(a -> "sex$$boy".equals(a.getFullCode()))
                 .findFirst().orElseThrow(RuntimeException::new);
         DictionaryDataBase boy1Dic = boyDic.getChildren()
                 .stream()
-                .filter(a -> "sex.boy.boy1".equals(a.getFullCode().replace(DictionaryEngine.DEFAULT_SPLIT_CHAR, ".")))
+                .filter(a -> "sex$$boy$$boy1".equals(a.getFullCode()))
                 .findFirst().orElseThrow(RuntimeException::new);
         Assert.assertEquals("新增失败", boy1Dic.getName(), boy1Name());
 
@@ -196,16 +197,16 @@ public class DictionaryUtilTest {
         dictionaryData.setName(updatedName);
         dictionaryData.setCode("boy-1");
         manager.sync().update(dictionaryData);
-        Assert.assertEquals("更新失败", DictionaryUtil.coverDicName("sex.boy.boy-1"), updatedName);
+        Assert.assertEquals("更新失败", DictionaryUtil.coverDicName("sex$$boy$$boy-1"), updatedName);
 
         sexDic = DictionaryUtil.coverDicBean("sex");
         boyDic = sexDic.getChildren()
                 .stream()
-                .filter(a -> "sex.boy".equals(a.getFullCode().replace(DictionaryEngine.DEFAULT_SPLIT_CHAR, ".")))
+                .filter(a -> "sex$$boy".equals(a.getFullCode()))
                 .findFirst().orElseThrow(RuntimeException::new);
         boy1Dic = boyDic.getChildren()
                 .stream()
-                .filter(a -> "sex.boy.boy-1".equals(a.getFullCode().replace(DictionaryEngine.DEFAULT_SPLIT_CHAR, ".")))
+                .filter(a -> "sex$$boy$$boy-1".equals(a.getFullCode()))
                 .findFirst().orElseThrow(RuntimeException::new);
         Assert.assertEquals("更新失败", boy1Dic.getName(), updatedName);
 
@@ -214,16 +215,16 @@ public class DictionaryUtilTest {
         a.setName(value);
         a.setCode("1212");
         manager.sync().update(a);
-        Assert.assertEquals("更新失败", DictionaryUtil.coverDicName("7.8.1212"), value);
+        Assert.assertEquals("更新失败", DictionaryUtil.coverDicName("7$$8$$1212"), value);
 
         DictionaryDataBase dic7 = DictionaryUtil.coverDicBean("7");
         DictionaryDataBase dic8 = dic7.getChildren()
                 .stream()
-                .filter(n -> "7.8".equals(n.getFullCode().replace(DictionaryEngine.DEFAULT_SPLIT_CHAR, ".")))
+                .filter(n -> "7$$8".equals(n.getFullCode()))
                 .findFirst().orElseThrow(RuntimeException::new);
         DictionaryDataBase dic9 = dic8.getChildren()
                 .stream()
-                .filter(n -> "7.8.1212".equals(n.getFullCode().replace(DictionaryEngine.DEFAULT_SPLIT_CHAR, ".")))
+                .filter(n -> "7$$8$$1212".equals(n.getFullCode()))
                 .findFirst().orElseThrow(RuntimeException::new);
         Assert.assertEquals("更新失败", dic9.getName(), value);
 

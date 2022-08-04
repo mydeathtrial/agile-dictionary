@@ -1,16 +1,11 @@
 package cloud.agileframework.dictionary;
 
-import cloud.agileframework.cache.util.BeanUtil;
+import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.object.ObjectUtil;
-import cloud.agileframework.dictionary.cache.AgileCacheImpl;
 import cloud.agileframework.dictionary.cache.DictionaryCache;
 import cloud.agileframework.dictionary.cache.MemoryCacheImpl;
-import cloud.agileframework.dictionary.cache.SpringCacheImpl;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
 import com.google.common.collect.Sets;
-import org.springframework.cache.ehcache.EhCacheCacheManager;
-import org.springframework.cache.jcache.JCacheCacheManager;
-import org.springframework.data.redis.cache.RedisCacheManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +24,7 @@ public class MemoryDictionaryManager extends AbstractDictionaryDataManager<Dicti
      */
     private static final Set<DictionaryDataBase> CACHE = Sets.newHashSet();
 
-    public static Set<DictionaryDataBase> store(){
+    public static Set<DictionaryDataBase> store() {
         return CACHE;
     }
 
@@ -40,7 +35,7 @@ public class MemoryDictionaryManager extends AbstractDictionaryDataManager<Dicti
 
     @Override
     public String dataSource() {
-        return DictionaryEngine.DICTIONARY_DATA_CACHE;
+        return Constant.AgileAbout.DIC_DATASOURCE;
     }
 
     @Override
@@ -63,7 +58,7 @@ public class MemoryDictionaryManager extends AbstractDictionaryDataManager<Dicti
     @Override
     public DictionaryDataBase updateOfNotNull(DictionaryDataBase dictionaryDataBase) {
         DictionaryDataBase dic = DictionaryUtil.findById(dataSource(), dictionaryDataBase.getId());
-        ObjectUtil.copyProperties(dictionaryDataBase,dic, ObjectUtil.Compare.DIFF_SOURCE_NOT_NULL);
+        ObjectUtil.copyProperties(dictionaryDataBase, dic, ObjectUtil.Compare.DIFF_SOURCE_NOT_NULL);
         update(dic);
         return dic;
     }

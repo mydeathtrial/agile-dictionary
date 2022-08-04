@@ -1,6 +1,6 @@
 package cloud.agileframework.dictionary.annotation;
 
-import cloud.agileframework.dictionary.DictionaryEngine;
+import cloud.agileframework.common.constant.Constant;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -19,10 +19,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Dictionary {
-    String NULL = "NULL";
-
-    String DEFAULT_NAME = "$Dictionary.DEFAULT_NAME";
-
     /**
      * 字典码
      */
@@ -51,10 +47,10 @@ public @interface Dictionary {
     /**
      * 为空时默认值
      */
-    String defaultValue() default Dictionary.DEFAULT_NAME;
+    String defaultValue() default Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE;
 
     /**
      * 数据源标识
      */
-    String dataSource() default DictionaryEngine.DICTIONARY_DATA_CACHE;
+    String dataSource() default Constant.AgileAbout.DIC_DATASOURCE;
 }

@@ -1,5 +1,7 @@
 package cloud.agileframework.dictionary.util;
 
+import cloud.agileframework.common.constant.Constant;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +14,17 @@ import java.util.Map;
  * @since 1.0
  */
 class ConvertDicMap extends ConvertDicName {
-    static final String CODE_FORMAT = "%s.%s";
+    static final String CODE_FORMAT = "%s$$%s";
+
+    public static <T extends Map<String, ?>> List<Map<String, Object>> coverMapDictionary(List<T> list,
+                                                                                          String dictionaryCode,
+                                                                                          String suffix,
+                                                                                          String column) {
+        return coverMapDictionary(list,
+                new String[]{dictionaryCode},
+                suffix,
+                new String[]{column}, Constant.AgileAbout.DIC_SPLIT);
+    }
 
     /**
      * 集合类型转换字典码工具，转换为List/Map类型
@@ -27,17 +39,29 @@ class ConvertDicMap extends ConvertDicName {
     public static <T extends Map<String, ?>> List<Map<String, Object>> coverMapDictionary(List<T> list,
                                                                                           String dictionaryCode,
                                                                                           String suffix,
-                                                                                          String column) {
+                                                                                          String column,
+                                                                                          String splitChar) {
         return coverMapDictionary(list,
                 new String[]{dictionaryCode},
                 suffix,
-                new String[]{column});
+                new String[]{column}, splitChar);
     }
 
     public static <T extends Map<String, ?>> List<Map<String, Object>> coverMapDictionary(List<T> list,
                                                                                           String[] dictionaryCodes,
                                                                                           String suffix,
                                                                                           String[] columns) {
+        return coverMapDictionary(list,
+                dictionaryCodes,
+                suffix,
+                columns, Constant.AgileAbout.DIC_SPLIT);
+    }
+
+    public static <T extends Map<String, ?>> List<Map<String, Object>> coverMapDictionary(List<T> list,
+                                                                                          String[] dictionaryCodes,
+                                                                                          String suffix,
+                                                                                          String[] columns,
+                                                                                          String splitChar) {
         if (dictionaryCodes == null || columns == null || dictionaryCodes.length != columns.length) {
             throw new IllegalArgumentException("dictionaryCodes and columns should be the same length");
         }
@@ -46,10 +70,18 @@ class ConvertDicMap extends ConvertDicName {
             result.add(coverMapDictionary(o,
                     dictionaryCodes,
                     suffix,
-                    columns)
+                    columns,
+                    splitChar)
             );
         }
         return result;
+    }
+
+    public static <T extends Map<String, ?>> Map<String, Object> coverMapDictionary(T o,
+                                                                                    String[] dictionaryCodes,
+                                                                                    String suffix,
+                                                                                    String[] columns) {
+        return coverMapDictionary(o, dictionaryCodes, suffix, columns, Constant.AgileAbout.DIC_SPLIT);
     }
 
     /**
@@ -65,11 +97,12 @@ class ConvertDicMap extends ConvertDicName {
     public static <T extends Map<String, ?>> Map<String, Object> coverMapDictionary(T o,
                                                                                     String[] dictionaryCodes,
                                                                                     String suffix,
-                                                                                    String[] columns) {
+                                                                                    String[] columns,
+                                                                                    String splitChar) {
         Map<String, Object> map = (Map<String, Object>) o;
         for (int i = 0; i < columns.length; i++) {
             String column = columns[i];
-            map.put(column + suffix, coverDicName(String.format(CODE_FORMAT, dictionaryCodes[i], map.get(column))));
+            map.put(column + suffix, coverDicName(dictionaryCodes[i] + splitChar + map.get(column)));
         }
         return map;
     }
