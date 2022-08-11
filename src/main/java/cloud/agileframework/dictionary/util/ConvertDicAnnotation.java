@@ -218,8 +218,11 @@ class ConvertDicAnnotation extends ConvertDicMap {
      */
     private static <A> A parseCollection(Dictionary dictionary, List<String> fullIndexes, TypeReference<A> typeReference) {
         List<String> targetNameList = fullIndexes.stream().map(fullIndex -> parseString(dictionary, fullIndex)).collect(Collectors.toList());
+        if(targetNameList.stream().allMatch(Objects::isNull)){
+            return null;
+        }
         if (typeReference.getType() == String.class) {
-            return (A) String.join(",", targetNameList);
+            return (A) targetNameList.stream().map(a->a==null?"": a).collect(Collectors.joining(","));
         }
         return ObjectUtil.to(targetNameList, typeReference);
     }

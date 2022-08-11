@@ -139,6 +139,12 @@ public class DictionaryUtilTest {
         Data5 o4 = Data5.builder().code(SexEnum.boy).build();
         DictionaryUtil.cover(o4);
         Assert.assertEquals(o4.getText(), "男");
+
+        Data2 o5 = Data2.builder().country("11").city("12").region("13").build();
+        DictionaryUtil.cover(o5);
+        Assert.assertNull(o5.getCountryValue());
+        Assert.assertEquals(o5.getCityValue(),"12");
+        Assert.assertEquals("qqq",o5.getRegionValue().get(0));
     }
 
     @Test

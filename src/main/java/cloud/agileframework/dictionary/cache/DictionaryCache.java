@@ -24,16 +24,19 @@ public interface DictionaryCache {
         Map<String, DictionaryDataBase> codeMap = Maps.newHashMap();
         Map<String, DictionaryDataBase> nameMap = Maps.newHashMap();
         Map<String, DictionaryDataBase> idMap = Maps.newHashMap();
+        Map<String, DictionaryDataBase> fullIdMap = Maps.newHashMap();
 
         treeSet.forEach(dic -> {
             codeMap.put(dic.getFullCode(), dic);
             nameMap.put(dic.getFullName(), dic);
             idMap.put(dic.getId(), dic);
+            fullIdMap.put(dic.getFullId(), dic);
         });
 
         initData(datasource, RegionEnum.CODE_MEMORY, codeMap);
         initData(datasource, RegionEnum.NAME_MEMORY, nameMap);
         initData(datasource, RegionEnum.ID_MEMORY, idMap);
+        initData(datasource, RegionEnum.FULL_ID_MEMORY, fullIdMap);
     }
 
 

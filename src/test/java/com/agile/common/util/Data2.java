@@ -1,5 +1,6 @@
 package com.agile.common.util;
 
+import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.dictionary.annotation.Dictionary;
 import cloud.agileframework.dictionary.annotation.DictionaryField;
 import lombok.Builder;
@@ -32,12 +33,12 @@ public class Data2 implements Serializable {
     @Dictionary(fieldName = {"country"})
     private String countryValue;
 
-    @Dictionary(fieldName = {"country", "city"}, split = ".")
+    @Dictionary(fieldName = {"country", "city"}, split = ".", defaultValue = Constant.AgileAbout.DIC_TRANSLATE_FAIL_VALUE)
     private String cityValue;
 
     //中国/黑龙江/哈尔滨
     //哈尔滨
-    @Dictionary(fieldName = {"country", "city", "region"}, isFull = true, split = ".")
+    @Dictionary(fieldName = {"country", "city", "region"}, isFull = true, split = ".",defaultValue = "qqq")
     private List<String> regionValue;
 
     @DictionaryField
