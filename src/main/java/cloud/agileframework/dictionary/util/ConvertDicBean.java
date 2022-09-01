@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * @version 1.0
  * @since 1.0
  */
-class ConvertDicBean extends ConvertBase {
+public class ConvertDicBean extends ConvertBase {
 
     public static final String NOT_FOUND_DICTIONARY_OF_FULL_NAME = "not found dictionary of fullName {}";
     public static final String NOT_FOUND_DICTIONARY_OF_FULL_CODE = "not found dictionary of fullCode {}";

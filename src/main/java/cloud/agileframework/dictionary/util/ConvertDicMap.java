@@ -13,7 +13,7 @@ import java.util.Map;
  * @version 1.0
  * @since 1.0
  */
-class ConvertDicMap extends ConvertDicName {
+public class ConvertDicMap extends ConvertDicName {
     static final String CODE_FORMAT = "%s$$%s";
 
     public static <T extends Map<String, ?>> List<Map<String, Object>> coverMapDictionary(List<T> list,

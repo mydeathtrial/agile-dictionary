@@ -38,7 +38,7 @@ public class Data2 implements Serializable {
 
     //中国/黑龙江/哈尔滨
     //哈尔滨
-    @Dictionary(fieldName = {"country", "city", "region"}, isFull = true, split = ".",defaultValue = "qqq")
+    @Dictionary(fieldName = {"country", "city", "region"}, isFull = true, split = ".", defaultValue = "qqq")
     private List<String> regionValue;
 
     @DictionaryField

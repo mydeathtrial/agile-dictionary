@@ -143,8 +143,8 @@ public class DictionaryUtilTest {
         Data2 o5 = Data2.builder().country("11").city("12").region("13").build();
         DictionaryUtil.cover(o5);
         Assert.assertNull(o5.getCountryValue());
-        Assert.assertEquals(o5.getCityValue(),"12");
-        Assert.assertEquals("qqq",o5.getRegionValue().get(0));
+        Assert.assertEquals(o5.getCityValue(), "12");
+        Assert.assertEquals("qqq", o5.getRegionValue().get(0));
     }
 
     @Test

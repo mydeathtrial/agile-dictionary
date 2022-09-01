@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  * @version 1.0
  * @since 1.0
  */
-class ConvertDicAnnotation extends ConvertDicMap {
+public class ConvertDicAnnotation extends ConvertDicMap {
     private static Map<String, String> dicCoverCache;
 
 
@@ -218,11 +218,11 @@ class ConvertDicAnnotation extends ConvertDicMap {
      */
     private static <A> A parseCollection(Dictionary dictionary, List<String> fullIndexes, TypeReference<A> typeReference) {
         List<String> targetNameList = fullIndexes.stream().map(fullIndex -> parseString(dictionary, fullIndex)).collect(Collectors.toList());
-        if(targetNameList.stream().allMatch(Objects::isNull)){
+        if (targetNameList.stream().allMatch(Objects::isNull)) {
             return null;
         }
         if (typeReference.getType() == String.class) {
-            return (A) targetNameList.stream().map(a->a==null?"": a).collect(Collectors.joining(","));
+            return (A) targetNameList.stream().map(a -> a == null ? "" : a).collect(Collectors.joining(","));
         }
         return ObjectUtil.to(targetNameList, typeReference);
     }
@@ -246,7 +246,7 @@ class ConvertDicAnnotation extends ConvertDicMap {
         final String threadCacheKey = fullIndex + dictionary.hashCode();
         if (dicCoverCache != null && dicCoverCache.containsKey(threadCacheKey)) {
             targetName = dicCoverCache.get(threadCacheKey);
-            if(Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE.equals(targetName)){
+            if (Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE.equals(targetName)) {
                 targetName = null;
             }
         } else {
@@ -322,9 +322,9 @@ class ConvertDicAnnotation extends ConvertDicMap {
                 targetName = parseNullValue(targetName);
             }
 
-            if (dicCoverCache != null && targetName==null) {
+            if (dicCoverCache != null && targetName == null) {
                 dicCoverCache.put(threadCacheKey, Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE);
-            }else if(dicCoverCache != null){
+            } else if (dicCoverCache != null) {
                 dicCoverCache.put(threadCacheKey, targetName);
             }
         }

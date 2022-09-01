@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * @version 1.0
  * @since 1.0
  */
-class ConvertDicCode extends ConvertDicBean {
+public class ConvertDicCode extends ConvertDicBean {
     /**
      * 编码转字典编码
      *
