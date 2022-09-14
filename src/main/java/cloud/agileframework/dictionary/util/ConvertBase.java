@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @since 1.0
  */
-class ConvertBase {
-
-    static final Logger LOGGER = LoggerFactory.getLogger(DictionaryUtil.class);
+public class ConvertBase {
+    public ConvertBase() {
+    }
 
     /**
      * 取字典
@@ -71,8 +71,7 @@ class ConvertBase {
         }
         // 直接从缓存中查找对应字典码
         if (entity == null) {
-            LOGGER.error(errorMessage, fullIndex);
-            return null;
+           throw new TranslateException(String.format(errorMessage,fullIndex));
         }
 
         return entity;

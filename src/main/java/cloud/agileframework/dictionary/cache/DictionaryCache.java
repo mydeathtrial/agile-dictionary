@@ -64,7 +64,10 @@ public interface DictionaryCache {
      * @return 缓存的树形结构字典数据
      */
     default SortedSet<DictionaryDataBase> getDataByDatasource(String datasource) throws NotFoundCacheException {
-        return new ConcurrentSkipListSet<>(getDataByRegion(datasource, RegionEnum.ID_MEMORY).values());
+
+        Map<String, DictionaryDataBase> dataByRegion = getDataByRegion(datasource, RegionEnum.ID_MEMORY);
+        dataByRegion.entrySet().stream().filter(a->a.getValue()==null).forEach(a-> System.out.println(a.getKey()));
+        return new ConcurrentSkipListSet<>(dataByRegion.values());
     }
 
     /**

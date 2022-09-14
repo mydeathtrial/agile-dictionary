@@ -3,6 +3,7 @@ package com.agile.common.util;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.MemoryDictionaryManager;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
+import cloud.agileframework.dictionary.util.TranslateException;
 import com.agile.App;
 import com.agile.DictionaryDataMemory;
 import com.google.common.collect.Maps;
@@ -10,6 +11,7 @@ import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,7 +46,13 @@ public class DictionaryUtilTest {
         DictionaryDataBase dic2 = DictionaryUtil.coverDicBean("sex#boy", "#");
         Assert.assertEquals(dic2.getName(), "男");
         IntStream.range(0, 10)
-                .forEach(a -> new Thread(() -> Assert.assertEquals(DictionaryUtil.coverDicBean("sex$$boy").getName(), "男")).start());
+                .forEach(a -> new Thread(() -> {
+                    try {
+                        Assert.assertEquals(DictionaryUtil.coverDicBean("sex$$boy").getName(), "男");
+                    } catch (TranslateException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).start());
     }
 
     @Test
@@ -183,7 +191,7 @@ public class DictionaryUtilTest {
     }
 
     @Test
-    public void add() throws InterruptedException {
+    public void add() throws InterruptedException, TranslateException {
         final DictionaryDataMemory dictionaryData = new DictionaryDataMemory("31", "3", boy1Name(), "boy1");
         manager.sync().add(dictionaryData);
         Assert.assertEquals("新增失败", DictionaryUtil.coverDicName("sex$$boy$$boy1"), boy1Name());
@@ -236,7 +244,7 @@ public class DictionaryUtilTest {
 
         final String fullCode = DictionaryUtil.findById(manager.dataSource(), dictionaryData.getId()).getFullCode();
         manager.sync().delete(fullCode);
-        Assert.assertNull("删除失败", DictionaryUtil.coverDicBean(fullCode));
+        Assert.assertThrows("删除失败", TranslateException.class, () -> DictionaryUtil.coverDicBean(fullCode));
 
         DictionaryDataBase parent = DictionaryUtil.findById(manager.dataSource(), dictionaryData.getParentId());
         boolean isHave = parent.getChildren()

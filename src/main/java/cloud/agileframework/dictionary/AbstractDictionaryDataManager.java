@@ -5,6 +5,7 @@ import cloud.agileframework.common.util.object.ObjectUtil;
 import cloud.agileframework.dictionary.cache.NotFoundCacheException;
 import cloud.agileframework.dictionary.cache.RegionEnum;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
+import cloud.agileframework.dictionary.util.TranslateException;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;

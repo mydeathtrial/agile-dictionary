@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
  */
 public class ConvertDicBean extends ConvertBase {
 
-    public static final String NOT_FOUND_DICTIONARY_OF_FULL_NAME = "not found dictionary of fullName {}";
-    public static final String NOT_FOUND_DICTIONARY_OF_FULL_CODE = "not found dictionary of fullCode {}";
+    public static final String NOT_FOUND_DICTIONARY_OF_FULL_NAME = "not found dictionary of fullName %s";
+    public static final String NOT_FOUND_DICTIONARY_OF_FULL_CODE = "not found dictionary of fullCode %s";
 
     /**
      * 转换字典对象

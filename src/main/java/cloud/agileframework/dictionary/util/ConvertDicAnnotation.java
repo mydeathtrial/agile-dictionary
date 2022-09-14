@@ -15,6 +15,7 @@ import org.springframework.util.ObjectUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -50,7 +51,7 @@ public class ConvertDicAnnotation extends ConvertDicMap {
         }
         Set<ClassUtil.Target<Dictionary>> targets = ClassUtil.getAllEntityAnnotation(o.getClass(), Dictionary.class);
 
-        targets.forEach(target -> {
+        for (ClassUtil.Target<Dictionary> target : targets) {
             Dictionary dictionary = target.getAnnotation();
             Member member = target.getMember();
             Field field;
@@ -58,18 +59,18 @@ public class ConvertDicAnnotation extends ConvertDicMap {
                 String fieldName = StringUtil.toLowerName(member.getName().substring(Constant.NumberAbout.THREE));
                 field = ClassUtil.getField(o.getClass(), fieldName);
                 if (ObjectUtils.isEmpty(field)) {
-                    return;
+                    continue;
                 }
             } else if (member instanceof Field) {
                 field = (Field) member;
             } else {
-                return;
+                continue;
             }
             parseNodeField(dictionary, field, o);
-        });
+        }
 
         Set<ClassUtil.Target<DictionaryField>> dictionaryTargets = ClassUtil.getAllEntityAnnotation(o.getClass(), DictionaryField.class);
-        dictionaryTargets.forEach(dictionaryTarget -> {
+        for (ClassUtil.Target<DictionaryField> dictionaryTarget : dictionaryTargets) {
             Member member = dictionaryTarget.getMember();
             String fieldName;
             if (member instanceof Method) {
@@ -77,11 +78,11 @@ public class ConvertDicAnnotation extends ConvertDicMap {
             } else if (member instanceof Field) {
                 fieldName = member.getName();
             } else {
-                return;
+                continue;
             }
             Object value = ObjectUtil.getFieldValue(o, fieldName);
             cover(value);
-        });
+        }
     }
 
     /**
@@ -100,7 +101,9 @@ public class ConvertDicAnnotation extends ConvertDicMap {
         Collection<T> c = Collections.synchronizedCollection(collection);
 
         synchronized (c) {
-            collection.parallelStream().forEach(ConvertDicAnnotation::cover);
+            for(T a:collection){
+                cover(a);
+            }
         }
         dicCoverCache.clear();
     }
@@ -217,7 +220,11 @@ public class ConvertDicAnnotation extends ConvertDicMap {
      * @return 转换后的数据
      */
     private static <A> A parseCollection(Dictionary dictionary, List<String> fullIndexes, TypeReference<A> typeReference) {
-        List<String> targetNameList = fullIndexes.stream().map(fullIndex -> parseString(dictionary, fullIndex)).collect(Collectors.toList());
+        List<String> targetNameList = new ArrayList<>();
+        for (String fullIndex : fullIndexes) {
+            String s = parseString(dictionary, fullIndex);
+            targetNameList.add(s);
+        }
         if (targetNameList.stream().allMatch(Objects::isNull)) {
             return null;
         }
@@ -252,23 +259,29 @@ public class ConvertDicAnnotation extends ConvertDicMap {
         } else {
             String defaultValue = dictionary.defaultValue();
             StringBuilder builder = new StringBuilder();
-            Arrays.stream(fullIndex.split(Constant.RegularAbout.COMMA)).forEach(c -> {
+            for (String c : fullIndex.split(Constant.RegularAbout.COMMA)) {
                 DictionaryDataBase targetEntity = null;
 
-                switch (dictionary.directionType()) {
-                    case CODE_TO_NAME:
-                    case CODE_TO_ID:
-                        targetEntity = coverDicBean(dictionary.dataSource(), c, split);
-                        break;
-                    case NAME_TO_CODE:
-                    case NAME_TO_ID:
-                        targetEntity = coverDicBeanByFullName(dictionary.dataSource(), c, split);
-                        break;
-                    case ID_TO_NAME:
-                    case ID_TO_CODE:
-                        targetEntity = DictionaryUtil.findById(dictionary.dataSource(), c);
-                        break;
-                    default:
+                try {
+                    switch (dictionary.directionType()) {
+                        case CODE_TO_NAME:
+                        case CODE_TO_ID:
+                            targetEntity = coverDicBean(dictionary.dataSource(), c, split);
+                            break;
+                        case NAME_TO_CODE:
+                        case NAME_TO_ID:
+                            targetEntity = coverDicBeanByFullName(dictionary.dataSource(), c, split);
+                            break;
+                        case ID_TO_NAME:
+                        case ID_TO_CODE:
+                            targetEntity = DictionaryUtil.findById(dictionary.dataSource(), c);
+                            break;
+                        default:
+                    }
+                }catch (TranslateException e){
+                    if(defaultValue==null){
+                        throw e;
+                    }
                 }
                 if (builder.length() > 0) {
                     builder.append(Constant.RegularAbout.COMMA);
@@ -315,7 +328,7 @@ public class ConvertDicAnnotation extends ConvertDicMap {
                         }
                     }
                 }
-            });
+            }
 
             targetName = builder.toString();
             if (Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE.equals(defaultValue)) {

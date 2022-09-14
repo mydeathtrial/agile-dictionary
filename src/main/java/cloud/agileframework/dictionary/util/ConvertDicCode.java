@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 /**
@@ -89,11 +90,15 @@ public class ConvertDicCode extends ConvertDicBean {
      * @return code（可包含逗号）
      */
     public static String coverDicCodeByParentCode(String datasource, String parentCode, String names) {
-        return Arrays.stream(names.split(Constant.RegularAbout.COMMA))
-                .map(name -> coverDicBeanByParent(datasource, parentCode, name))
-                .filter(Objects::nonNull)
-                .map(DictionaryDataBase::getCode)
-                .collect(Collectors.joining(Constant.RegularAbout.COMMA));
+        StringJoiner joiner = new StringJoiner(Constant.RegularAbout.COMMA);
+        for (String name : names.split(Constant.RegularAbout.COMMA)) {
+            DictionaryDataBase dictionaryDataBase = coverDicBeanByParent(datasource, parentCode, name);
+            if (dictionaryDataBase != null) {
+                String code = dictionaryDataBase.getCode();
+                joiner.add(code);
+            }
+        }
+        return joiner.toString();
     }
 
     /**
@@ -176,13 +181,16 @@ public class ConvertDicCode extends ConvertDicBean {
             defaultCode = parent.getFullCode() + splitChar + defaultCode;
         }
         String finalDefaultCode = defaultCode;
-        return Arrays.stream(names.split(Constant.RegularAbout.COMMA))
-                .map(code -> coverDicCode(datasource,
-                        parent.getFullName() + splitChar + code,
-                        finalDefaultCode,
-                        isFull,
-                        splitChar))
-                .collect(Collectors.joining(Constant.RegularAbout.COMMA));
+        StringJoiner joiner = new StringJoiner(Constant.RegularAbout.COMMA);
+        for (String code : names.split(Constant.RegularAbout.COMMA)) {
+            String s = coverDicCode(datasource,
+                    parent.getFullName() + splitChar + code,
+                    finalDefaultCode,
+                    isFull,
+                    splitChar);
+            joiner.add(s);
+        }
+        return joiner.toString();
     }
 
     /**
@@ -200,8 +208,15 @@ public class ConvertDicCode extends ConvertDicBean {
             return null;
         }
         StringBuilder builder = new StringBuilder();
-        Arrays.stream(fulNames.split(Constant.RegularAbout.COMMA)).forEach(c -> {
-            DictionaryDataBase targetEntity = coverDicBeanByFullName(datasource, c, splitChar);
+        for (String c : fulNames.split(Constant.RegularAbout.COMMA)) {
+            DictionaryDataBase targetEntity = null;
+            try {
+                targetEntity = coverDicBeanByFullName(datasource, c, splitChar);
+            } catch (TranslateException e) {
+                if (defaultCode == null) {
+                    throw e;
+                }
+            }
             if (builder.length() > 0) {
                 builder.append(Constant.RegularAbout.COMMA);
             }
@@ -218,7 +233,7 @@ public class ConvertDicCode extends ConvertDicBean {
                     builder.append(targetEntity.getCode());
                 }
             }
-        });
+        }
 
         if (Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE.equals(defaultCode)) {
             return parseNullValue(builder.toString());

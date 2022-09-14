@@ -6,6 +6,7 @@ import cloud.agileframework.dictionary.DictionaryDataBase;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 /**
@@ -124,9 +125,12 @@ public class ConvertDicName extends ConvertDicCode {
 
         String finalDefaultValue = defaultValue;
 
-        return Arrays.stream(codes.split(Constant.RegularAbout.COMMA))
-                .map(code -> coverDicName(datasource, parent.getFullCode() + splitChar + code, finalDefaultValue, isFull, splitChar))
-                .collect(Collectors.joining(Constant.RegularAbout.COMMA));
+        StringJoiner joiner = new StringJoiner(Constant.RegularAbout.COMMA);
+        for (String code : codes.split(Constant.RegularAbout.COMMA)) {
+            String s = coverDicName(datasource, parent.getFullCode() + splitChar + code, finalDefaultValue, isFull, splitChar);
+            joiner.add(s);
+        }
+        return joiner.toString();
     }
 
     public static String coverDicName(String fullCodes, String defaultName, boolean isFull, String splitChar) {
@@ -148,8 +152,15 @@ public class ConvertDicName extends ConvertDicCode {
             return null;
         }
         StringBuilder builder = new StringBuilder();
-        Arrays.stream(fullCodes.split(Constant.RegularAbout.COMMA)).forEach(c -> {
-            DictionaryDataBase targetEntity = coverDicBean(datasource, c, splitChar);
+        for (String c : fullCodes.split(Constant.RegularAbout.COMMA)) {
+            DictionaryDataBase targetEntity = null;
+            try {
+                targetEntity = coverDicBean(datasource, c, splitChar);
+            } catch (TranslateException e) {
+                if(defaultName==null){
+                    throw e;
+                }
+            }
             if (builder.length() > 0) {
                 builder.append(Constant.RegularAbout.COMMA);
             }
@@ -166,7 +177,7 @@ public class ConvertDicName extends ConvertDicCode {
                     builder.append(targetEntity.getName());
                 }
             }
-        });
+        }
         if (Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE.equals(defaultName)) {
             return parseNullValue(builder.toString());
         }
