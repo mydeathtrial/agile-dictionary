@@ -2,6 +2,11 @@ package com.agile.common.util;
 
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.MemoryDictionaryManager;
+import cloud.agileframework.dictionary.util.ConvertDicAnnotation;
+import cloud.agileframework.dictionary.util.ConvertDicBean;
+import cloud.agileframework.dictionary.util.ConvertDicCode;
+import cloud.agileframework.dictionary.util.ConvertDicMap;
+import cloud.agileframework.dictionary.util.ConvertDicName;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
 import cloud.agileframework.dictionary.util.TranslateException;
 import com.agile.App;
@@ -41,14 +46,14 @@ public class DictionaryUtilTest {
 
     @Test
     public void coverDicBean() {
-        DictionaryDataBase dic1 = DictionaryUtil.coverDicBean("sex$$boy");
+        DictionaryDataBase dic1 = ConvertDicBean.coverDicBean("sex$$boy");
         Assert.assertEquals(dic1.getName(), "男");
-        DictionaryDataBase dic2 = DictionaryUtil.coverDicBean("sex#boy", "#");
+        DictionaryDataBase dic2 = ConvertDicBean.coverDicBean("sex#boy", "#");
         Assert.assertEquals(dic2.getName(), "男");
         IntStream.range(0, 10)
                 .forEach(a -> new Thread(() -> {
                     try {
-                        Assert.assertEquals(DictionaryUtil.coverDicBean("sex$$boy").getName(), "男");
+                        Assert.assertEquals(ConvertDicBean.coverDicBean("sex$$boy").getName(), "男");
                     } catch (TranslateException e) {
                         throw new RuntimeException(e);
                     }
@@ -57,59 +62,59 @@ public class DictionaryUtilTest {
 
     @Test
     public void coverDicBeanByFullName() {
-        DictionaryDataBase dic1 = DictionaryUtil.coverDicBeanByFullName("性别$$男");
+        DictionaryDataBase dic1 = ConvertDicBean.coverDicBeanByFullName("性别$$男");
         Assert.assertEquals(dic1.getFullCode(), "sex$$boy");
     }
 
     @Test
     public void testCoverDicBeanByFullName() {
-        DictionaryDataBase dic1 = DictionaryUtil.coverDicBeanByFullName("性别|男", "|");
+        DictionaryDataBase dic1 = ConvertDicBean.coverDicBeanByFullName("性别|男", "|");
         Assert.assertEquals(dic1.getFullCode(), "sex$$boy");
     }
 
     @Test
     public void coverDicBeanByParent() {
-        DictionaryDataBase dic1 = DictionaryUtil.coverDicBeanByParent("sex", "男");
+        DictionaryDataBase dic1 = ConvertDicBean.coverDicBeanByParent("sex", "男");
         Assert.assertEquals(dic1.getFullCode(), "sex$$boy");
     }
 
     @Test
     public void coverDicName() {
-        String name = DictionaryUtil.coverDicName("sex");
+        String name = ConvertDicName.coverDicName("sex");
         Assert.assertEquals(name, "性别");
-        String name2 = DictionaryUtil.coverDicName("sex$$boy");
+        String name2 = ConvertDicName.coverDicName("sex$$boy");
         Assert.assertEquals(name2, "男");
-        String name3 = DictionaryUtil.coverDicName("sex$$no", "未知");
+        String name3 = ConvertDicName.coverDicName("sex$$no", "未知");
         Assert.assertEquals(name3, "未知");
     }
 
     @Test
     public void coverDicNameByParent() {
-        String name = DictionaryUtil.coverDicNameByParent("sex", "boy,girl");
+        String name = ConvertDicName.coverDicNameByParent("sex", "boy,girl");
         Assert.assertEquals(name, "男,女");
-        String name2 = DictionaryUtil.coverDicNameByParent("sex", "neutral,boy,girl", "中性");
+        String name2 = ConvertDicName.coverDicNameByParent("sex", "neutral,boy,girl", "中性");
         Assert.assertEquals(name2, "中性,男,女");
-        String name3 = DictionaryUtil.coverDicNameByParent("sex", "neutral,boy,girl", "中性", true, "#");
+        String name3 = ConvertDicName.coverDicNameByParent("sex", "neutral,boy,girl", "中性", true, "#");
         Assert.assertEquals(name3, "性别#中性,性别#男,性别#女");
     }
 
     @Test
     public void coverDicCode() {
-        String code = DictionaryUtil.coverDicCode("性别$$男,性别$$女");
+        String code = ConvertDicCode.coverDicCode("性别$$男,性别$$女");
         Assert.assertEquals(code, "boy,girl");
-        String code2 = DictionaryUtil.coverDicCode("性别$$男,性别$$女,性别$$中性", "no");
+        String code2 = ConvertDicCode.coverDicCode("性别$$男,性别$$女,性别$$中性", "no");
         Assert.assertEquals(code2, "boy,girl,no");
-        String code3 = DictionaryUtil.coverDicCode("性别|男,性别|女,性别|中性", "no", true, "|");
+        String code3 = ConvertDicCode.coverDicCode("性别|男,性别|女,性别|中性", "no", true, "|");
         Assert.assertEquals(code3, "sex|boy,sex|girl,no");
     }
 
     @Test
     public void coverDicCodeByParent() {
-        String code = DictionaryUtil.coverDicCodeByParent("性别", "男,女");
+        String code = ConvertDicCode.coverDicCodeByParent("性别", "男,女");
         Assert.assertEquals(code, "boy,girl");
-        String code2 = DictionaryUtil.coverDicCodeByParent("性别", "男,女,中性", "no");
+        String code2 = ConvertDicCode.coverDicCodeByParent("性别", "男,女,中性", "no");
         Assert.assertEquals(code2, "boy,girl,no");
-        String code3 = DictionaryUtil.coverDicCodeByParent("性别", "男,女,中性", "no", true, "|");
+        String code3 = ConvertDicCode.coverDicCodeByParent("性别", "男,女,中性", "no", true, "|");
         Assert.assertEquals(code3, "sex|boy,sex|girl,sex|no");
     }
 
@@ -124,13 +129,13 @@ public class DictionaryUtilTest {
         map2.put("code", "girl");
         list.add(map2);
 
-        Map<String, Object> o = DictionaryUtil.coverMapDictionary(map, new String[]{"sex"}, "_value", new String[]{"code"});
+        Map<String, Object> o = ConvertDicMap.coverMapDictionary(map, new String[]{"sex"}, "_value", new String[]{"code"});
         Assert.assertEquals(o.get("code_value"), "男");
 
-        List<Map<String, Object>> toList1 = DictionaryUtil.coverMapDictionary(list, new String[]{"sex"}, "_value", new String[]{"code"});
+        List<Map<String, Object>> toList1 = ConvertDicMap.coverMapDictionary(list, new String[]{"sex"}, "_value", new String[]{"code"});
         Assert.assertArrayEquals(toList1.stream().map(a -> a.get("code_value")).sorted().toArray(), Arrays.stream(new String[]{"男", "女"}).sorted().toArray());
 
-        List<Map<String, Object>> toList2 = DictionaryUtil.coverMapDictionary(list, "sex", "_value", "code");
+        List<Map<String, Object>> toList2 = ConvertDicMap.coverMapDictionary(list, "sex", "_value", "code");
         Assert.assertArrayEquals(toList2.stream().map(a -> a.get("code_value")).sorted().toArray(), Arrays.stream(new String[]{"男", "女"}).sorted().toArray());
     }
 
@@ -139,17 +144,17 @@ public class DictionaryUtilTest {
         Data2 o2 = Data2.builder().country("7").city("8").region("9,9").build();
         Data2 o3 = Data2.builder().country("7").city("8").region("9").build();
         o2.setData2(o3);
-        DictionaryUtil.cover(o2);
+        ConvertDicAnnotation.cover(o2);
         Assert.assertEquals(o2.getCountryValue(), "中国");
         Assert.assertEquals(o2.getCityValue(), "黑龙江");
         Assert.assertArrayEquals(o2.getRegionValue().stream().sorted().toArray(), Arrays.stream(new String[]{"中国.黑龙江.哈尔滨", "中国.黑龙江.哈尔滨"}).sorted().toArray());
 
         Data5 o4 = Data5.builder().code(SexEnum.boy).build();
-        DictionaryUtil.cover(o4);
+        ConvertDicAnnotation.cover(o4);
         Assert.assertEquals(o4.getText(), "男");
 
         Data2 o5 = Data2.builder().country("11").city("12").region("13").build();
-        DictionaryUtil.cover(o5);
+        ConvertDicAnnotation.cover(o5);
         Assert.assertNull(o5.getCountryValue());
         Assert.assertEquals(o5.getCityValue(), "12");
         Assert.assertEquals("qqq", o5.getRegionValue().get(0));
@@ -160,7 +165,7 @@ public class DictionaryUtilTest {
         ArrayList<Object> list = Lists.newArrayList();
         IntStream.range(0, 1000).forEach(a -> list.add(Data3.builder().status("sex$$boy").build()));
         long start = System.nanoTime();
-        DictionaryUtil.cover(list);
+        ConvertDicAnnotation.cover(list);
         long end = System.nanoTime();
         //计算每秒转化次数
         double count = (end - start) / 1000000;
@@ -171,32 +176,32 @@ public class DictionaryUtilTest {
     @Before
     public void init() {
         manager.sync().add(new DictionaryDataMemory("1", null, "性别", "sex", 3));
-        Assert.assertEquals(DictionaryUtil.coverDicName("sex"), "性别");
+        Assert.assertEquals(ConvertDicName.coverDicName("sex"), "性别");
         manager.sync().add(new DictionaryDataMemory("2", null, "对错", "isTrue", 3));
-        Assert.assertEquals(DictionaryUtil.coverDicName("isTrue"), "对错");
+        Assert.assertEquals(ConvertDicName.coverDicName("isTrue"), "对错");
         manager.sync().add(new DictionaryDataMemory("3", "1", "男", "boy", 6));
-        Assert.assertEquals(DictionaryUtil.coverDicName("sex$$boy"), "男");
+        Assert.assertEquals(ConvertDicName.coverDicName("sex$$boy"), "男");
         manager.sync().add(new DictionaryDataMemory("4", "1", "女", "girl", 5));
-        Assert.assertEquals(DictionaryUtil.coverDicName("sex$$girl"), "女");
+        Assert.assertEquals(ConvertDicName.coverDicName("sex$$girl"), "女");
         manager.sync().add(new DictionaryDataMemory("5", "2", "对", "1", 2));
-        Assert.assertEquals(DictionaryUtil.coverDicName("isTrue$$1"), "对");
+        Assert.assertEquals(ConvertDicName.coverDicName("isTrue$$1"), "对");
         manager.sync().add(new DictionaryDataMemory("6", "2", "错", "2", 8));
-        Assert.assertEquals(DictionaryUtil.coverDicName("isTrue$$2"), "错");
+        Assert.assertEquals(ConvertDicName.coverDicName("isTrue$$2"), "错");
         manager.sync().add(new DictionaryDataMemory("7", null, "中国", "7", 9));
-        Assert.assertEquals(DictionaryUtil.coverDicName("7"), "中国");
+        Assert.assertEquals(ConvertDicName.coverDicName("7"), "中国");
         manager.sync().add(new DictionaryDataMemory("8", "7", "黑龙江", "8", 0));
-        Assert.assertEquals(DictionaryUtil.coverDicName("7$$8"), "黑龙江");
+        Assert.assertEquals(ConvertDicName.coverDicName("7$$8"), "黑龙江");
         manager.sync().add(new DictionaryDataMemory("9", "8", "哈尔滨", "9", 1));
-        Assert.assertEquals(DictionaryUtil.coverDicName("7$$8$$9"), "哈尔滨");
+        Assert.assertEquals(ConvertDicName.coverDicName("7$$8$$9"), "哈尔滨");
     }
 
     @Test
     public void add() throws InterruptedException, TranslateException {
         final DictionaryDataMemory dictionaryData = new DictionaryDataMemory("31", "3", boy1Name(), "boy1");
         manager.sync().add(dictionaryData);
-        Assert.assertEquals("新增失败", DictionaryUtil.coverDicName("sex$$boy$$boy1"), boy1Name());
+        Assert.assertEquals("新增失败", ConvertDicName.coverDicName("sex$$boy$$boy1"), boy1Name());
 
-        DictionaryDataBase sexDic = DictionaryUtil.coverDicBean("sex");
+        DictionaryDataBase sexDic = ConvertDicBean.coverDicBean("sex");
         DictionaryDataBase boyDic = sexDic.getChildren()
                 .stream()
                 .filter(a -> "sex$$boy".equals(a.getFullCode()))
@@ -211,9 +216,9 @@ public class DictionaryUtilTest {
         dictionaryData.setName(updatedName);
         dictionaryData.setCode("boy-1");
         manager.sync().update(dictionaryData);
-        Assert.assertEquals("更新失败", DictionaryUtil.coverDicName("sex$$boy$$boy-1"), updatedName);
+        Assert.assertEquals("更新失败", ConvertDicName.coverDicName("sex$$boy$$boy-1"), updatedName);
 
-        sexDic = DictionaryUtil.coverDicBean("sex");
+        sexDic = ConvertDicBean.coverDicBean("sex");
         boyDic = sexDic.getChildren()
                 .stream()
                 .filter(a -> "sex$$boy".equals(a.getFullCode()))
@@ -229,9 +234,9 @@ public class DictionaryUtilTest {
         a.setName(value);
         a.setCode("1212");
         manager.sync().update(a);
-        Assert.assertEquals("更新失败", DictionaryUtil.coverDicName("7$$8$$1212"), value);
+        Assert.assertEquals("更新失败", ConvertDicName.coverDicName("7$$8$$1212"), value);
 
-        DictionaryDataBase dic7 = DictionaryUtil.coverDicBean("7");
+        DictionaryDataBase dic7 = ConvertDicBean.coverDicBean("7");
         DictionaryDataBase dic8 = dic7.getChildren()
                 .stream()
                 .filter(n -> "7$$8".equals(n.getFullCode()))
@@ -244,7 +249,7 @@ public class DictionaryUtilTest {
 
         final String fullCode = DictionaryUtil.findById(manager.dataSource(), dictionaryData.getId()).getFullCode();
         manager.sync().delete(fullCode);
-        Assert.assertThrows("删除失败", TranslateException.class, () -> DictionaryUtil.coverDicBean(fullCode));
+        Assert.assertThrows("删除失败", TranslateException.class, () -> ConvertDicBean.coverDicBean(fullCode));
 
         DictionaryDataBase parent = DictionaryUtil.findById(manager.dataSource(), dictionaryData.getParentId());
         boolean isHave = parent.getChildren()

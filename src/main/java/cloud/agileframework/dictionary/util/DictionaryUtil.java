@@ -17,7 +17,9 @@ import java.util.stream.Collectors;
  * 描述 字典工具
  * @since 1.0
  */
-public class DictionaryUtil extends ConvertDicAnnotation {
+public class DictionaryUtil {
+    private DictionaryUtil() {
+    }
 
     /**
      * 根据主键查找字典
@@ -59,8 +61,7 @@ public class DictionaryUtil extends ConvertDicAnnotation {
      */
     public static SortedSet<DictionaryDataBase> findAll(String datasource) {
         try {
-            SortedSet<DictionaryDataBase> treeSet = DictionaryCacheUtil.getDictionaryCache(datasource).getDataByDatasource(datasource);
-            return treeSet;
+            return DictionaryCacheUtil.getDictionaryCache(datasource).getDataByDatasource(datasource);
         } catch (NotFoundCacheException e) {
             e.printStackTrace();
         }

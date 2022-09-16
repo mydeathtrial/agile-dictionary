@@ -4,6 +4,7 @@ import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.object.ObjectUtil;
 import cloud.agileframework.dictionary.cache.NotFoundCacheException;
 import cloud.agileframework.dictionary.cache.RegionEnum;
+import cloud.agileframework.dictionary.util.ConvertDicBean;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
 import cloud.agileframework.dictionary.util.TranslateException;
 
@@ -131,7 +132,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
          * @param fullCode 全路径字典码
          */
         public void delete(String fullCode) {
-            D dictionaryData = (D) DictionaryUtil.coverDicBean(dataSource(), fullCode, Constant.AgileAbout.DIC_SPLIT);
+            D dictionaryData = (D) ConvertDicBean.coverDicBean(dataSource(), fullCode, Constant.AgileAbout.DIC_SPLIT);
             if (dictionaryData == null) {
                 throw new NoSuchElementException(String.format("Did not find dictionary [%s]", fullCode));
             }

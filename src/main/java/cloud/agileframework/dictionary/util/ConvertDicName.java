@@ -5,9 +5,7 @@ import cloud.agileframework.common.util.string.StringUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
 import java.util.StringJoiner;
-import java.util.stream.Collectors;
 
 /**
  * @author 佟盟
@@ -16,7 +14,10 @@ import java.util.stream.Collectors;
  * @version 1.0
  * @since 1.0
  */
-public class ConvertDicName extends ConvertDicCode {
+public class ConvertDicName {
+    private ConvertDicName() {
+    }
+
     /**
      * 编码转字典值
      *
@@ -115,7 +116,7 @@ public class ConvertDicName extends ConvertDicCode {
             return defaultValue;
         }
 
-        DictionaryDataBase parent = coverDicBean(datasource, parentCode, splitChar);
+        DictionaryDataBase parent = ConvertDicBean.coverDicBean(datasource, parentCode, splitChar);
         if (parent == null) {
             return defaultValue;
         }
@@ -155,9 +156,9 @@ public class ConvertDicName extends ConvertDicCode {
         for (String c : fullCodes.split(Constant.RegularAbout.COMMA)) {
             DictionaryDataBase targetEntity = null;
             try {
-                targetEntity = coverDicBean(datasource, c, splitChar);
+                targetEntity = ConvertDicBean.coverDicBean(datasource, c, splitChar);
             } catch (TranslateException e) {
-                if(defaultName==null){
+                if (defaultName == null) {
                     throw e;
                 }
             }
@@ -179,7 +180,7 @@ public class ConvertDicName extends ConvertDicCode {
             }
         }
         if (Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE.equals(defaultName)) {
-            return parseNullValue(builder.toString());
+            return ConvertDicBean.parseNullValue(builder.toString());
         }
         return builder.toString();
     }

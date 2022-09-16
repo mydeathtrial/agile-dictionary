@@ -6,10 +6,7 @@ import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.DictionaryEngine;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.StringJoiner;
-import java.util.stream.Collectors;
 
 /**
  * @author 佟盟
@@ -18,7 +15,10 @@ import java.util.stream.Collectors;
  * @version 1.0
  * @since 1.0
  */
-public class ConvertDicCode extends ConvertDicBean {
+public class ConvertDicCode {
+    private ConvertDicCode() {
+    }
+
     /**
      * 编码转字典编码
      *
@@ -92,7 +92,7 @@ public class ConvertDicCode extends ConvertDicBean {
     public static String coverDicCodeByParentCode(String datasource, String parentCode, String names) {
         StringJoiner joiner = new StringJoiner(Constant.RegularAbout.COMMA);
         for (String name : names.split(Constant.RegularAbout.COMMA)) {
-            DictionaryDataBase dictionaryDataBase = coverDicBeanByParent(datasource, parentCode, name);
+            DictionaryDataBase dictionaryDataBase = ConvertDicBean.coverDicBeanByParent(datasource, parentCode, name);
             if (dictionaryDataBase != null) {
                 String code = dictionaryDataBase.getCode();
                 joiner.add(code);
@@ -168,10 +168,10 @@ public class ConvertDicCode extends ConvertDicBean {
             return defaultCode;
         }
 
-        DictionaryDataBase parent = getDictionary(datasource,
+        DictionaryDataBase parent = ConvertDicBean.getDictionary(datasource,
                 parentName,
                 DictionaryEngine.CacheType.NAME_CACHE,
-                NOT_FOUND_DICTIONARY_OF_FULL_NAME,
+                ConvertDicBean.NOT_FOUND_DICTIONARY_OF_FULL_NAME,
                 splitChar);
 
         if (parent == null) {
@@ -211,7 +211,7 @@ public class ConvertDicCode extends ConvertDicBean {
         for (String c : fulNames.split(Constant.RegularAbout.COMMA)) {
             DictionaryDataBase targetEntity = null;
             try {
-                targetEntity = coverDicBeanByFullName(datasource, c, splitChar);
+                targetEntity = ConvertDicBean.coverDicBeanByFullName(datasource, c, splitChar);
             } catch (TranslateException e) {
                 if (defaultCode == null) {
                     throw e;
@@ -236,7 +236,7 @@ public class ConvertDicCode extends ConvertDicBean {
         }
 
         if (Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE.equals(defaultCode)) {
-            return parseNullValue(builder.toString());
+            return ConvertDicBean.parseNullValue(builder.toString());
         }
         return builder.toString();
     }

@@ -13,8 +13,9 @@ import java.util.Map;
  * @version 1.0
  * @since 1.0
  */
-public class ConvertDicMap extends ConvertDicName {
-    static final String CODE_FORMAT = "%s$$%s";
+public class ConvertDicMap {
+    private ConvertDicMap() {
+    }
 
     public static <T extends Map<String, ?>> List<Map<String, Object>> coverMapDictionary(List<T> list,
                                                                                           String dictionaryCode,
@@ -102,7 +103,7 @@ public class ConvertDicMap extends ConvertDicName {
         Map<String, Object> map = (Map<String, Object>) o;
         for (int i = 0; i < columns.length; i++) {
             String column = columns[i];
-            map.put(column + suffix, coverDicName(dictionaryCodes[i] + splitChar + map.get(column)));
+            map.put(column + suffix, ConvertDicName.coverDicName(dictionaryCodes[i] + splitChar + map.get(column)));
         }
         return map;
     }

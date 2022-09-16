@@ -32,7 +32,10 @@ import java.util.stream.Collectors;
  * @version 1.0
  * @since 1.0
  */
-public class ConvertDicAnnotation extends ConvertDicMap {
+public class ConvertDicAnnotation {
+    private ConvertDicAnnotation() {
+    }
+
     private static Map<String, String> dicCoverCache;
 
 
@@ -101,7 +104,7 @@ public class ConvertDicAnnotation extends ConvertDicMap {
         Collection<T> c = Collections.synchronizedCollection(collection);
 
         synchronized (c) {
-            for(T a:collection){
+            for (T a : collection) {
                 cover(a);
             }
         }
@@ -133,7 +136,7 @@ public class ConvertDicAnnotation extends ConvertDicMap {
         // 处理字典前缀
         String split = dictionary.split();
         String prefix = "";
-        DictionaryDataBase parent = StringUtils.isBlank(dictionary.dicCode()) ? null : coverDicBean(dictionary.dicCode());
+        DictionaryDataBase parent = StringUtils.isBlank(dictionary.dicCode()) ? null : ConvertDicBean.coverDicBean(dictionary.dicCode());
         if (parent != null) {
             switch (dictionary.directionType()) {
                 case NAME_TO_CODE:
@@ -266,11 +269,11 @@ public class ConvertDicAnnotation extends ConvertDicMap {
                     switch (dictionary.directionType()) {
                         case CODE_TO_NAME:
                         case CODE_TO_ID:
-                            targetEntity = coverDicBean(dictionary.dataSource(), c, split);
+                            targetEntity = ConvertDicBean.coverDicBean(dictionary.dataSource(), c, split);
                             break;
                         case NAME_TO_CODE:
                         case NAME_TO_ID:
-                            targetEntity = coverDicBeanByFullName(dictionary.dataSource(), c, split);
+                            targetEntity = ConvertDicBean.coverDicBeanByFullName(dictionary.dataSource(), c, split);
                             break;
                         case ID_TO_NAME:
                         case ID_TO_CODE:
@@ -278,8 +281,8 @@ public class ConvertDicAnnotation extends ConvertDicMap {
                             break;
                         default:
                     }
-                }catch (TranslateException e){
-                    if(defaultValue==null){
+                } catch (TranslateException e) {
+                    if (defaultValue == null) {
                         throw e;
                     }
                 }
@@ -332,7 +335,7 @@ public class ConvertDicAnnotation extends ConvertDicMap {
 
             targetName = builder.toString();
             if (Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE.equals(defaultValue)) {
-                targetName = parseNullValue(targetName);
+                targetName = ConvertDicBean.parseNullValue(targetName);
             }
 
             if (dicCoverCache != null && targetName == null) {
