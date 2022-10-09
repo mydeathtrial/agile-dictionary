@@ -2,10 +2,12 @@ package cloud.agileframework.dictionary;
 
 import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.collection.TreeBase;
+import cloud.agileframework.common.util.pinyin.PinYinUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 
@@ -93,5 +95,35 @@ public class DictionaryDataBase extends TreeBase<String, DictionaryDataBase> {
     @Override
     public String getParentId() {
         return super.getParentId();
+    }
+
+    private String pinYin;
+
+    public String getPinYin() {
+        if (pinYin == null) {
+            pinYin = PinYinUtil.converterToFirstSpell(getName());
+        }
+        return pinYin;
+    }
+
+    @Override
+    public int compareTo(DictionaryDataBase o) {
+        if (Objects.equals(this, o)) {
+            return 0;
+        }
+        if (o == null) {
+            return 1;
+        }
+        int a = o.getSort() == null ? 0 : o.getSort();
+        int b = getSort() == null ? 0 : getSort();
+        int i = b - a;
+        if (i == 0) {
+            i = StringUtils.compare(getPinYin(),
+                    PinYinUtil.converterToFirstSpell(o.getPinYin()));
+        }
+        if (i == 0) {
+            i = StringUtils.compare(getCode(), o.getCode());
+        }
+        return i == 0 ? 1 : i;
     }
 }

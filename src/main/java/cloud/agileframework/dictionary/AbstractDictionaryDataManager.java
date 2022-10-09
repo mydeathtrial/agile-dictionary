@@ -6,7 +6,6 @@ import cloud.agileframework.dictionary.cache.NotFoundCacheException;
 import cloud.agileframework.dictionary.cache.RegionEnum;
 import cloud.agileframework.dictionary.util.ConvertDicBean;
 import cloud.agileframework.dictionary.util.DictionaryUtil;
-import cloud.agileframework.dictionary.util.TranslateException;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -67,13 +66,14 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
          *
          * @param dictionaryData 字典
          */
-        public void add(D dictionaryData) {
+        public D add(D dictionaryData) {
             synchronized (this) {
                 if (dictionaryData.getId() != null && Objects.equals(dictionaryData.getId(), dictionaryData.getParentId())) {
                     throw new IllegalArgumentException("父主键与主键不能相同");
                 }
-                addData(dictionaryData);
+                D data = addData(dictionaryData);
                 cache().refresh(dataSource());
+                return data;
             }
         }
 
@@ -82,22 +82,22 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
          *
          * @param dictionaryData 字典
          */
-        private void addData(D dictionaryData) {
+        private D addData(D dictionaryData) {
             //判断是否为更新
             D self = findOne(dictionaryData.getId());
 
             if (self != null) {
-                updateData(dictionaryData, AbstractDictionaryDataManager.this::update, false, false);
-                return;
+                return updateData(dictionaryData, AbstractDictionaryDataManager.this::update, false, false);
             }
 
-            AbstractDictionaryDataManager.this.add(dictionaryData);
+            D data = AbstractDictionaryDataManager.this.add(dictionaryData);
             addCache(dictionaryData);
 
             //新增子
             Optional.ofNullable(dictionaryData.getChildren()).ifPresent(children -> children.stream()
                     .map(a -> (D) a)
                     .forEach(this::addData));
+            return data;
         }
 
         /**
@@ -205,13 +205,14 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
          *
          * @param dictionaryData 字典
          */
-        public void update(D dictionaryData) {
+        public D update(D dictionaryData) {
             synchronized (this) {
                 if (Objects.equals(dictionaryData.getId(), dictionaryData.getParentId())) {
                     throw new IllegalArgumentException("父主键与主键不能相同");
                 }
-                updateData(dictionaryData, AbstractDictionaryDataManager.this::update, true, false);
+                D data = updateData(dictionaryData, AbstractDictionaryDataManager.this::update, true, false);
                 cache().refresh(dataSource());
+                return data;
             }
         }
 
@@ -220,10 +221,11 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
          *
          * @param dictionaryData 字典
          */
-        public void updateOfNotNull(D dictionaryData) {
+        public D updateOfNotNull(D dictionaryData) {
             synchronized (this) {
-                updateData(dictionaryData, AbstractDictionaryDataManager.this::updateOfNotNull, true, true);
+                D data = updateData(dictionaryData, AbstractDictionaryDataManager.this::updateOfNotNull, true, true);
                 cache().refresh(dataSource());
+                return data;
             }
         }
 
@@ -232,13 +234,12 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
          *
          * @param newData 字典
          */
-        private void updateData(D newData, Function<D, D> function, boolean ignoreChildren, boolean ignoreNullField) {
+        private D updateData(D newData, Function<D, D> function, boolean ignoreChildren, boolean ignoreNullField) {
             D oldData = findOne(newData.getId());
 
             //如果不存在就新增
             if (oldData == null) {
-                addData(newData);
-                return;
+                return addData(newData);
             }
 
             //调用持久层更新
@@ -249,6 +250,7 @@ public abstract class AbstractDictionaryDataManager<D extends DictionaryDataBase
 
             //缓存更新
             updateCache(newData, ignoreNullField);
+            return newData;
         }
 
         private void replaceProperties(D newData, DictionaryDataBase oldData, boolean ignoreNullField) {

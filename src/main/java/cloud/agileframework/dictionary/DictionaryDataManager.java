@@ -28,7 +28,7 @@ public interface DictionaryDataManager<D extends DictionaryDataBase> {
      *
      * @param dictionaryDataBase 字典
      */
-    void add(D dictionaryDataBase);
+    D add(D dictionaryDataBase);
 
     /**
      * 删除字典

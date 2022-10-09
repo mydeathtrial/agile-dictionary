@@ -39,8 +39,9 @@ public class MemoryDictionaryManager extends AbstractDictionaryDataManager<Dicti
     }
 
     @Override
-    public void add(DictionaryDataBase dictionaryDataBase) {
+    public DictionaryDataBase add(DictionaryDataBase dictionaryDataBase) {
         CACHE.add(dictionaryDataBase);
+        return dictionaryDataBase;
     }
 
     @Override
