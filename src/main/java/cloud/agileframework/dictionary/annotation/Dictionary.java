@@ -37,7 +37,7 @@ public @interface Dictionary {
     /**
      * 全路径字典值分隔符
      */
-    String split() default "$$";
+    String split() default Constant.AgileAbout.DIC_SPLIT;
 
     /**
      * 字典转换方向

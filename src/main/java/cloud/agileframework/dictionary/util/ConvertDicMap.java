@@ -1,6 +1,9 @@
 package cloud.agileframework.dictionary.util;
 
 import cloud.agileframework.common.constant.Constant;
+import cloud.agileframework.common.util.clazz.TypeReference;
+import cloud.agileframework.common.util.object.ObjectUtil;
+import cloud.agileframework.dictionary.annotation.DirectionType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,15 +66,12 @@ public class ConvertDicMap {
                                                                                           String suffix,
                                                                                           String[] columns,
                                                                                           String splitChar) {
-        if (dictionaryCodes == null || columns == null || dictionaryCodes.length != columns.length) {
-            throw new IllegalArgumentException("dictionaryCodes and columns should be the same length");
-        }
         List<Map<String, Object>> result = new ArrayList<>(list.size());
         for (T o : list) {
             result.add(coverMapDictionary(o,
                     dictionaryCodes,
-                    suffix,
                     columns,
+                    suffix,
                     splitChar)
             );
         }
@@ -82,7 +82,13 @@ public class ConvertDicMap {
                                                                                     String[] dictionaryCodes,
                                                                                     String suffix,
                                                                                     String[] columns) {
-        return coverMapDictionary(o, dictionaryCodes, suffix, columns, Constant.AgileAbout.DIC_SPLIT);
+        return coverMapDictionary(o, dictionaryCodes, columns, suffix, Constant.AgileAbout.DIC_SPLIT);
+    }
+
+    public static <T extends Map<String, ?>> Map<String, Object> coverMapDictionary(T o,
+                                                                                    String suffix,
+                                                                                    String[] columns) {
+        return coverMapDictionary(o, null, columns, suffix, Constant.AgileAbout.DIC_SPLIT);
     }
 
     /**
@@ -97,15 +103,108 @@ public class ConvertDicMap {
      */
     public static <T extends Map<String, ?>> Map<String, Object> coverMapDictionary(T o,
                                                                                     String[] dictionaryCodes,
-                                                                                    String suffix,
                                                                                     String[] columns,
+                                                                                    String suffix,
                                                                                     String splitChar) {
-        Map<String, Object> map = (Map<String, Object>) o;
+        String[] columnNames = new String[columns.length];
         for (int i = 0; i < columns.length; i++) {
             String column = columns[i];
-            map.put(column + suffix, ConvertDicName.coverDicName(dictionaryCodes[i] + splitChar + map.get(column)));
+            columnNames[i] = column + suffix;
         }
+        return coverMapDictionary(o, dictionaryCodes, columns, columnNames, splitChar);
+    }
+
+    public static <T extends Map<String, ?>> Map<String, Object> coverMapDictionary(T o, String[] columns, String[] columnNames, String splitChar) {
+        return coverMapDictionary(o, null, columns, columnNames, splitChar);
+    }
+
+    public static <T extends Map<String, ?>> Map<String, Object> coverMapDictionary(T o, String[] columns, String[] columnNames) {
+        return coverMapDictionary(o, null, columns, columnNames, Constant.AgileAbout.DIC_SPLIT);
+    }
+
+    public static <T extends Map<String, ?>> Map<String, Object> coverMapDictionary(T o, String[] columns) {
+        return coverMapDictionary(o, null, columns, columns, Constant.AgileAbout.DIC_SPLIT);
+    }
+
+    /**
+     * 对象转换字典
+     *
+     * @param o               pojo或map对象
+     * @param dictionaryCodes 要转换的columns对应的字典码，其长度与columns长度应该保持一致，一一对应关系
+     * @param columnNames     转换后的字典值存放到结果集map中的key值
+     * @param columns         要转换的pojo属性名或map的key值数组
+     * @param <T>             泛型
+     * @return 转换后的Map结果数据
+     */
+    public static <T extends Map<String, ?>> Map<String, Object> coverMapDictionary(T o,
+                                                                                    String[] dictionaryCodes,
+                                                                                    String[] columns,
+                                                                                    String[] columnNames,
+                                                                                    String splitChar) {
+        Map<String, Object> map = ObjectUtil.to(o, new TypeReference<Map<String, Object>>() {
+        });
+        for (int i = 0; i < columns.length; i++) {
+            String column = columns[i];
+            Object value = map.get(column);
+            if (value == null) {
+                continue;
+            }
+            if (dictionaryCodes != null && i < dictionaryCodes.length && dictionaryCodes[i] != null) {
+                map.put(columnNames[i], ConvertDicName.coverDicName(dictionaryCodes[i] + splitChar + value));
+            } else {
+                map.put(columnNames[i], ConvertDicName.coverDicName(value.toString()));
+            }
+        }
+
         return map;
     }
 
+    public static <T extends Map<String, ?>> List<Map<String, Object>> coverMapDictionary(List<T> o, String[] columns, String[] columnNames, String splitChar, DirectionType[] directionTypes) {
+        return coverMapDictionary(o, null, columns, columnNames, splitChar);
+    }
+
+    public static <T extends Map<String, ?>> List<Map<String, Object>> coverMapDictionary(List<T> o, String[] columns, String[] columnNames, DirectionType[] directionTypes) {
+        return coverMapDictionary(o, null, columns, columnNames, Constant.AgileAbout.DIC_SPLIT);
+    }
+
+    public static <T extends Map<String, ?>> List<Map<String, Object>> coverMapDictionary(List<T> o, String[] columns, DirectionType[] directionTypes) {
+        return coverMapDictionary(o, null, columns, columns, Constant.AgileAbout.DIC_SPLIT);
+    }
+
+
+    public static <T extends Map<String, ?>> List<Map<String, Object>> coverMapDictionary(List<T> list,
+                                                                                          String[] dictionaryCodes,
+                                                                                          String[] columns,
+                                                                                          String[] columnNames,
+                                                                                          String splitChar) {
+        List<Map<String, Object>> result = new ArrayList<>(list.size());
+        for (T o : list) {
+            result.add(coverMapDictionary(o,
+                    dictionaryCodes,
+                    columns,
+                    columnNames,
+                    splitChar)
+            );
+        }
+        return result;
+    }
+
+    public static <T extends Map<String, ?>> List<Map<String, Object>> coverMapDictionary(List<T> list, ConvertConf... convertConfigs) {
+        List<Map<String, Object>> result = new ArrayList<>(list.size());
+        for (T o : list) {
+            result.add(coverMapDictionary(o, convertConfigs));
+        }
+        return result;
+    }
+
+    public static <T extends Map<String, ?>> Map<String, Object> coverMapDictionary(T o, ConvertConf... convertConfigs) {
+        Map<String, Object> map = ObjectUtil.to(o, new TypeReference<Map<String, Object>>() {
+        });
+        for (ConvertConf convertConf : convertConfigs) {
+            String value = (String) map.get(convertConf.getRef());
+            map.put(convertConf.getToRef(), convertConf.parseString(value));
+        }
+
+        return map;
+    }
 }

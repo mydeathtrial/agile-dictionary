@@ -5,6 +5,9 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 
 public class DictionaryCacheUtil {
+    private DictionaryCacheUtil() {
+    }
+
     private static final Map<String, DictionaryCache> map = Maps.newConcurrentMap();
 
     public static void setDictionaryCache(String datasource, DictionaryCache dictionaryCache) {
