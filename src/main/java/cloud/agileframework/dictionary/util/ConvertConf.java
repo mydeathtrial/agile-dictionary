@@ -4,12 +4,16 @@ import cloud.agileframework.common.constant.Constant;
 import cloud.agileframework.common.util.string.StringUtil;
 import cloud.agileframework.dictionary.DictionaryDataBase;
 import cloud.agileframework.dictionary.annotation.DirectionType;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class ConvertConf {
     @Builder.Default
@@ -24,7 +28,9 @@ public class ConvertConf {
     private String defaultValue = Constant.AgileAbout.DIC_TRANSLATE_FAIL_NULL_VALUE;
     @Builder.Default
     private String dataSource = Constant.AgileAbout.DIC_DATASOURCE;
+    //从字段
     private String ref;
+    //到字段
     private String toRef;
     private static Map<String, String> dicCoverCache;
 

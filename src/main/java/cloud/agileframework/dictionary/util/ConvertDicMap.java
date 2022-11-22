@@ -6,8 +6,11 @@ import cloud.agileframework.common.util.object.ObjectUtil;
 import cloud.agileframework.dictionary.annotation.DirectionType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author 佟盟
@@ -197,7 +200,7 @@ public class ConvertDicMap {
         return result;
     }
 
-    public static <T extends Map<String, ?>> Map<String, Object> coverMapDictionary(T o, ConvertConf... convertConfigs) {
+    public static <T extends Map<String, ?>> Map<String, Object> coverMapDictionary(T o, Collection<? extends ConvertConf> convertConfigs) {
         Map<String, Object> map = ObjectUtil.to(o, new TypeReference<Map<String, Object>>() {
         });
         for (ConvertConf convertConf : convertConfigs) {
@@ -206,5 +209,9 @@ public class ConvertDicMap {
         }
 
         return map;
+    }
+
+    public static <T extends Map<String, ?>> Map<String, Object> coverMapDictionary(T o, ConvertConf... convertConfigs) {
+        return coverMapDictionary(o, Arrays.stream(convertConfigs).collect(Collectors.toList()));
     }
 }
